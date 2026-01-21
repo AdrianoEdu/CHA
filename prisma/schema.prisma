@@ -13,3 +13,40 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Employee {
+  id        String    @id @default(uuid())
+  name      String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  advances  EmployeeAdvance[]
+
+  @@map("employees")
+}
+
+model EmployeeAdvance {
+  id         String   @id @default(uuid())
+  employeeId String
+  amount     Decimal
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("employee_advances")
+}
+
+model BackupConfig {
+  id               String   @id @default(uuid())
+  enabled          Boolean  @default(true)
+  intervalHours    Int      
+  runAtHour        Int?     
+  lastBackupAt     DateTime?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("backup_config")
+}
