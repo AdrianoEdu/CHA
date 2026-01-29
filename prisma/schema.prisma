@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+ // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
@@ -12,6 +12,36 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum ReceivedCheckStatus {
+  RECEIVED    
+  IN_USE      
+  FINALIZED   
+  CANCELLED
+}
+
+enum CheckUsageType {
+  DEPOSIT    
+  PAYABLE    
+}
+
+enum FinancialFlowType {
+  IN
+  OUT
+}
+
+enum FinancialStatus {
+  OPEN        
+  PAID        
+  CANCELLED
+}
+
+enum CustomerType {
+  CLIENT
+  SUPPLIER
+  SERVICE
+  GOVERNMENT
 }
 
 model Employee {
@@ -29,7 +59,7 @@ model Employee {
 model EmployeeAdvance {
   id         String   @id @default(uuid())
   employeeId String
-  amount     Decimal
+  amount     Decimal  @db.Decimal(15,2)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -38,15 +68,145 @@ model EmployeeAdvance {
   @@map("employee_advances")
 }
 
-model BackupConfig {
-  id               String   @id @default(uuid())
-  enabled          Boolean  @default(true)
-  intervalHours    Int      
-  runAtHour        Int?     
-  lastBackupAt     DateTime?
+model Customer {
+  id                 String @id @default(uuid())
+  name               String
+  code               Int
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  receivedChecks     ReceivedCheck[]
+  accountsPayable    AccountsPayable[]
+  accountsReceivable AccountsReceivable[]
 
-  @@map("backup_config")
+  type               CustomerType
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("customers")
 }
+
+model Bank {
+  id                String @id @default(uuid())
+  name              String
+
+  agencies           String[]
+
+  receivedChecks     ReceivedCheck[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banks")
+}
+
+model ReceivedCheck {
+  id String @id @default(uuid())
+
+  receivedAt DateTime
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  bankId String
+  bank   Bank @relation(fields: [bankId], references: [id])
+
+  agency String
+  checkNumber String
+
+  totalAmount   Decimal @db.Decimal(15,2)
+  currentAmount Decimal @db.Decimal(15,2)
+
+  goodForAt DateTime?
+
+  status ReceivedCheckStatus @default(RECEIVED)
+
+  usages CheckUsage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("received_checks")
+}
+
+
+model CheckUsage {
+  id              String @id @default(uuid())
+
+  receivedCheckId String
+  receivedCheck   ReceivedCheck @relation(fields: [receivedCheckId], references: [id])
+
+  usageType       CheckUsageType
+
+  referenceTable  String
+  referenceId     String
+
+  usedAt          DateTime
+  amount          Decimal @db.Decimal(15,2)
+
+  notes           String?
+
+  createdAt       DateTime @default(now())
+
+  @@map("check_usages")
+}
+
+model FinancialCategory {
+  id                String @id @default(uuid())
+  name              String
+  financialFlowType FinancialFlowType
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  receivables       AccountsReceivable[]
+  payables          AccountsPayable[]
+
+  @@map("financial_categories")
+}
+
+model AccountsPayable {
+  id         String @id @default(uuid())
+
+  categoryId String
+  category   FinancialCategory @relation(fields: [categoryId], references: [id])
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  amount     Decimal @db.Decimal(15,2)
+  dueDate    DateTime
+  paidAt     DateTime?
+  status     FinancialStatus @default(OPEN)
+
+  @@map("accounts_payables")
+}
+
+model AccountsReceivable {
+  id         String @id @default(uuid())
+
+  categoryId String
+  category   FinancialCategory @relation(fields: [categoryId], references: [id])
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  amount     Decimal @db.Decimal(15,2)
+  dueDate    DateTime
+  receivedAt DateTime
+  status     FinancialStatus @default(OPEN)
+
+  @@map("accounts_receivables")
+}
+
+model SystemConfig {
+  id            String   @id @default(uuid())
+  enabled       Boolean  @default(true)
+  intervalHours Int      
+  runAtHour     Int?     
+  lastBackupAt  DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("system_configs")
+}
+
