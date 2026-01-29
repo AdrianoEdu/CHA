@@ -191,7 +191,7 @@ model AccountsReceivable {
 
   amount     Decimal @db.Decimal(15,2)
   dueDate    DateTime
-  receivedAt DateTime
+  receivedAt DateTime?
   status     FinancialStatus @default(OPEN)
 
   @@map("accounts_receivables")

@@ -1,4 +1,8 @@
-// services/EmployeeService.ts
+// Copyright (c) 2026-01-28
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 import { EmployeeDto } from '@/dto/Employee/CreateEmployee';
 import { databaseService } from '../providers/DatabaseService';
 import { Employee } from '@/app/generated/prisma';
