@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import { EmployeeDto } from '@/app/dto/Employee/CreateEmployee';
-import { databaseService } from '../providers/DatabaseService';
+import { databaseService } from '../DatabaseService';
 import { Employee } from '@/app/generated/prisma';
 
 class EmployeeService {

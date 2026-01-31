@@ -1,17 +1,13 @@
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
-import { employeeService } from "../providers/EmployeeService";
+import { employeeService } from "../providers/employee/employee-service";
 
 export async function POST(req: Request) {
   const body = await req.json();
 
   const payload = body?.payload;
 
-  if (!payload) {
-    console.error('Payload ausente!', body);
-    throw new Error('Payload ausente no request');
-  }
-
-  console.log(payload, 'payload');
+  if (!payload) throw new Error('Payload ausente no request');
+  
 
   const decrypted = await decryptMiddleware(payload);
 
