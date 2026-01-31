@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { EmployeeDto } from '@/dto/Employee/CreateEmployee';
+import { EmployeeDto } from '@/app/dto/Employee/CreateEmployee';
 import { databaseService } from '../providers/DatabaseService';
 import { Employee } from '@/app/generated/prisma';
 

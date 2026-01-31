@@ -127,7 +127,6 @@ model ReceivedCheck {
   @@map("received_checks")
 }
 
-
 model CheckUsage {
   id              String @id @default(uuid())
 
