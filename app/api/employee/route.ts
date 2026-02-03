@@ -1,5 +1,5 @@
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
-import { employeeService } from "../providers/employee/employee-service";
+import { employeeService } from "../resources/employee/employee-service";
 
 export async function POST(req: Request) {
   const body = await req.json();
