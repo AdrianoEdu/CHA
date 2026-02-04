@@ -9,13 +9,6 @@ import { PrismaClient } from "@/app/generated/prisma";
 class DatabaseService extends PrismaClient {
   private static instance: DatabaseService;
 
-  private constructor() {
-    super({
-      errorFormat: process.env.PRETTY_LOG === 'true' ? 'pretty' : 'colorless',
-      log: ['info', 'warn', 'error'],
-    });
-  }
-
   static getInstance(): DatabaseService {
     if (!DatabaseService.instance) {
       DatabaseService.instance = new DatabaseService();

@@ -6,8 +6,6 @@
 import { decrypt } from "../lib/decrypt";
 
 export function decryptMiddleware<T>(payload: T) {
-  if (!payload) throw new Error('Payload ausente!');
-
   const decrypted = decrypt(payload);
   return decrypted;
 }

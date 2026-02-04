@@ -13,4 +13,7 @@ export default defineConfig({
   datasource: {
     url: process.env["DATABASE_URL"],
   },
+  client: {
+    output: './generated/prisma'
+  }
 });

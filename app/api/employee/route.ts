@@ -7,7 +7,6 @@ export async function POST(req: Request) {
   const payload = body?.payload;
 
   if (!payload) throw new Error('Payload ausente no request');
-  
 
   const decrypted = await decryptMiddleware(payload);
 
