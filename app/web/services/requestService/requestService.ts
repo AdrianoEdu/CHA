@@ -33,6 +33,8 @@ class RequestService {
         : undefined,
     });
 
+    console.log(response);
+
     if (!response.ok) {
       throw new Error('Erro na requisição');
     }
@@ -57,7 +59,7 @@ class RequestService {
     });
   }
 
-  create<T>(url: string, data: T) {
+  post<T>(url: string, data: T) {
     return this.request<T>(url, {
       method: 'POST',
       body: data,
