@@ -1,4 +1,4 @@
-import { encrypt } from "@/app/web/lib/encrypt";
+import { decrypt, encrypt } from "@/app/web/lib/encrypt";
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
@@ -16,31 +16,34 @@ class RequestService {
   }
 
   private async request<T>(
-    url: string,
-    options: RequestOptions
-  ): Promise<T> {
-    const encryptedPayload = options.body
-      ? encrypt(options.body)
-      : null;
+  url: string,
+  options: RequestOptions
+): Promise<T> {
+  const encryptedPayload = options.body
+    ? encrypt(options.body)
+    : null;
 
-    const response = await fetch(`${this.baseUrl}${url}`, {
-      method: options.method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: encryptedPayload
-        ? JSON.stringify({ payload: encryptedPayload })
-        : undefined,
-    });
+  const response = await fetch(`${this.baseUrl}${url}`, {
+    method: options.method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: encryptedPayload
+      ? JSON.stringify({ payload: encryptedPayload })
+      : undefined,
+  });
 
-    console.log(response);
+  if (!response.ok) 
+    throw new Error('Erro na requisição');
 
-    if (!response.ok) {
-      throw new Error('Erro na requisição');
-    }
+  const data = await response.json();
 
-    return response.json();
-  }
+  if (data?.payload) 
+    return decrypt(data.payload) as T;
+
+  return data as T;
+}
+
 
   getAll<T>(url: string, filters?: Record<string, any>) {
     const query = filters
