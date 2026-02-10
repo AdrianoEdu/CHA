@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 
 const ALGORITHM = 'aes-256-gcm';
-const SECRET_KEY = process.env.SECRET_KEY ?? '';
+const AES_SECRET = process.env.AES_SECRET ?? '';
 
 export function decrypt(payload: any) {
-  const key = Buffer.from(SECRET_KEY, 'hex');
+  const key = Buffer.from(AES_SECRET, 'hex');
 
   const decipher = crypto.createDecipheriv(
     ALGORITHM,
@@ -20,4 +20,24 @@ export function decrypt(payload: any) {
   ]);
 
   return JSON.parse(decrypted.toString('utf8'));
+}
+
+export function encrypt(data: unknown) {
+  const iv = crypto.randomBytes(12); 
+  const key = Buffer.from(AES_SECRET, 'hex');
+
+  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify(data), 'utf8'),
+    cipher.final(),
+  ]);
+
+  const authTag = cipher.getAuthTag();
+
+  return {
+    iv: iv.toString('hex'),
+    content: encrypted.toString('hex'),
+    authTag: authTag.toString('hex'),
+  };
 }

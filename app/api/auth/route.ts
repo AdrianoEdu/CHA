@@ -1,4 +1,4 @@
-import { encrypt } from "@/app/web/lib/encrypt";
+import { encrypt } from "../lib/decrypt";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { AuthController } from "../resources/auth/auth-controller";
 

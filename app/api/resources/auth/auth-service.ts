@@ -12,13 +12,13 @@ import { JwtProps } from './types';
 
 class AuthService {
   private databaseService = databaseService;
-  private readonly SECRET_KEY = process.env.SECRET_KEY ?? '';
+  private readonly JWT_SECRET = process.env.JWT_SECRET ?? '';
 
     async login({ login, password }: LoginDto): Promise<string> {
       const user = await databaseService.user.findUnique({where: { login }})
   
       if (!user) {
-        throw new Error('Autenticação inválida 1°');
+        throw new Error('Autenticação inválida');
       }
   
       const passwordValid = await this.comparePassword(
@@ -27,13 +27,13 @@ class AuthService {
       );
   
       if (!passwordValid ) {
-        throw new Error('Autenticação inválida2°');
+        throw new Error('Autenticação inválida');
       }
   
       const token = this.generateJwt({
         sub: user.id,
         login: user.login,
-        key: this.SECRET_KEY,
+        key: this.JWT_SECRET,
       });
   
       return token;
