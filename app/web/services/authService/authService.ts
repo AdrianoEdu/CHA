@@ -10,11 +10,11 @@ class AuthService {
   private readonly url: string;
 
   constructor() {
-    this.url = '/auth';
+    this.url = "/auth";
   }
 
-  login<T>(data: LoginDto) {
-    return requestService.post(this.url, data);
+  login(data: LoginDto) {
+    return requestService.post<LoginDto, { token: string }>(this.url, data);
   }
 }
 

@@ -8,11 +8,21 @@
 import Image from "next/image";
 import Input, { InputType } from "../../components/input/page";
 import Button from "../../components/button/page";
+import { authService } from "../../services/authService/authService";
+import { useState } from "react";
 
 export default function Login() {
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+
+  const login = async (): Promise<void> => {
+    const result = await authService.login({ login: userName, password });
+    alert(result);
+  };
+
   return (
     <div className="flex-row min-h-screen flex items-center justify-center bg-blue-default">
-      <div className="flex bg-off-white w-[800px] border-2 border-black rounded-2xl overflow-hidden justify-around">
+      <div className="flex bg-off-white w-200 border-2 border-black rounded-2xl overflow-hidden justify-around">
         <div className="flex items-center justify-center p-6">
           <Image
             src={"/images/logo.jpeg"}
@@ -25,19 +35,18 @@ export default function Login() {
 
         <div className="flex flex-col justify-center gap-4 p-8 bg-transparent">
           <Input
-            label="Informe seu usuário"
-            inputType={InputType.Password}
-            onChange={(text) => console.log(text)}
+            name="Informe seu usuário"
+            onChange={(e) => setUserName(e.target.value)}
           />
 
           <Input
-            label="Informe sua senha"
-            inputType={InputType.Password}
-            onChange={(text) => console.log(text)}
+            type={"password"}
+            name="Informe sua senha"
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <div className="self-end pr-4">
-            <Button onPress={() => console.log("apertei")} text={"Entrar"} />
+            <Button onPress={() => login()} text={"Entrar"} />
           </div>
         </div>
       </div>

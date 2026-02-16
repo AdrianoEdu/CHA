@@ -1,6 +1,13 @@
-import { decrypt, encrypt } from "@/app/web/lib/encrypt";
+// Copyright (c) 2026-02-16
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+import { decrypt, encrypt } from "@/app/web/lib/encrypt";
+import { appConfig } from "../../config/appConfig";
+import { deobfuscateKey } from "../../utils/obfuscate";
+
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 interface RequestOptions {
   method: HttpMethod;
@@ -12,81 +19,65 @@ class RequestService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.API_URL ?? '';
+    this.baseUrl = deobfuscateKey(appConfig.API);
   }
 
-  private async request<T>(
-  url: string,
-  options: RequestOptions
-): Promise<T> {
-  const encryptedPayload = options.body
-    ? encrypt(options.body)
-    : null;
+  private async request<TResponse>(
+    url: string,
+    options: RequestOptions,
+  ): Promise<TResponse> {
+    const encryptedPayload = options.body ? encrypt(options.body) : null;
 
-  const response = await fetch(`${this.baseUrl}${url}`, {
-    method: options.method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: encryptedPayload
-      ? JSON.stringify({ payload: encryptedPayload })
-      : undefined,
-  });
-
-  if (!response.ok) 
-    throw new Error('Erro na requisição');
-
-  const data = await response.json();
-
-  if (data?.payload) 
-    return decrypt(data.payload) as T;
-
-  return data as T;
-}
-
-
-  getAll<T>(url: string, filters?: Record<string, any>) {
-    const query = filters
-      ? `?${new URLSearchParams(filters).toString()}`
-      : '';
-
-    return this.request<T>(`${url}${query}`, {
-      method: 'GET',
-      params: filters,
+    const response = await fetch(`${this.baseUrl}${url}`, {
+      method: options.method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: encryptedPayload
+        ? JSON.stringify({ payload: encryptedPayload })
+        : undefined,
     });
+
+    alert(response.url);
+
+    if (!response.ok) throw new Error(`Erro na requisição: ${response.status}`);
+
+    const data = await response.json();
+
+    if (data?.payload) return decrypt(data.payload) as TResponse;
+
+    return data as TResponse;
   }
 
-  getById<T>(url: string, id: string) {
-    return this.request<T>(`${url}${id}`, {
-      method: 'GET',
-    });
+  getAll<TResponse>(url: string, filters?: Record<string, any>) {
+    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
+    return this.request<TResponse>(`${url}${query}`, { method: "GET" });
   }
 
-  post<T>(url: string, data: T) {
-    return this.request<T>(url, {
-      method: 'POST',
+  getById<TResponse>(url: string, id: string) {
+    return this.request<TResponse>(`${url}/${id}`, { method: "GET" });
+  }
+
+  post<TBody, TResponse>(url: string, data: TBody) {
+    return this.request<TResponse>(url, { method: "POST", body: data });
+  }
+
+  update<TBody, TResponse>(url: string, id: string, data: TBody) {
+    return this.request<TResponse>(`${url}/${id}`, {
+      method: "PUT",
       body: data,
     });
   }
 
-  update<T>(url: string, id: string, data: T) {
-    return this.request<T>(`${url}/${id}`, {
-      method: 'PUT',
+  patch<TBody, TResponse>(url: string, id: string, data: TBody) {
+    return this.request<TResponse>(`${url}/${id}`, {
+      method: "PATCH",
       body: data,
     });
   }
 
-  patch<T>(url: string, id: string, data: T) {
-    return this.request<T>(`${url}/${id}`, {
-      method: 'PATCH',
-      body: data,
-    });
-  }
-
-  delete<T>(url: string, id: string) {
-    return this.request<T>(`${url}/${id}`, {
-      method: 'DELETE',
-    });
+  delete<TResponse>(url: string, id: string) {
+    return this.request<TResponse>(`${url}/${id}`, { method: "DELETE" });
   }
 }
 

@@ -14,7 +14,7 @@ enum ButtonType {
 type ButtonProps = {
   text: string;
   type?: ButtonType;
-  onPress: () => void;
+  onPress: () => Promise<void>;
 };
 
 export default function Button({
@@ -40,7 +40,7 @@ export default function Button({
         whitespace-normal
         text-center
 
-        break-words
+        wrap-break-word
       "
     >
       <span>{text}</span>
