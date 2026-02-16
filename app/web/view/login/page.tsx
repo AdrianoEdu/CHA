@@ -7,11 +7,12 @@
 
 import Image from "next/image";
 import Input, { InputType } from "../../components/input/page";
+import Button from "../../components/button/page";
 
 export default function Login() {
   return (
-    <div className="flex-row min-h-screen flex items-center justify-center bg-off-white">
-      <div className="flex bg-transparent w-[800px] border-2 border-black rounded-2xl overflow-hidden justify-around">
+    <div className="flex-row min-h-screen flex items-center justify-center bg-blue-default">
+      <div className="flex bg-off-white w-[800px] border-2 border-black rounded-2xl overflow-hidden justify-around">
         <div className="flex items-center justify-center p-6">
           <Image
             src={"/images/logo.jpeg"}
@@ -34,6 +35,10 @@ export default function Login() {
             inputType={InputType.Password}
             onChange={(text) => console.log(text)}
           />
+
+          <div className="self-end pr-4">
+            <Button onPress={() => console.log("apertei")} text={"Entrar"} />
+          </div>
         </div>
       </div>
     </div>
