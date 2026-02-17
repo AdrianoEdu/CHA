@@ -16,16 +16,20 @@ export default function Login() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = async (): Promise<void> => {
+  const auth = async (): Promise<void> => {
     try {
       const result = await authService.login({ login: userName, password });
-
-      toast.success("Auntenticação Efetuada com sucesso");
-      setUserName("");
-      setPassword("");
-    } catch (error) {
+      toast.success("Auntenticação bem sucedida");
+    } catch (err) {
       toast.error("Erro na autenticação");
+    } finally {
+      clearFields();
     }
+  };
+
+  const clearFields = (): void => {
+    setUserName("");
+    setPassword("");
   };
 
   return (
@@ -56,7 +60,7 @@ export default function Login() {
           />
 
           <div className="self-end pr-4">
-            <Button onPress={() => login()} text={"Entrar"} />
+            <Button onPress={auth} text={"Entrar"} />
           </div>
         </div>
       </div>

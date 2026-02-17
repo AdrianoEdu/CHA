@@ -1,17 +1,32 @@
+import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
+import { authGuard } from "../middleware/validate-token-middleware";
 import { EmployeeController } from "../resources/employee/employee-controller";
 
 const employeeController = new EmployeeController();
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    authGuard(req);
 
-  const payload = body?.payload;
+    const body = await req.json();
 
-  if (!payload) throw new Error('Payload ausente no request');
+    const payload = body?.payload;
 
-  const decrypted = await decryptMiddleware(payload);
+    if (!payload) throw new Error("Payload ausente no request");
 
-  const result = await employeeController.create(decrypted);
-  return Response.json(result);
+    const decrypted = await decryptMiddleware(payload);
+
+    const result = await employeeController.create(decrypted);
+    return Response.json(result);
+  } catch (error) {
+    if (error instanceof HttpException) {
+      return Response.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    return Response.json({ error: "Erro interno" }, { status: 500 });
+  }
 }
