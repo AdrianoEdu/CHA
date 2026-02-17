@@ -10,14 +10,22 @@ import Input, { InputType } from "../../components/input/page";
 import Button from "../../components/button/page";
 import { authService } from "../../services/authService/authService";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
   const login = async (): Promise<void> => {
-    const result = await authService.login({ login: userName, password });
-    alert(result);
+    try {
+      const result = await authService.login({ login: userName, password });
+
+      toast.success("Auntenticação Efetuada com sucesso");
+      setUserName("");
+      setPassword("");
+    } catch (error) {
+      toast.error("Erro na autenticação");
+    }
   };
 
   return (
@@ -36,11 +44,13 @@ export default function Login() {
         <div className="flex flex-col justify-center gap-4 p-8 bg-transparent">
           <Input
             name="Informe seu usuário"
+            value={userName}
             onChange={(e) => setUserName(e.target.value)}
           />
 
           <Input
             type={"password"}
+            value={password}
             name="Informe sua senha"
             onChange={(e) => setPassword(e.target.value)}
           />
