@@ -3,8 +3,8 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ActionDto, AuthDto, LoginDto } from "../../dto/auth.dto";
 import { requestService } from "../requestService/requestService";
-import { LoginDto } from "@/app/dto/Auth/Auth";
 
 class AuthService {
   private readonly url: string;
@@ -15,6 +15,14 @@ class AuthService {
 
   login(data: LoginDto) {
     return requestService.post<LoginDto, { token: string }>(this.url, data);
+  }
+
+  isLogged(data: ActionDto) {
+    return requestService.post<ActionDto, AuthDto>(this.url, data);
+  }
+
+  logout(data: ActionDto) {
+    return requestService.post<ActionDto, void>(this.url, data);
   }
 }
 

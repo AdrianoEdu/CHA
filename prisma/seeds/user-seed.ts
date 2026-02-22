@@ -3,21 +3,23 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { PrismaClient } from '@prisma/client';
-import * as argon2 from 'argon2';
+import { PrismaClient } from "@prisma/client";
+import * as argon2 from "argon2";
 
 export async function seedUsers(prisma: PrismaClient) {
-  const passwordHash = await argon2.hash('admin123');
+  const passwordHash = await argon2.hash("admin123");
 
   await prisma.user.upsert({
-    where: { login: 'admin' },
+    where: { login: "admin" },
     update: {},
     create: {
-      login: 'admin',
+      login: "admin",
       password: passwordHash,
-      status: 'ACTIVE',
+      status: "ACTIVE",
+      name: "Admin",
+      lastName: "User",
     },
   });
 
-  console.log('👤 Usuários seedados');
+  console.log("👤 Usuários seedados");
 }

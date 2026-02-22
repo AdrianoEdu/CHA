@@ -3,14 +3,14 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { EmployeeDto } from "@/app/dto/Employee/Employee";
+import { EmployeeDto } from "@/app/api/dto/Employee/Employee";
 import { requestService } from "../requestService/requestService";
 
 class EmployeeService {
   private readonly url: string;
 
   constructor() {
-    this.url = '/employee';
+    this.url = "/employee";
   }
 
   create<T>(data: EmployeeDto) {

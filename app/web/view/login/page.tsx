@@ -11,14 +11,24 @@ import Button from "../../components/button/page";
 import { authService } from "../../services/authService/authService";
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { ActionEnum } from "../../dto/auth.dto";
 
 export default function Login() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
 
+  const router = useRouter();
+
   const auth = async (): Promise<void> => {
     try {
-      const result = await authService.login({ login: userName, password });
+      const result = await authService.login({
+        login: userName,
+        password,
+        type: ActionEnum.Login,
+      });
+
+      router.push("home");
       toast.success("Auntenticação bem sucedida");
     } catch (err) {
       toast.error("Erro na autenticação");

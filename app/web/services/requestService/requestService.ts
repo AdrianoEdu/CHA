@@ -57,7 +57,7 @@ class RequestService {
     return this.request<TResponse>(`${url}/${id}`, { method: "GET" });
   }
 
-  post<TBody, TResponse>(url: string, data: TBody) {
+  post<TBody, TResponse>(url: string, data?: TBody) {
     return this.request<TResponse>(url, { method: "POST", body: data });
   }
 

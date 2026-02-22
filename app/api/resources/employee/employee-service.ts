@@ -3,9 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { EmployeeDto } from '@/app/dto/Employee/Employee';
-import { databaseService } from '../../providers/database/DatabaseService';
-import { Employee } from '@/app/generated/prisma';
+import { EmployeeDto } from "@/app/api/dto/Employee/Employee";
+import { databaseService } from "../../providers/database/DatabaseService";
+import { Employee } from "@/app/generated/prisma";
 
 class EmployeeService {
   private databaseService = databaseService;
