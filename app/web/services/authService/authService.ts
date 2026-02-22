@@ -14,7 +14,7 @@ class AuthService {
   }
 
   login(data: LoginDto) {
-    return requestService.post<LoginDto, { token: string }>(this.url, data);
+    return requestService.post<LoginDto, AuthDto>(this.url, data);
   }
 
   isLogged(data: ActionDto) {

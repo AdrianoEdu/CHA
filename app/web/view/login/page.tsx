@@ -13,32 +13,21 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { ActionEnum } from "../../dto/auth.dto";
+import { useAuth } from "../../providers/AuthProvider";
 
 export default function Login() {
-  const [userName, setUserName] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const { auth } = useAuth();
 
   const router = useRouter();
 
-  const auth = async (): Promise<void> => {
-    try {
-      const result = await authService.login({
-        login: userName,
-        password,
-        type: ActionEnum.Login,
-      });
-
-      router.push("home");
-      toast.success("Auntenticação bem sucedida");
-    } catch (err) {
-      toast.error("Erro na autenticação");
-    } finally {
-      clearFields();
-    }
+  const onHandlerAuth = async (): Promise<void> => {
+    await auth(login, password).then(() => clearFields());
   };
 
   const clearFields = (): void => {
-    setUserName("");
+    setLogin("");
     setPassword("");
   };
 
@@ -58,8 +47,8 @@ export default function Login() {
         <div className="flex flex-col justify-center gap-4 p-8 bg-transparent">
           <Input
             name="Informe seu usuário"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
           />
 
           <Input
@@ -70,7 +59,7 @@ export default function Login() {
           />
 
           <div className="self-end pr-4">
-            <Button onPress={auth} text={"Entrar"} />
+            <Button onPress={onHandlerAuth} text={"Entrar"} />
           </div>
         </div>
       </div>

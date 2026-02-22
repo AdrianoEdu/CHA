@@ -1,10 +1,9 @@
 import Link from "next/link";
+import { useAuth } from "../../providers/AuthProvider";
 
-type SideBarProps = {
-  onLogout: () => void;
-};
+export default function SideBar() {
+  const { user, logout } = useAuth();
 
-export default function SideBar({ onLogout }: SideBarProps) {
   return (
     <aside className="flex flex-col w-64 h-full bg-gray-900 text-gray-300">
       {/* Logo / Título */}
@@ -24,7 +23,7 @@ export default function SideBar({ onLogout }: SideBarProps) {
       {/* Rodapé */}
       <div className="p-4 border-t border-gray-800">
         <button
-          onClick={onLogout}
+          onClick={logout}
           className="w-full px-3 py-2 bg-gray-800 rounded hover:bg-gray-700"
         >
           Sair
