@@ -7,17 +7,30 @@ export default function SideBar() {
   return (
     <aside className="flex flex-col w-64 h-full bg-gray-900 text-gray-300">
       {/* Logo / Título */}
-      <div className="flex items-center h-16 px-6 border-b border-gray-800">
-        <span className="text-lg font-bold text-white">Meu Sistema</span>
+      <div className="flex flex-col gap-3 text-center py-6 px-6 border-b border-gray-800">
+        <span className="text-lg font-bold text-white">
+          Contabilidade H. Alvarenga LTDA
+        </span>
+
+        <span className="text-lg font-bold text-white">
+          {`Bem vindo: ${user.name} ${user.lastName}`}
+        </span>
       </div>
       {/* Menu */}
-      <nav className="flex-1 px-3 py-4 space-y-2">
+      <nav className="flex-1 text-center px-3 py-4 space-y-2">
         {/* Item */}
         <Link
           href="/web/view/home/dashboard"
-          className="flex items-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
-          📊 <span className="ml-3">Dashboard</span>
+          <span className="ml-3">Dashboard</span>
+        </Link>
+
+        <Link
+          href="/web/view/home/dashboard"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Funcionários</span>
         </Link>
       </nav>
       {/* Rodapé */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { authService } from "../services/authService/authService";
 import { ActionEnum, AuthDto } from "../dto/auth.dto";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthDto>({ name: "", lastName: "" });
 
+  useEffect(() => {
+    isAuthenticated();
+  }, []);
   const auth = async (userName: string, password: string): Promise<void> => {
     try {
       const result = (await authService.login({
