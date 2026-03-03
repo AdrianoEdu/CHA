@@ -1,3 +1,8 @@
+// Copyright (c) 2026-03-02
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 import Link from "next/link";
 import { useAuth } from "../../providers/AuthProvider";
 
@@ -27,7 +32,7 @@ export default function SideBar() {
         </Link>
 
         <Link
-          href="/web/view/home/dashboard"
+          href="/web/view/home/employee"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
           <span className="ml-3">Funcionários</span>
