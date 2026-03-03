@@ -10,7 +10,7 @@ import { UnauthorizedException } from "../error/UnauthorizedException";
 
 export async function authGuard(req: Request) {
   const cookieStore = await cookies();
-  const cookieToken = cookieStore.get("token")?.value;
+  const cookieToken = cookieStore.get("auth_token")?.value;
 
   const headerToken = req.headers.get("authorization")?.replace("Bearer ", "");
 

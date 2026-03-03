@@ -33,15 +33,6 @@ export default function Modal({
         {title && <h2 className="text-lg font-semibold mb-4">{title}</h2>}
 
         <div>{children}</div>
-
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-          >
-            Fechar
-          </button>
-        </div>
       </div>
     </div>
   );

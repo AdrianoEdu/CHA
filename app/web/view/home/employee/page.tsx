@@ -6,23 +6,36 @@
 "use client";
 
 import Modal from "@/app/web/components/modal/page";
+import RegisterUser from "@/app/web/components/modal/register-user/page";
 import Table from "@/app/web/components/table/page";
+import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { access } from "fs";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 export default function EmployeeScreen() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = (): void => setIsModalOpen(true);
+  const closeModal = (): void => setIsModalOpen(false);
+
+  const handleRegisterUser = async (name: string): Promise<void> => {
+    employeeService.create({ name }).then(() => {
+      closeModal();
+      toast.success("Usuário criado com sucesso");
+    });
+  };
 
   return (
     <div>
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Meu Modal"
+        onClose={closeModal}
+        title="Registrar Funcionário"
       >
-        <p>Conteúdo do modal aqui.</p>
+        <RegisterUser onClose={closeModal} onRegister={handleRegisterUser} />
       </Modal>
-      <h1 className="text-2xl font-bold">Funcionários</h1>
+      /<h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
         title="Tabela de funcionários"
         columns={[
@@ -40,7 +53,7 @@ export default function EmployeeScreen() {
             createdAt: new Date().toDateString(),
           },
         ]}
-        onActionClicked={() => setIsModalOpen(true)}
+        onActionClicked={openModal}
       />
     </div>
   );

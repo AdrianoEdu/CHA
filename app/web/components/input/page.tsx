@@ -26,7 +26,7 @@ export default function Input({
           type={rest.type}
           value={rest.value}
           onChange={rest.onChange}
-          className="peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none"
+          className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />
 
         <label

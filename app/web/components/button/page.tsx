@@ -14,7 +14,7 @@ enum ButtonType {
 type ButtonProps = {
   text: string;
   type?: ButtonType;
-  onPress: () => Promise<void>;
+  onPress: () => void;
 };
 
 export default function Button({
