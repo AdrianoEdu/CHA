@@ -5,45 +5,41 @@
 
 "use client";
 
-enum ButtonType {
-  Default,
-  Success,
-  Back,
-}
+import React from "react";
 
-type ButtonProps = {
-  text: string;
-  type?: ButtonType;
-  onPress: () => void;
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  text?: string;
+  icon?: React.ReactNode;
+  onPress?: () => void;
 };
 
 export default function Button({
   text,
-  type = ButtonType.Default,
+  icon,
   onPress,
+  ...rest
 }: Readonly<ButtonProps>) {
   return (
     <button
       onClick={onPress}
-      className="
+      {...rest}
+      className={`
         inline-flex
         items-center
         justify-center
-
+        gap-2
         px-4 py-2
         bg-blue-600
         text-white
-
         rounded-lg
         font-medium
-
         whitespace-normal
         text-center
-
-        wrap-break-word
-      "
+        ${rest.className ?? ""}
+      `}
     >
-      <span>{text}</span>
+      {icon && <span>{icon}</span>}
+      {text && <span>{text}</span>}
     </button>
   );
 }

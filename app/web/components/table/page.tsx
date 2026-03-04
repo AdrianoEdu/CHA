@@ -1,132 +1,115 @@
-// Copyright (c) 2026-03-02
-// Contabilidade H. Alvarenga LTDA
-// Developed by Adriano Trentin Jr.
-// All rights reserved.
-
 import React from "react";
+import DisableIcon from "../../icons/disable-icon";
+import Button from "../button/page";
 
-interface TableColumn {
+export interface TableColumn<T> {
   label: string;
-  key: string;
+  accessor?: keyof T;
+  render?: (row: T) => React.ReactNode;
   isAction?: boolean;
 }
 
-interface TableProps {
-  title?: string; // Título da tabela
-  columns: TableColumn[]; // Colunas da tabela
-  rows: Record<string, any>[]; // Linhas com valores variados
-  onActionClicked: () => void;
+interface TableProps<T> {
+  title?: string;
+  columns: TableColumn<T>[];
+  rows?: T[] | null; // agora pode ser undefined/null
+  onActionClicked?: () => void;
+  onRowAction?: (row: T) => void;
 }
 
-const defaultColumns: TableColumn[] = [
-  { label: "#", key: "id" },
-  { label: "Nome", key: "name" },
-  { label: "Símbolo", key: "symbol" },
-  { label: "Preço", key: "price" },
-  { label: "Supply", key: "supply" },
-  { label: "1h", key: "change1h" },
-  { label: "24h", key: "change24h" },
-  { label: "7d", key: "change7d" },
-  { label: "Ações", key: "action", isAction: true }, // Label em português
-];
+// 🔹 Função utilitária para formatar datas automaticamente
+function formatValue(value: unknown) {
+  if (!value) return "-";
 
-const defaultRows = [
-  {
-    id: 1,
-    name: "Bitcoin",
-    symbol: "BTC",
-    price: "$27,000",
-    supply: "19M",
-    change1h: "+0.5%",
-    change24h: "+2.3%",
-    change7d: "+5.1%",
-  },
-  {
-    id: 2,
-    name: "Ethereum",
-    symbol: "ETH",
-    price: "$1,800",
-    supply: "120M",
-    change1h: "+0.3%",
-    change24h: "+1.8%",
-    change7d: "+4.0%",
-  },
-  {
-    id: 3,
-    name: "Cardano",
-    symbol: "ADA",
-    price: "$0.40",
-    supply: "32B",
-    change1h: "-0.1%",
-    change24h: "+0.5%",
-    change7d: "+1.2%",
-  },
-];
+  const date = new Date(value as string);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 
-export default function Table({
-  title = "My Wallet",
-  columns = defaultColumns,
-  rows = defaultRows,
+  return String(value);
+}
+
+export default function Table<T>({
+  title = "Tabela",
+  columns,
+  rows,
   onActionClicked,
-}: TableProps) {
+  onRowAction,
+}: TableProps<T>) {
+  // 🔥 Garantia absoluta de array
+  const safeRows: T[] = Array.isArray(rows) ? rows : [];
+
   return (
     <div className="relative font-inter antialiased">
       <main className="relative min-h-screen flex flex-col bg-slate-50 overflow-x-auto">
         <div className="w-full px-3 md:px-6 pt-12 pb-24">
           <div className="flex justify-start">
             <div className="w-full bg-white shadow-xl rounded-2xl">
-              {/* Header com botão */}
+              {/* Header */}
               <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-900 text-lg">
                   {title}
                 </h2>
-                <button
-                  className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
-                  onClick={onActionClicked}
-                >
-                  Adicionar
-                </button>
+
+                {onActionClicked && (
+                  <button
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                    onClick={onActionClicked}
+                  >
+                    Adicionar
+                  </button>
+                )}
               </header>
 
               <div className="p-6">
                 <div className="overflow-x-auto w-full">
-                  <table className="table-auto w-full min-w-250 text-center">
-                    <thead className="text-[13px] text-slate-500/70 align-middle">
+                  <table className="table-auto w-full text-center">
+                    {/* Header */}
+                    <thead className="text-[13px] text-slate-500/70">
                       <tr>
                         {columns.map((col, index) => (
-                          <th
-                            key={index}
-                            className="px-5 py-2 bg-slate-100 align-middle"
-                          >
+                          <th key={index} className="px-5 py-2 bg-slate-100">
                             {col.label}
                           </th>
                         ))}
                       </tr>
                     </thead>
+
+                    {/* Body */}
                     <tbody className="text-sm font-medium">
-                      {rows.map((row, rowIndex) => (
-                        <tr
-                          key={rowIndex}
-                          className="border-b border-slate-200"
-                        >
-                          {columns.map((col, colIndex) => (
-                            <td
-                              key={colIndex}
-                              className="px-5 py-2 align-middle"
-                            >
-                              {col.isAction ? (
-                                <button className="text-blue-500">
-                                  Action
-                                </button>
-                              ) : row[col.key] !== undefined ? (
-                                row[col.key].toString()
-                              ) : (
-                                "-"
-                              )}
-                            </td>
-                          ))}
+                      {safeRows.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={columns.length}
+                            className="py-6 text-slate-400"
+                          >
+                            Nenhum registro encontrado
+                          </td>
                         </tr>
-                      ))}
+                      ) : (
+                        safeRows.map((row, rowIndex) => (
+                          <tr
+                            key={rowIndex}
+                            className="border-b border-slate-200"
+                          >
+                            {columns.map((col, colIndex) => (
+                              <td key={colIndex} className="px-5 py-2">
+                                {col.render
+                                  ? col.render(row)
+                                  : col.accessor
+                                    ? formatValue((row as any)[col.accessor])
+                                    : "-"}
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -138,8 +121,8 @@ export default function Table({
 
       <footer className="absolute left-6 right-6 md:left-12 md:right-auto bottom-4 md:bottom-8 md:text-left">
         <span className="text-xs text-slate-500">
-          &copy; 2026-03-02 Contabilidade H. Alvarenga LTDA - Developed by
-          Adriano Trentin Jr. All rights reserved.
+          &copy; 2026 Contabilidade H. Alvarenga LTDA - Developed by Adriano
+          Trentin Jr. All rights reserved.
         </span>
       </footer>
     </div>

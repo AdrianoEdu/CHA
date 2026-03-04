@@ -5,7 +5,8 @@
 
 import { EmployeeDto } from "@/app/api/dto/Employee/Employee";
 import { databaseService } from "../../providers/database/DatabaseService";
-import { Employee } from "@/app/generated/prisma";
+import { Employee, Prisma } from "@/app/generated/prisma";
+import { PaginationDto } from "../../dto/Pagination/Pagination";
 
 class EmployeeService {
   private databaseService = databaseService;
@@ -18,8 +19,28 @@ class EmployeeService {
     await this.databaseService.employee.update({ where: { id }, data });
   }
 
-  async findAll(): Promise<Employee[]> {
-    return await this.databaseService.employee.findMany();
+  async findAll(
+    params: PaginationDto<
+      Prisma.EmployeeWhereInput,
+      Prisma.EmployeeSelect,
+      Prisma.EmployeeInclude,
+      Prisma.EmployeeOrderByWithRelationInput
+    >,
+  ): Promise<Employee[]> {
+    const baseQuery: Prisma.EmployeeFindManyArgs = {
+      skip: params.skip,
+      where: params.where,
+      take: params.take,
+      orderBy: params.orderBy,
+    };
+
+    if (params.select) baseQuery.select = params.select;
+    if (params.include) baseQuery.include = params.include;
+
+    return await this.databaseService.employee.findMany({
+      ...baseQuery,
+      orderBy: { createdAt: "desc" },
+    });
   }
 }
 

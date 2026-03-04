@@ -3,8 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { EmployeeDto } from "@/app/api/dto/Employee/Employee";
 import { requestService } from "../requestService/requestService";
+import { PaginationDto } from "../../dto/pagination.dto";
+import { EmployeeDto } from "../../dto/employee.dto";
 
 class EmployeeService {
   private readonly url: string;
@@ -13,8 +14,12 @@ class EmployeeService {
     this.url = "/employee";
   }
 
-  create<T>(data: EmployeeDto) {
+  create(data: EmployeeDto) {
     return requestService.post(this.url, data);
+  }
+
+  findAll(data: PaginationDto) {
+    return requestService.getAll<EmployeeDto[]>(this.url, data);
   }
 }
 

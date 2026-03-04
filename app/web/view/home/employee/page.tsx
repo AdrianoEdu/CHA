@@ -5,55 +5,88 @@
 
 "use client";
 
+import Button from "@/app/web/components/button/page";
 import Modal from "@/app/web/components/modal/page";
 import RegisterUser from "@/app/web/components/modal/register-user/page";
 import Table from "@/app/web/components/table/page";
+import { EmployeeDto } from "@/app/web/dto/employee.dto";
+import { EnableIcon } from "@/app/web/icons";
+import DisableIcon from "@/app/web/icons/disable-icon";
+import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
-import { access } from "fs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function EmployeeScreen() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
 
-  const openModal = (): void => setIsModalOpen(true);
-  const closeModal = (): void => setIsModalOpen(false);
+  const { openModal, closeModal } = useModal();
 
   const handleRegisterUser = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
       closeModal();
       toast.success("Usuário criado com sucesso");
+      handleFindEmployees();
     });
   };
 
+  const handleOpenRegisterUserModal = (): void => {
+    openModal(
+      <RegisterUser onClose={closeModal} onRegister={handleRegisterUser} />,
+      "Registrar Funcionário",
+    );
+  };
+
+  const handleOpenDeactiveUserModal = (): void => {
+    openModal(<></>, "Desativar Funcionário");
+  };
+
+  const handleOpenActiveUserModal = (): void => {
+    openModal(<></>, "Ativar Funcionário");
+  };
+
+  const handleFindEmployees = async (): Promise<void> => {
+    const result = await employeeService.findAll({ skip: 0, take: 20 });
+    setEmployeeList(result);
+  };
+
+  useEffect(() => {
+    handleFindEmployees();
+  }, []);
+
   return (
     <div>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title="Registrar Funcionário"
-      >
-        <RegisterUser onClose={closeModal} onRegister={handleRegisterUser} />
-      </Modal>
-      /<h1 className="text-2xl font-bold">Funcionários</h1>
+      <h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
         title="Tabela de funcionários"
         columns={[
-          { key: "id", label: "#" },
-          { key: "name", label: "Nome" },
-          { key: "active", label: "Ativo no sistema?" },
-          { key: "createdAt", label: "Criado em" },
-          { key: "actions", label: "Ações", isAction: true },
-        ]}
-        rows={[
+          { label: "Criado em", accessor: "createdAt" },
+          { label: "Nome", accessor: "name" },
           {
-            id: "1",
-            name: "AdrianoEduardo",
-            active: true ? "Sim" : "Não",
-            createdAt: new Date().toDateString(),
+            label: "Ativo",
+            render: (row) => (row.isActive ? "Sim" : "Não"),
+          },
+          {
+            label: "Ações",
+            isAction: true,
+            render: (row) =>
+              row.isActive ? (
+                <Button
+                  className="bg-red-500"
+                  icon={<DisableIcon />}
+                  onClick={handleOpenDeactiveUserModal}
+                />
+              ) : (
+                <Button
+                  className="bg-green-500"
+                  icon={<EnableIcon />}
+                  onClick={handleOpenActiveUserModal}
+                />
+              ),
           },
         ]}
-        onActionClicked={openModal}
+        rows={employeeList}
+        onActionClicked={handleOpenRegisterUserModal}
       />
     </div>
   );

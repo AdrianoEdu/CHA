@@ -6,20 +6,12 @@
 import React from "react";
 
 interface ModalProps {
-  isOpen: boolean;
   onClose: () => void;
   title?: string;
   children?: React.ReactNode;
 }
 
-export default function Modal({
-  isOpen,
-  onClose,
-  title,
-  children,
-}: ModalProps) {
-  if (!isOpen) return null;
-
+export default function Modal({ onClose, title, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-lg mx-4 p-6 relative">

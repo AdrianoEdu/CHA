@@ -30,3 +30,24 @@ export async function POST(req: Request) {
     return Response.json({ error: "Erro interno" }, { status: 500 });
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    authGuard(req);
+
+    const { searchParams } = new URL(req.url);
+    const skip = searchParams.get("skip");
+    const take = searchParams.get("take");
+
+    const employees = await employeeController.findAll({
+      skip: skip ? Number(skip) : undefined,
+      take: take ? Number(take) : undefined,
+    });
+
+    return new Response(JSON.stringify(employees), { status: 200 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Erro interno" }), {
+      status: 500,
+    });
+  }
+}
