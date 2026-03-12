@@ -30,7 +30,7 @@ class AuthService {
       key: this.JWT_SECRET,
     });
 
-    return { lastName: user.lastName, name: user.name, token };
+    return { lastName: user.lastName, name: user.name, token, role: user.role };
   }
 
   private comparePassword(hash: string, passwd: string) {
@@ -38,7 +38,7 @@ class AuthService {
   }
 
   async isLogged(token: string): Promise<AuthLoggedDto> {
-    if (!token) return { name: "", lastName: "" };
+    if (!token) return { name: "", lastName: "", role: undefined };
 
     const userId = this.decodeJwt(token) ?? "";
 
@@ -48,7 +48,11 @@ class AuthService {
 
     if (!user) throw new UnauthorizedException();
 
-    return { name: user?.name ?? "", lastName: user?.lastName ?? "" };
+    return {
+      name: user?.name ?? "",
+      lastName: user?.lastName ?? "",
+      role: user.role,
+    };
   }
 
   async logout(token: string): Promise<void> {

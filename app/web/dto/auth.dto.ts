@@ -3,6 +3,8 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { UserRole } from "@/app/generated/prisma";
+
 export enum ActionEnum {
   Login,
   IsLogged,
@@ -20,5 +22,6 @@ export interface LoginDto extends ActionDto {
 
 export interface AuthDto {
   name: string;
+  role?: UserRole;
   lastName: string;
 }

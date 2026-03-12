@@ -28,6 +28,10 @@ class EmployeeService {
       id,
     });
   }
+
+  delete(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const employeeService = new EmployeeService();

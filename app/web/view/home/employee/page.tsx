@@ -5,15 +5,18 @@
 
 "use client";
 
+import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/page";
 import Modal from "@/app/web/components/modal/page";
 import RegisterUserModal from "@/app/web/components/modal/register-user/page";
+import RemoveUserModal from "@/app/web/components/modal/remove-user/page";
 import UpdateStatusUserModal from "@/app/web/components/modal/update-status-user/page";
 import Table from "@/app/web/components/table/page";
 import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
-import { EnableIcon } from "@/app/web/icons";
+import { DeleteIcon, EnableIcon } from "@/app/web/icons";
 import DisableIcon from "@/app/web/icons/disable-icon";
+import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { useEffect, useState } from "react";
@@ -25,6 +28,7 @@ export default function EmployeeScreen() {
   const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
 
   const { openModal, closeModal } = useModal();
+  const { user } = useAuth();
 
   const handleRegisterUser = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
@@ -48,6 +52,13 @@ export default function EmployeeScreen() {
     });
   };
 
+  const handleRemoverUser = async (id?: string): Promise<void> => {
+    employeeService.delete(id ?? "").then(() => {
+      closeModal();
+      toast.success("ola");
+    });
+  };
+
   const handleOpenRegisterUserModal = (): void => {
     openModal(
       <RegisterUserModal
@@ -55,6 +66,15 @@ export default function EmployeeScreen() {
         onRegister={handleRegisterUser}
       />,
       RegisterUser.title,
+    );
+  };
+
+  const handleOpenRemoveUserModal = (userId?: string): void => {
+    openModal(
+      <RemoveUserModal
+        onClose={closeModal}
+        onConfirm={() => handleRemoverUser(userId)}
+      />,
     );
   };
 
@@ -98,24 +118,39 @@ export default function EmployeeScreen() {
           {
             label: "Ações",
             isAction: true,
-            render: (row) =>
-              row.isActive ? (
-                <Button
-                  className="bg-red-500"
-                  icon={<DisableIcon />}
-                  onClick={() =>
-                    handleOpenStatusUserModal(row.isActive, row.id)
-                  }
-                />
-              ) : (
-                <Button
-                  className="bg-green-500"
-                  icon={<EnableIcon />}
-                  onClick={() =>
-                    handleOpenStatusUserModal(row.isActive, row.id)
-                  }
-                />
-              ),
+            render: (row) => {
+              const isAdmin = user?.role === UserRole.ADMIN;
+
+              return (
+                <div className="flex gap-2 justify-center">
+                  {row.isActive ? (
+                    <Button
+                      className="bg-red-500"
+                      icon={<DisableIcon />}
+                      onClick={() =>
+                        handleOpenStatusUserModal(row.isActive, row.id)
+                      }
+                    />
+                  ) : (
+                    <Button
+                      className="bg-green-500"
+                      icon={<EnableIcon />}
+                      onClick={() =>
+                        handleOpenStatusUserModal(row.isActive, row.id)
+                      }
+                    />
+                  )}
+
+                  {isAdmin && (
+                    <Button
+                      className="bg-gray-700"
+                      icon={<DeleteIcon />}
+                      onClick={() => handleOpenRemoveUserModal(row.id)}
+                    />
+                  )}
+                </div>
+              );
+            },
           },
         ]}
         rows={employeeList}

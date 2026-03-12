@@ -11,13 +11,12 @@ export interface TableColumn<T> {
 
 interface TableProps<T> {
   title?: string;
+  rows?: T[] | null;
   columns: TableColumn<T>[];
-  rows?: T[] | null; // agora pode ser undefined/null
   onActionClicked?: () => void;
   onRowAction?: (row: T) => void;
 }
 
-// 🔹 Função utilitária para formatar datas automaticamente
 function formatValue(value: unknown) {
   if (!value) return "-";
 
@@ -42,7 +41,6 @@ export default function Table<T>({
   onActionClicked,
   onRowAction,
 }: TableProps<T>) {
-  // 🔥 Garantia absoluta de array
   const safeRows: T[] = Array.isArray(rows) ? rows : [];
 
   return (
@@ -51,7 +49,6 @@ export default function Table<T>({
         <div className="w-full px-3 md:px-6 pt-12 pb-24">
           <div className="flex justify-start">
             <div className="w-full bg-white shadow-xl rounded-2xl">
-              {/* Header */}
               <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-900 text-lg">
                   {title}
@@ -70,7 +67,6 @@ export default function Table<T>({
               <div className="p-6">
                 <div className="overflow-x-auto w-full">
                   <table className="table-auto w-full text-center">
-                    {/* Header */}
                     <thead className="text-[13px] text-slate-500/70">
                       <tr>
                         {columns.map((col, index) => (
@@ -81,7 +77,6 @@ export default function Table<T>({
                       </tr>
                     </thead>
 
-                    {/* Body */}
                     <tbody className="text-sm font-medium">
                       {safeRows.length === 0 ? (
                         <tr>

@@ -23,7 +23,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<AuthDto>({ name: "", lastName: "" });
+  const [user, setUser] = useState<AuthDto>({
+    name: "",
+    lastName: "",
+    role: undefined,
+  });
 
   useEffect(() => {
     isAuthenticated();

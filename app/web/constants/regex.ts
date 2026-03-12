@@ -4,5 +4,5 @@
 // All rights reserved.
 
 export const Regex = {
-  userName: new RegExp("^[A-Za-zÀ-ÿ\s]+$"),
+  userName: new RegExp("^[A-Za-zÀ-ÿ\\s]+$"),
 };

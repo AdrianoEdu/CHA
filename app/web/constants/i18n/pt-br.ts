@@ -27,5 +27,13 @@ export const PtBr = {
       successActiveUser: "O usuário foi ativado com sucesso.",
       successDeactiveUser: "O usuário foi desativado com sucesso.",
     },
+    RemoveUser: {
+      message: "Atenção: você realmente deseja remover este usuário?",
+      description:
+        "Após a remoção, o usuário não poderá mais ser utilizado no sistema. Utilize esta opção apenas quando o cadastro tiver sido realizado de forma incorreta.",
+      confirmButton: "Remover",
+      cancelButton: "Cancelar",
+      successRemoveUser: "Usuário removido com sucesso.",
+    },
   },
 };

@@ -7,6 +7,7 @@ import { EmployeeDto } from "@/app/api/dto/Employee/Employee";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { Employee, Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class EmployeeService {
   private databaseService = databaseService;
@@ -48,6 +49,16 @@ class EmployeeService {
       where: { id },
       data: { isActive },
     });
+  }
+
+  async delete(id?: string): Promise<void> {
+    const employee = await this.databaseService.employee.findFirst({
+      where: { id },
+    });
+
+    if (!employee) throw new NotFoundException();
+
+    await this.databaseService.employee.delete({ where: { id } });
   }
 }
 

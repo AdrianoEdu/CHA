@@ -76,7 +76,10 @@ class RequestService {
   }
 
   delete<TResponse>(url: string, id: string) {
-    return this.request<TResponse>(`${url}/${id}`, { method: "DELETE" });
+    return this.request<TResponse>(`${url}`, {
+      method: "DELETE",
+      body: { id },
+    });
   }
 }
 

@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { UserRole } from "@/app/generated/prisma";
 import { PrismaClient } from "@prisma/client";
 import * as argon2 from "argon2";
 
@@ -18,6 +19,7 @@ export async function seedUsers(prisma: PrismaClient) {
       status: "ACTIVE",
       name: "Admin",
       lastName: "User",
+      role: UserRole.ADMIN,
     },
   });
 
