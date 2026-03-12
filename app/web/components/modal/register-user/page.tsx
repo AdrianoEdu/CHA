@@ -8,6 +8,16 @@
 import { useState } from "react";
 import Button from "../../button/page";
 import Input from "../../input/page";
+import { Regex } from "@/app/web/constants/regex";
+import { i18n } from "@/app/web/constants/i18n";
+
+const {
+  cancelButton,
+  errorEmptyName,
+  errorInvalidName,
+  inputNamePlaceholder,
+  registerButton,
+} = i18n["Pt-Br"].Modal.RegisterUser;
 
 export type RegisterUserProps = {
   onRegister: (value: string) => Promise<void>;
@@ -19,20 +29,39 @@ export default function RegisterUser({
   onClose,
 }: Readonly<RegisterUserProps>) {
   const [name, setName] = useState("");
+  const [showErrorRegex, setShowErrorRegex] = useState(false);
 
-  const handleRegisterUser = async (): Promise<void> => onRegister(name);
+  const errorRegexMessage =
+    name.trim() === "" ? errorEmptyName : errorInvalidName;
+
+  const handleRegisterUser = async (): Promise<void> => {
+    if (name.trim() === "") {
+      setShowErrorRegex(true);
+      return;
+    }
+
+    onRegister(name);
+  };
 
   return (
     <div className="flex flex-col w-full">
       <Input
         value={name}
         className="flex-1"
+        regex={Regex.userName}
+        regexError={showErrorRegex}
+        name={inputNamePlaceholder}
+        onRegexError={setShowErrorRegex}
+        regexMessageError={errorRegexMessage}
         onChange={(e) => setName(e.target.value)}
-        name={"Informe o nome do seu funcionário"}
       />
       <div className="mt-6 flex justify-end gap-4">
-        <Button text="Cancelar" onPress={onClose} />
-        <Button text="Registrar" onPress={handleRegisterUser} />
+        <Button text={cancelButton} onPress={onClose} />
+        <Button
+          text={registerButton}
+          disabled={showErrorRegex}
+          onPress={handleRegisterUser}
+        />
       </div>
     </div>
   );

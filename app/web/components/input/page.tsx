@@ -13,9 +13,31 @@ export enum InputType {
   Number = "number",
 }
 
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  regex?: RegExp;
+  regexError?: boolean;
+  regexMessageError?: string;
+  onRegexError?: (status: boolean) => void;
+}
+
 export default function Input({
+  regex,
+  regexError,
+  regexMessageError,
+  onRegexError,
   ...rest
-}: Readonly<InputHTMLAttributes<HTMLInputElement>>) {
+}: Readonly<InputProps>) {
+  function handleOnPress(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = e.target.value;
+
+    if (onRegexError) {
+      if (regex && !regex.test(value)) onRegexError(true);
+      else onRegexError(false);
+    }
+
+    rest.onChange?.(e);
+  }
+
   return (
     <div className="bg-transparent p-4 rounded-lg">
       <div className="relative w-72">
@@ -25,7 +47,7 @@ export default function Input({
           placeholder=" "
           type={rest.type}
           value={rest.value}
-          onChange={rest.onChange}
+          onChange={handleOnPress}
           className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />
 
@@ -53,6 +75,11 @@ export default function Input({
         >
           {rest.name}
         </label>
+        {regexError && (
+          <span className="text-red-500 text-xs mt-1 block">
+            {regexMessageError}
+          </span>
+        )}
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ export default function Button({
   return (
     <button
       onClick={onPress}
+      disabled={rest.disabled}
       {...rest}
       className={`
         inline-flex
@@ -29,12 +30,18 @@ export default function Button({
         justify-center
         gap-2
         px-4 py-2
-        bg-blue-600
-        text-white
         rounded-lg
         font-medium
         whitespace-normal
         text-center
+        transition
+
+        ${
+          rest.disabled
+            ? "bg-gray-400 text-gray-200 opacity-60 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        }
+
         ${rest.className ?? ""}
       `}
     >
