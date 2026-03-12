@@ -22,7 +22,7 @@ import { employeeService } from "@/app/web/services/employeeService/employeeServ
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const { RegisterUser, UpdateStatusUser } = i18n["Pt-Br"].Modal;
+const { RegisterUser, UpdateStatusUser, RemoveUser } = i18n["Pt-Br"].Modal;
 
 export default function EmployeeScreen() {
   const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
@@ -55,7 +55,7 @@ export default function EmployeeScreen() {
   const handleRemoverUser = async (id?: string): Promise<void> => {
     employeeService.delete(id ?? "").then(() => {
       closeModal();
-      toast.success("ola");
+      toast.success(RemoveUser.successRemoveUser);
     });
   };
 
@@ -75,6 +75,7 @@ export default function EmployeeScreen() {
         onClose={closeModal}
         onConfirm={() => handleRemoverUser(userId)}
       />,
+      RemoveUser.title,
     );
   };
 
