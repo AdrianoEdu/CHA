@@ -3,10 +3,14 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-export type EmployeeDto = {
+import { ActionDto } from "./auth.dto";
+
+export interface EmployeeDto {
   id?: string;
   name: string;
   isActive?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-};
+}
+
+export interface SendEmployeeDto extends ActionDto, EmployeeDto {}

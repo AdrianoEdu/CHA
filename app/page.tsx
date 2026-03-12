@@ -7,9 +7,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { authService } from "./web/services/authService/authService";
-import { toast } from "react-toastify";
-import { ActionEnum } from "./web/dto/auth.dto";
 import { useAuth } from "./web/providers/AuthProvider";
 
 export default function Main() {

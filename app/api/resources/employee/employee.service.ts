@@ -44,6 +44,10 @@ class EmployeeService {
     });
   }
 
+  async findByName({ name }: Partial<EmployeeDto>) {
+    return this.databaseService.employee.findFirst({ where: { name } });
+  }
+
   async updateStatusUser({ isActive, id }: Partial<EmployeeDto>) {
     await this.databaseService.employee.update({
       where: { id },

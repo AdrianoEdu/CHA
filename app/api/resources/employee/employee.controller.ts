@@ -38,20 +38,29 @@ export class EmployeeController {
     }
   }
 
-  async findAll(
-    params: PaginationDto<
-      Prisma.EmployeeWhereInput,
-      Prisma.EmployeeSelect,
-      Prisma.EmployeeInclude,
-      Prisma.EmployeeOrderByWithRelationInput
-    >,
-  ) {
+  async findAll(req: Request) {
     try {
-      return await this.employeeService.findAll(params);
+      const { searchParams } = new URL(req.url);
+      const skip = searchParams.get("skip");
+      const take = searchParams.get("take");
+
+      return this.employeeService.findAll({
+        skip: Number(skip),
+        take: Number(take),
+      });
     } catch (error: any) {
       console.error("Erro ao buscar Employees:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
+  }
+
+  async findByName(req: Request) {
+    try {
+      const { searchParams } = new URL(req.url);
+      const name = searchParams.get("name") ?? "";
+
+      return await this.employeeService.findByName({ name });
+    } catch (error) {}
   }
 
   async patch({ isActive, id }: Partial<EmployeeDto>) {

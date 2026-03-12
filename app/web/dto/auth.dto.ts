@@ -4,15 +4,10 @@
 // All rights reserved.
 
 import { UserRole } from "@/app/generated/prisma";
-
-export enum ActionEnum {
-  Login,
-  IsLogged,
-  Logout,
-}
+import { ActionEnum } from "../constants/enum";
 
 export interface ActionDto {
-  type: ActionEnum;
+  type?: ActionEnum;
 }
 
 export interface LoginDto extends ActionDto {

@@ -7,11 +7,11 @@
 
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/page";
-import Modal from "@/app/web/components/modal/page";
-import RegisterUserModal from "@/app/web/components/modal/register-user/page";
-import RemoveUserModal from "@/app/web/components/modal/remove-user/page";
-import UpdateStatusUserModal from "@/app/web/components/modal/update-status-user/page";
+import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/page";
+import RemoveEmployeeModal from "@/app/web/components/modal/remove-employee/page";
+import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/page";
 import Table from "@/app/web/components/table/page";
+import { ActionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
 import { DeleteIcon, EnableIcon } from "@/app/web/icons";
@@ -19,96 +19,157 @@ import DisableIcon from "@/app/web/icons/disable-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const { RegisterUser, UpdateStatusUser, RemoveUser } = i18n["Pt-Br"].Modal;
+const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
+  i18n["Pt-Br"].Modal;
+
+let oldEmployeeList: EmployeeDto[] = [];
 
 export default function EmployeeScreen() {
   const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
+  const [filter, setFilter] = useState("");
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const { openModal, closeModal } = useModal();
   const { user } = useAuth();
 
-  const handleRegisterUser = async (name: string): Promise<void> => {
+  const handleRegisterEmployee = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
       closeModal();
-      toast.success(RegisterUser.successRegisterUser);
+      toast.success(RegisterEmployee.successRegisterEmployee);
       handleFindEmployees();
     });
   };
 
-  const handleUpdateStatusUser = async (
+  const handleUpdateStatusEmployee = async (
     status?: boolean,
-    userId?: string,
+    employeeId?: string,
   ): Promise<void> => {
-    employeeService.patch({ isActive: !status, id: userId }).then(() => {
+    employeeService.patch({ isActive: !status, id: employeeId }).then(() => {
       closeModal();
       toast.success(
         status
-          ? UpdateStatusUser.successDeactiveUser
-          : UpdateStatusUser.successActiveUser,
+          ? UpdateStatusEmployee.successDeactiveEmployee
+          : UpdateStatusEmployee.successActiveEmployee,
       );
     });
   };
 
-  const handleRemoverUser = async (id?: string): Promise<void> => {
+  const handleRemoverEmployee = async (id?: string): Promise<void> => {
     employeeService.delete(id ?? "").then(() => {
       closeModal();
-      toast.success(RemoveUser.successRemoveUser);
+      toast.success(RemoveEmployee.successRemoveEmployee);
     });
   };
 
-  const handleOpenRegisterUserModal = (): void => {
+  const handleOpenRegisterEmployeeModal = (): void => {
     openModal(
-      <RegisterUserModal
+      <RegisterEmployeeModal
         onClose={closeModal}
-        onRegister={handleRegisterUser}
+        onRegister={handleRegisterEmployee}
       />,
-      RegisterUser.title,
+      RegisterEmployee.title,
     );
   };
 
-  const handleOpenRemoveUserModal = (userId?: string): void => {
+  const handleOpenRemoveEmployeeModal = (employeeId?: string): void => {
     openModal(
-      <RemoveUserModal
+      <RemoveEmployeeModal
         onClose={closeModal}
-        onConfirm={() => handleRemoverUser(userId)}
+        onConfirm={() => handleRemoverEmployee(employeeId)}
       />,
-      RemoveUser.title,
+      RemoveEmployee.title,
     );
   };
 
-  const handleOpenStatusUserModal = (
+  const handleOpenStatusEmployeeModal = (
     status?: boolean,
-    userId?: string,
+    employeeId?: string,
   ): void => {
     openModal(
-      <UpdateStatusUserModal
+      <UpdateStatusEmployeeModal
         isActive={status}
         onCancel={closeModal}
-        onConfirm={() => handleUpdateStatusUser(status, userId)}
+        onConfirm={() => handleUpdateStatusEmployee(status, employeeId)}
       />,
       status
-        ? UpdateStatusUser.deactivateTitle
-        : UpdateStatusUser.activateTitle,
+        ? UpdateStatusEmployee.deactivateTitle
+        : UpdateStatusEmployee.activateTitle,
     );
   };
 
   const handleFindEmployees = async (): Promise<void> => {
-    const result = await employeeService.findAll({ skip: 0, take: 20 });
+    const result = await employeeService.findAll({
+      skip: 0,
+      take: 20,
+      type: ActionEnum.FindAll,
+    });
+
+    oldEmployeeList = result;
     setEmployeeList(result);
   };
 
+  const handleSetFilterEmployeeName = (name: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      setFilter(name);
+    }, 500);
+  };
+
+  const handleFilterEmployeeName = async (): Promise<void> => {
+    if (filter === "") {
+      setEmployeeList(oldEmployeeList);
+      return;
+    }
+
+    const local = oldEmployeeList.filter((emp) =>
+      emp.name.toLowerCase().includes(filter),
+    );
+
+    if (local.length > 0) {
+      setEmployeeList(local);
+      return;
+    }
+
+    try {
+      const apiResult = await employeeService.findByName({
+        name: filter,
+        type: ActionEnum.FindByName,
+      });
+
+      if (!apiResult || apiResult.length === 0) {
+        setEmployeeList([]);
+        return;
+      }
+
+      setEmployeeList(apiResult);
+    } catch (error) {
+      console.error(error);
+      setEmployeeList(oldEmployeeList);
+    }
+  };
   useEffect(() => {
     handleFindEmployees();
   }, []);
+
+  useEffect(() => {
+    handleFilterEmployeeName();
+  }, [filter]);
 
   return (
     <div>
       <h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
+        enableFilter
+        rows={employeeList}
         title="Tabela de funcionários"
+        onFilterChange={handleSetFilterEmployeeName}
+        onActionClicked={handleOpenRegisterEmployeeModal}
         columns={[
           { label: "Criado em", accessor: "createdAt" },
           { label: "Nome", accessor: "name" },
@@ -129,7 +190,7 @@ export default function EmployeeScreen() {
                       className="bg-red-500"
                       icon={<DisableIcon />}
                       onClick={() =>
-                        handleOpenStatusUserModal(row.isActive, row.id)
+                        handleOpenStatusEmployeeModal(row.isActive, row.id)
                       }
                     />
                   ) : (
@@ -137,7 +198,7 @@ export default function EmployeeScreen() {
                       className="bg-green-500"
                       icon={<EnableIcon />}
                       onClick={() =>
-                        handleOpenStatusUserModal(row.isActive, row.id)
+                        handleOpenStatusEmployeeModal(row.isActive, row.id)
                       }
                     />
                   )}
@@ -146,7 +207,7 @@ export default function EmployeeScreen() {
                     <Button
                       className="bg-gray-700"
                       icon={<DeleteIcon />}
-                      onClick={() => handleOpenRemoveUserModal(row.id)}
+                      onClick={() => handleOpenRemoveEmployeeModal(row.id)}
                     />
                   )}
                 </div>
@@ -154,8 +215,6 @@ export default function EmployeeScreen() {
             },
           },
         ]}
-        rows={employeeList}
-        onActionClicked={handleOpenRegisterUserModal}
       />
     </div>
   );

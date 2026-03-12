@@ -1,3 +1,4 @@
+import { ActionEnum } from "../dto/Auth/Auth";
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
@@ -36,15 +37,22 @@ export async function GET(req: Request) {
     authGuard(req);
 
     const { searchParams } = new URL(req.url);
-    const skip = searchParams.get("skip");
-    const take = searchParams.get("take");
+    const type = Number(searchParams.get("type"));
 
-    const employees = await employeeController.findAll({
-      skip: skip ? Number(skip) : undefined,
-      take: take ? Number(take) : undefined,
-    });
+    let result;
 
-    return new Response(JSON.stringify(employees), { status: 200 });
+    switch (type) {
+      case ActionEnum.FindAll:
+        result = await employeeController.findAll(req);
+        break;
+      case ActionEnum.FindByName:
+        result = await employeeController.findByName(req);
+        break;
+      default:
+        break;
+    }
+
+    return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,

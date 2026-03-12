@@ -16,19 +16,19 @@ const {
   cancelButton,
   confirmActivateButton,
   confirmDeactivateButton,
-} = i18n["Pt-Br"].Modal.UpdateStatusUser;
+} = i18n["Pt-Br"].Modal.UpdateStatusEmployee;
 
-export type ToggleUserStatusModalProps = {
+export type ToggleEmployeeStatusModalProps = {
   isActive?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
-export default function UpdateStatusUserModal({
+export default function UpdateStatusEmployeeModal({
   onCancel,
   onConfirm,
   isActive = false,
-}: Readonly<ToggleUserStatusModalProps>) {
+}: Readonly<ToggleEmployeeStatusModalProps>) {
   const title = isActive ? deactivateTitle : activateTitle;
 
   const description = isActive ? deactivateDescription : activateDescription;

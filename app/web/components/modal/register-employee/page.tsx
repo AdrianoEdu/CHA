@@ -17,24 +17,24 @@ const {
   errorInvalidName,
   inputNamePlaceholder,
   registerButton,
-} = i18n["Pt-Br"].Modal.RegisterUser;
+} = i18n["Pt-Br"].Modal.RegisterEmployee;
 
-export type RegisterUserProps = {
+export type RegisterEmployeeProps = {
   onRegister: (value: string) => Promise<void>;
   onClose: () => void;
 };
 
-export default function RegisterUserModal({
+export default function RegisterEmployeeModal({
   onRegister,
   onClose,
-}: Readonly<RegisterUserProps>) {
+}: Readonly<RegisterEmployeeProps>) {
   const [name, setName] = useState("");
   const [showErrorRegex, setShowErrorRegex] = useState(false);
 
   const errorRegexMessage =
     name.trim() === "" ? errorEmptyName : errorInvalidName;
 
-  const handleRegisterUser = async (): Promise<void> => {
+  const handleRegisterEmployee = async (): Promise<void> => {
     if (name.trim() === "") {
       setShowErrorRegex(true);
       return;
@@ -48,7 +48,7 @@ export default function RegisterUserModal({
       <Input
         value={name}
         className="flex-1"
-        regex={Regex.userName}
+        regex={Regex.employeeName}
         regexError={showErrorRegex}
         name={inputNamePlaceholder}
         onRegexError={setShowErrorRegex}
@@ -60,7 +60,7 @@ export default function RegisterUserModal({
         <Button
           text={registerButton}
           disabled={showErrorRegex}
-          onPress={handleRegisterUser}
+          onPress={handleRegisterEmployee}
         />
       </div>
     </div>

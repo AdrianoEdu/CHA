@@ -17,8 +17,10 @@ interface TableProps<T> {
   rows?: T[] | null;
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
-
   onRowClick?: (row: T) => void;
+
+  enableFilter?: boolean;
+  onFilterChange?: (value: string) => void;
 }
 
 function formatValue(value: unknown) {
@@ -44,8 +46,25 @@ export default function Table<T>({
   rows,
   onActionClicked,
   onRowClick,
+  enableFilter = false,
+  onFilterChange,
 }: TableProps<T>) {
   const safeRows: T[] = Array.isArray(rows) ? rows : [];
+
+  const [filter, setFilter] = React.useState("");
+  const debounceRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  function handleFilterChange(value: string) {
+    setFilter(value);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      onFilterChange?.(value);
+    }, 500);
+  }
 
   return (
     <div className="relative font-inter antialiased">
@@ -53,19 +72,32 @@ export default function Table<T>({
         <div className="w-full px-3 md:px-6 pt-12 pb-24">
           <div className="flex justify-start">
             <div className="w-full bg-white shadow-xl rounded-2xl">
+              {/* HEADER */}
               <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-900 text-lg">
                   {title}
                 </h2>
 
-                {onActionClicked && (
-                  <button
-                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
-                    onClick={onActionClicked}
-                  >
-                    Adicionar
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                  {enableFilter && (
+                    <input
+                      type="text"
+                      placeholder="Pesquisar..."
+                      value={filter}
+                      onChange={(e) => handleFilterChange(e.target.value)}
+                      className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  )}
+
+                  {onActionClicked && (
+                    <button
+                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                      onClick={onActionClicked}
+                    >
+                      Adicionar
+                    </button>
+                  )}
+                </div>
               </header>
 
               <div className="p-6">

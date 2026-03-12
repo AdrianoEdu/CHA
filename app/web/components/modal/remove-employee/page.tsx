@@ -8,18 +8,18 @@
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { cancelButton, confirmButton, description, message, successRemoveUser } =
-  i18n["Pt-Br"].Modal.RemoveUser;
+const { cancelButton, confirmButton, description, message } =
+  i18n["Pt-Br"].Modal.RemoveEmployee;
 
-export type RemoveUserModalContentProps = {
+export type RemoveEmployeeModalContentProps = {
   onConfirm: () => Promise<void> | void;
   onClose: () => void;
 };
 
-export default function RemoveUserModal({
+export default function RemoveEmployeeModal({
   onConfirm,
   onClose,
-}: Readonly<RemoveUserModalContentProps>) {
+}: Readonly<RemoveEmployeeModalContentProps>) {
   return (
     <div className="flex flex-col w-full">
       <p className="text-sm font-medium">{message}</p>

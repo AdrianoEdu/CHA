@@ -3,7 +3,11 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-export type PaginationDto = {
+import { ActionDto } from "./auth.dto";
+
+export interface PaginationDto {
   skip?: number;
   take?: number;
-};
+}
+
+export interface SendPaginationDto extends ActionDto, PaginationDto {}

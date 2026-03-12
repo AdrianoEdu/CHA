@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { authService } from "../services/authService/authService";
-import { ActionEnum, AuthDto } from "../dto/auth.dto";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { AuthDto } from "../dto/auth.dto";
+import { ActionEnum } from "../constants/enum";
 
 interface User {
   id: string;

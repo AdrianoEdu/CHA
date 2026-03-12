@@ -57,8 +57,10 @@ export default function BankScreen() {
     <div>
       <h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
+        rows={listBank}
         title="Agências bancárias"
         onRowClick={handleOpenBankModal}
+        onActionClicked={handleOpenBankModal}
         columns={[
           { label: "Criado em", accessor: "createdAt" },
           { label: "Nome", accessor: "name" },
@@ -84,8 +86,6 @@ export default function BankScreen() {
             },
           },
         ]}
-        rows={listBank}
-        onActionClicked={handleOpenBankModal}
       />
     </div>
   );

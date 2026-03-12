@@ -7,8 +7,11 @@ import { UserRole } from "@/app/generated/prisma";
 
 export enum ActionEnum {
   Login,
-  IsLogged,
   Logout,
+  IsLogged,
+
+  FindAll,
+  FindByName,
 }
 
 export interface LoginDto {

@@ -38,7 +38,8 @@ class RequestService {
         : undefined,
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : undefined;
 
     if (!response.ok)
       throw new Error(data.error || `Erro na requisição: ${response.status}`);
@@ -48,13 +49,18 @@ class RequestService {
     return data as TResponse;
   }
 
-  getAll<TResponse>(url: string, filters?: Record<string, any>) {
+  getAll<TBody, TResponse>(url: string, filters?: TBody) {
     const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
     return this.request<TResponse>(`${url}${query}`, { method: "GET" });
   }
 
   getById<TResponse>(url: string, id: string) {
     return this.request<TResponse>(`${url}/${id}`, { method: "GET" });
+  }
+
+  getByFilters<TBody, TResponse>(url: string, filters: TBody) {
+    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
+    return this.request<TResponse>(`${url}`, { method: "GET" });
   }
 
   post<TBody, TResponse>(url: string, data?: TBody) {
