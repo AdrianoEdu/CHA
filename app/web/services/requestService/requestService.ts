@@ -68,8 +68,8 @@ class RequestService {
     });
   }
 
-  patch<TBody, TResponse>(url: string, id: string, data: TBody) {
-    return this.request<TResponse>(`${url}/${id}`, {
+  patch<TBody, TResponse>(url: string, data: TBody) {
+    return this.request<TResponse>(`${url}`, {
       method: "PATCH",
       body: data,
     });

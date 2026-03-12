@@ -24,7 +24,7 @@ export type RegisterUserProps = {
   onClose: () => void;
 };
 
-export default function RegisterUser({
+export default function RegisterUserModal({
   onRegister,
   onClose,
 }: Readonly<RegisterUserProps>) {

@@ -6,6 +6,7 @@
 import { Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { employeeService } from "./employee-service";
+import { EmployeeDto } from "../../dto/Employee/Employee";
 
 export class EmployeeController {
   private employeeService;
@@ -52,5 +53,9 @@ export class EmployeeController {
       console.error("Erro ao buscar Employees:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
+  }
+
+  async patch({ isActive, id }: Partial<EmployeeDto>) {
+    await this.employeeService.updateStatusUser({ isActive, id });
   }
 }

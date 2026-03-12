@@ -42,6 +42,13 @@ class EmployeeService {
       orderBy: { createdAt: "desc" },
     });
   }
+
+  async updateStatusUser({ isActive, id }: Partial<EmployeeDto>) {
+    await this.databaseService.employee.update({
+      where: { id },
+      data: { isActive },
+    });
+  }
 }
 
 export const employeeService = new EmployeeService();

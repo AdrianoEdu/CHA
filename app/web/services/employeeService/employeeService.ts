@@ -21,6 +21,13 @@ class EmployeeService {
   findAll(data: PaginationDto) {
     return requestService.getAll<EmployeeDto[]>(this.url, data);
   }
+
+  patch({ isActive, id }: Partial<EmployeeDto>) {
+    return requestService.patch<Partial<EmployeeDto>, void>(this.url, {
+      isActive,
+      id,
+    });
+  }
 }
 
 export const employeeService = new EmployeeService();

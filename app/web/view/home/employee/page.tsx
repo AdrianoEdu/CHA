@@ -7,8 +7,10 @@
 
 import Button from "@/app/web/components/button/page";
 import Modal from "@/app/web/components/modal/page";
-import RegisterUser from "@/app/web/components/modal/register-user/page";
+import RegisterUserModal from "@/app/web/components/modal/register-user/page";
+import UpdateStatusUserModal from "@/app/web/components/modal/update-status-user/page";
 import Table from "@/app/web/components/table/page";
+import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
 import { EnableIcon } from "@/app/web/icons";
 import DisableIcon from "@/app/web/icons/disable-icon";
@@ -16,6 +18,8 @@ import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+
+const { RegisterUser, UpdateStatusUser } = i18n["Pt-Br"].Modal;
 
 export default function EmployeeScreen() {
   const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
@@ -25,24 +29,49 @@ export default function EmployeeScreen() {
   const handleRegisterUser = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
       closeModal();
-      toast.success("Usuário criado com sucesso");
+      toast.success(RegisterUser.successRegisterUser);
       handleFindEmployees();
+    });
+  };
+
+  const handleUpdateStatusUser = async (
+    status?: boolean,
+    userId?: string,
+  ): Promise<void> => {
+    employeeService.patch({ isActive: !status, id: userId }).then(() => {
+      closeModal();
+      toast.success(
+        status
+          ? UpdateStatusUser.successDeactiveUser
+          : UpdateStatusUser.successActiveUser,
+      );
     });
   };
 
   const handleOpenRegisterUserModal = (): void => {
     openModal(
-      <RegisterUser onClose={closeModal} onRegister={handleRegisterUser} />,
-      "Registrar Funcionário",
+      <RegisterUserModal
+        onClose={closeModal}
+        onRegister={handleRegisterUser}
+      />,
+      RegisterUser.title,
     );
   };
 
-  const handleOpenDeactiveUserModal = (): void => {
-    openModal(<></>, "Desativar Funcionário");
-  };
-
-  const handleOpenActiveUserModal = (): void => {
-    openModal(<></>, "Ativar Funcionário");
+  const handleOpenStatusUserModal = (
+    status?: boolean,
+    userId?: string,
+  ): void => {
+    openModal(
+      <UpdateStatusUserModal
+        isActive={status}
+        onCancel={closeModal}
+        onConfirm={() => handleUpdateStatusUser(status, userId)}
+      />,
+      status
+        ? UpdateStatusUser.deactivateTitle
+        : UpdateStatusUser.activateTitle,
+    );
   };
 
   const handleFindEmployees = async (): Promise<void> => {
@@ -74,13 +103,17 @@ export default function EmployeeScreen() {
                 <Button
                   className="bg-red-500"
                   icon={<DisableIcon />}
-                  onClick={handleOpenDeactiveUserModal}
+                  onClick={() =>
+                    handleOpenStatusUserModal(row.isActive, row.id)
+                  }
                 />
               ) : (
                 <Button
                   className="bg-green-500"
                   icon={<EnableIcon />}
-                  onClick={handleOpenActiveUserModal}
+                  onClick={() =>
+                    handleOpenStatusUserModal(row.isActive, row.id)
+                  }
                 />
               ),
           },
