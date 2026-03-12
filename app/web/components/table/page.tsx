@@ -1,6 +1,9 @@
+// Copyright (c) 2026-03-12
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 import React from "react";
-import DisableIcon from "../../icons/disable-icon";
-import Button from "../button/page";
 
 export interface TableColumn<T> {
   label: string;
@@ -14,7 +17,8 @@ interface TableProps<T> {
   rows?: T[] | null;
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
-  onRowAction?: (row: T) => void;
+
+  onRowClick?: (row: T) => void;
 }
 
 function formatValue(value: unknown) {
@@ -39,7 +43,7 @@ export default function Table<T>({
   columns,
   rows,
   onActionClicked,
-  onRowAction,
+  onRowClick,
 }: TableProps<T>) {
   const safeRows: T[] = Array.isArray(rows) ? rows : [];
 
@@ -91,7 +95,12 @@ export default function Table<T>({
                         safeRows.map((row, rowIndex) => (
                           <tr
                             key={rowIndex}
-                            className="border-b border-slate-200"
+                            className={`border-b border-slate-200 ${
+                              onRowClick
+                                ? "cursor-pointer hover:bg-slate-100 transition"
+                                : ""
+                            }`}
+                            onClick={() => onRowClick?.(row)}
                           >
                             {columns.map((col, colIndex) => (
                               <td key={colIndex} className="px-5 py-2">

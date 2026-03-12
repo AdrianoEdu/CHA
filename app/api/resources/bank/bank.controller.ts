@@ -1,23 +1,22 @@
-// Copyright (c) 2026-01-31
+// Copyright (c) 2026-03-12
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
-import { employeeService } from "./employee-service";
-import { EmployeeDto } from "../../dto/Employee/Employee";
+import { bankService } from "./bank.service";
 
-export class EmployeeController {
-  private employeeService;
+export class BankController {
+  private bankService;
 
   constructor() {
-    this.employeeService = employeeService;
+    this.bankService = bankService;
   }
 
   async create(decryptedBody: any) {
     try {
-      const employee = await this.employeeService.create(decryptedBody);
+      const employee = await this.bankService.create(decryptedBody);
       return Response.json(employee, { status: 201 });
     } catch (error: any) {
       console.error("Erro ao criar Employee:", error);
@@ -25,9 +24,9 @@ export class EmployeeController {
     }
   }
 
-  async update(id: string, decryptedBody: any) {
+  async update(decryptedBody: any) {
     try {
-      await this.employeeService.update(id, decryptedBody);
+      await this.bankService.update(decryptedBody);
       return Response.json(
         { message: "Employee atualizado com sucesso" },
         { status: 200 },
@@ -40,26 +39,17 @@ export class EmployeeController {
 
   async findAll(
     params: PaginationDto<
-      Prisma.EmployeeWhereInput,
-      Prisma.EmployeeSelect,
-      Prisma.EmployeeInclude,
-      Prisma.EmployeeOrderByWithRelationInput
+      Prisma.BankWhereInput,
+      Prisma.BankSelect,
+      Prisma.BankInclude,
+      Prisma.BankOrderByWithRelationInput
     >,
   ) {
     try {
-      const employees = await this.employeeService.findAll(params);
-      return employees;
+      return await this.bankService.findAll(params);
     } catch (error: any) {
       console.error("Erro ao buscar Employees:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
-  }
-
-  async patch({ isActive, id }: Partial<EmployeeDto>) {
-    await this.employeeService.updateStatusUser({ isActive, id });
-  }
-
-  async delete({ id }: Partial<EmployeeDto>): Promise<void> {
-    await this.employeeService.delete(id);
   }
 }

@@ -61,8 +61,8 @@ class RequestService {
     return this.request<TResponse>(url, { method: "POST", body: data });
   }
 
-  update<TBody, TResponse>(url: string, id: string, data: TBody) {
-    return this.request<TResponse>(`${url}/${id}`, {
+  update<TBody, TResponse>(url: string, data: TBody) {
+    return this.request<TResponse>(`${url}`, {
       method: "PUT",
       body: data,
     });

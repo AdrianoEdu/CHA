@@ -1,7 +1,7 @@
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
-import { EmployeeController } from "../resources/employee/employee-controller";
+import { EmployeeController } from "../resources/employee/employee.controller";
 
 const employeeController = new EmployeeController();
 

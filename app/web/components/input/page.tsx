@@ -44,9 +44,10 @@ export default function Input({
         <input
           id={rest.name}
           name={rest.name}
-          placeholder=" "
           type={rest.type}
+          placeholder={" "}
           value={rest.value}
+          disabled={rest.disabled}
           onChange={handleOnPress}
           className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />
