@@ -19,6 +19,7 @@ import DisableIcon from "@/app/web/icons/disable-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -34,6 +35,11 @@ export default function EmployeeScreen() {
 
   const { openModal, closeModal } = useModal();
   const { user } = useAuth();
+  const router = useRouter();
+
+  const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
+    router.push(`/web/view/home/employee/advanced/${row.id}`);
+  };
 
   const handleRegisterEmployee = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
@@ -153,6 +159,7 @@ export default function EmployeeScreen() {
       setEmployeeList(oldEmployeeList);
     }
   };
+
   useEffect(() => {
     handleFindEmployees();
   }, []);
@@ -167,6 +174,7 @@ export default function EmployeeScreen() {
       <Table
         enableFilter
         rows={employeeList}
+        onRowClick={handleNavigateEmployeeAdvancedScreen}
         title="Tabela de funcionários"
         onFilterChange={handleSetFilterEmployeeName}
         onActionClicked={handleOpenRegisterEmployeeModal}

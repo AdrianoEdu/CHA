@@ -2,9 +2,7 @@ import { ActionEnum } from "../dto/Auth/Auth";
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
-import { EmployeeController } from "../resources/employee/employee.controller";
-
-const employeeController = new EmployeeController();
+import { employeeController } from "../resources/employee/employee.controller";
 
 export async function POST(req: Request) {
   try {

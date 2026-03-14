@@ -88,14 +88,28 @@ model Employee {
 
 model EmployeeAdvance {
   id         String   @id @default(uuid())
-  employeeId String
   amount     Decimal  @db.Decimal(15,2)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
 
+  reasonId String
+  reason   AdvanceReason @relation(fields: [reasonId], references: [id])
+
   @@map("employee_advances")
+}
+
+model AdvanceReason {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  advances  EmployeeAdvance[]
+
+  @@map("advance_reasons")
 }
 
 model Customer {

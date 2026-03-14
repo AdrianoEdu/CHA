@@ -71,3 +71,5 @@ export class EmployeeController {
     await this.employeeService.delete(id);
   }
 }
+
+export const employeeController = new EmployeeController();
