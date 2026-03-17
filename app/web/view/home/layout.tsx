@@ -2,7 +2,6 @@
 
 import { toast } from "react-toastify";
 import SideBar from "../../components/sidebar/page";
-import { ActionEnum } from "../../dto/auth.dto";
 import { authService } from "../../services/authService/authService";
 import { useRouter } from "next/navigation";
 export default function Home({ children }: { children: React.ReactNode }) {

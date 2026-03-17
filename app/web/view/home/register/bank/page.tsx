@@ -57,10 +57,9 @@ export default function BankScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
+        title={"Agências bancárias"}
         rows={listBank}
-        title="Agências bancárias"
         onRowClick={handleOpenBankModal}
         onActionClicked={handleOpenBankModal}
         columns={[

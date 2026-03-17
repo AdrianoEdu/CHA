@@ -11,3 +11,10 @@ export enum ActionEnum {
   FindAll,
   FindByName,
 }
+
+export enum RegisterAction {
+  General = "General",
+  Bank = "Bank",
+  Financial = "Financial",
+  Costumer = "Costumer",
+}

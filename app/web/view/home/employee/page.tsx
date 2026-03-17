@@ -170,11 +170,10 @@ export default function EmployeeScreen() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Funcionários</h1>
       <Table
         enableFilter
         rows={employeeList}
-        title="Tabela de funcionários"
+        title="Funcionários"
         onFilterChange={handleSetFilterEmployeeName}
         onRowClick={handleNavigateEmployeeAdvancedScreen}
         onActionClicked={handleOpenRegisterEmployeeModal}
