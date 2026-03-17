@@ -43,9 +43,9 @@ export default function EmployeeScreen() {
 
   const handleRegisterEmployee = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
-      closeModal();
       toast.success(RegisterEmployee.successRegisterEmployee);
       handleFindEmployees();
+      closeModal();
     });
   };
 
@@ -54,19 +54,19 @@ export default function EmployeeScreen() {
     employeeId?: string,
   ): Promise<void> => {
     employeeService.patch({ isActive: !status, id: employeeId }).then(() => {
-      closeModal();
       toast.success(
         status
           ? UpdateStatusEmployee.successDeactiveEmployee
           : UpdateStatusEmployee.successActiveEmployee,
       );
+      closeModal();
     });
   };
 
   const handleRemoverEmployee = async (id?: string): Promise<void> => {
     employeeService.delete(id ?? "").then(() => {
-      closeModal();
       toast.success(RemoveEmployee.successRemoveEmployee);
+      closeModal();
     });
   };
 

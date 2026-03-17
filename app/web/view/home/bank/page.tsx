@@ -39,6 +39,9 @@ export default function BankScreen() {
       await bankService
         .create(data)
         .then(() => toast.success("Criado com sucesso"));
+
+    await handleFindBanks();
+    closeModal();
   };
 
   const handleOpenBankModal = (row?: BankDto): void => {

@@ -84,13 +84,16 @@ export default function EmployeeAdvanced() {
     reasonId: string,
     amount: number,
   ): Promise<void> => {
-    await employeeAdvanceService.create({
-      amount,
-      reasonId,
-      employeeId: id as string,
-    });
-
-    closeModal();
+    await employeeAdvanceService
+      .create({
+        amount,
+        reasonId,
+        employeeId: id as string,
+      })
+      .then(() => {
+        onHandleGetAllEmployeeAdvanced();
+        closeModal();
+      });
   };
 
   const onHandleActionClick = (): void => {
