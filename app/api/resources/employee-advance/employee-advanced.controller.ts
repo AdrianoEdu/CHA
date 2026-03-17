@@ -50,6 +50,15 @@ export class EmployeeAdvanceController {
       return Response.json({ error: error.message }, { status: 500 });
     }
   }
+
+  async findByName(req: Request) {
+    try {
+      const { searchParams } = new URL(req.url);
+      const reasonName = searchParams.get("reasonName") ?? "";
+
+      return await this.employeeAdvancedService.findByName({ reasonName });
+    } catch (error) {}
+  }
 }
 
 export const employeeAdvanceController = new EmployeeAdvanceController();

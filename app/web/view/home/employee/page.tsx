@@ -38,7 +38,7 @@ export default function EmployeeScreen() {
   const router = useRouter();
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
-    router.push(`/web/view/home/employee/advanced/${row.id}`);
+    router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
   };
 
   const handleRegisterEmployee = async (name: string): Promise<void> => {
@@ -174,9 +174,9 @@ export default function EmployeeScreen() {
       <Table
         enableFilter
         rows={employeeList}
-        onRowClick={handleNavigateEmployeeAdvancedScreen}
         title="Tabela de funcionários"
         onFilterChange={handleSetFilterEmployeeName}
+        onRowClick={handleNavigateEmployeeAdvancedScreen}
         onActionClicked={handleOpenRegisterEmployeeModal}
         columns={[
           { label: "Criado em", accessor: "createdAt" },

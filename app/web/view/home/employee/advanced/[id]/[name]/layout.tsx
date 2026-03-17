@@ -10,5 +10,5 @@ export default function EmployeeAdvancedLayout({
 }: {
   children: ReactNode;
 }) {
-  return <div className="flex flex-col flex-1 bg-amber-300">{children}</div>;
+  return <div className="flex flex-col flex-1">{children}</div>;
 }

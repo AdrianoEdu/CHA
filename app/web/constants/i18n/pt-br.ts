@@ -14,6 +14,17 @@ export const PtBr = {
       registerButton: "Registrar",
       successRegisterEmployee: "Funcionário registrado com sucesso",
     },
+    RegisterEmployeeAdvanced: {
+      title: "Registrar adiantamento",
+      inputNamePlaceholder: "Informe o motivo do adiantamento",
+      inputAmountPlaceholder: "Informe valor do adiantamento",
+      errorEmptyName: "Por favor, informe o motivo do adiantamento.",
+      errorInvalidName:
+        "Por favor, insira somente caracteres válidos (apenas letras).",
+      cancelButton: "Cancelar",
+      registerButton: "Registrar",
+      successRegisterEmployeeAdvance: "Adiantamento registrado com sucesso!",
+    },
     UpdateStatusEmployee: {
       activateTitle: "Habilitar Funcionáio",
       deactivateTitle: "Desativar Funcionário",

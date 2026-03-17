@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Input from "../../input/page";
+import Input, { InputType } from "../../input/page";
 import Button from "../../button/page";
 import { AddIcon, DeleteIcon } from "@/app/web/icons";
 import { BankDto } from "@/app/web/dto/bank.dto";
@@ -66,9 +66,9 @@ export default function BankModal({
         <div className="flex items-center gap-2">
           <div>
             <Input
-              type="number"
               name="Agência"
               value={agencyInput}
+              inputType={InputType.Number}
               onChange={(e) => {
                 const value = e.target.value;
 

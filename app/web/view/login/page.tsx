@@ -12,7 +12,6 @@ import { authService } from "../../services/authService/authService";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { ActionEnum } from "../../dto/auth.dto";
 import { useAuth } from "../../providers/AuthProvider";
 
 export default function Login() {
@@ -52,9 +51,9 @@ export default function Login() {
           />
 
           <Input
-            type={"password"}
             value={password}
             name="Informe sua senha"
+            inputType={InputType.Password}
             onChange={(e) => setPassword(e.target.value)}
           />
 

@@ -3,6 +3,8 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ActionDto } from "./auth.dto";
+
 export interface EmployeeAdvanceDto {
   amount: number;
   reasonId: string;
@@ -14,3 +16,6 @@ export interface GetAllEmployeeAdvanceDto extends EmployeeAdvanceDto {
   createdAt: Date;
   reasonName: string;
 }
+
+export interface SendEmployeeAdvanceDto
+  extends ActionDto, GetAllEmployeeAdvanceDto {}

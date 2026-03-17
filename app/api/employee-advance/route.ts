@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ActionEnum } from "../dto/Auth/Auth";
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
@@ -65,8 +66,20 @@ export async function GET(req: Request) {
     authGuard(req);
 
     const { searchParams } = new URL(req.url);
-    const skip = searchParams.get("skip");
-    const take = searchParams.get("take");
+    const type = Number(searchParams.get("type"));
+
+    let result;
+
+    switch (type) {
+      case ActionEnum.FindAll:
+        result = await employeeAdvanceController.findAll(req);
+        break;
+      case ActionEnum.FindByName:
+        result = await employeeAdvanceController.findByName(req);
+        break;
+      default:
+        break;
+    }
 
     const banks = await employeeAdvanceController.findAll(req);
 

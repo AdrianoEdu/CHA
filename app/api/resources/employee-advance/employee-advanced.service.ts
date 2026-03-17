@@ -24,6 +24,12 @@ class EmployeeAdvanceService {
     });
   }
 
+  async findByName({ reasonName }: Partial<GetAllEmployeeAdvanceDto>) {
+    return this.databaseService.employee.findFirst({
+      where: { name: reasonName },
+    });
+  }
+
   async findAll(
     params: PaginationDto<
       Prisma.EmployeeAdvanceWhereInput,
