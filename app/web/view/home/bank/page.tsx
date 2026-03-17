@@ -42,11 +42,10 @@ export default function BankScreen() {
   };
 
   const handleOpenBankModal = (row?: BankDto): void => {
-    const status = row === undefined ? false : true;
     openModal(
       <BankModal
         data={row}
-        isEdit={status}
+        isEdit={!!row?.id}
         onClose={closeModal}
         onSubmit={handleUpsertBank}
       />,
@@ -68,7 +67,7 @@ export default function BankScreen() {
             label: "Agências",
             render: (row) => {
               return (
-                <div className="flex flex-wrap justify-center gap-2 ">
+                <div className="flex flex-wrap justify-center gap-2">
                   {row.agencies?.map((agency: string, index: number) => (
                     <div
                       key={agency}

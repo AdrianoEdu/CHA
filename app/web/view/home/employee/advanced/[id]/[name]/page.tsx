@@ -107,7 +107,10 @@ export default function EmployeeAdvanced() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">{`Funcionário: ${employeeName}`} </h1>
+      <div className="flex flex-col">
+        <span className="text-gray-500">Funcionário selecionado:</span>
+        <span className="text-2xl font-bold">{employeeName}</span>
+      </div>
       <Table
         enableFilter
         rows={employeeAdvanceList}

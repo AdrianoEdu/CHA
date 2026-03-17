@@ -87,7 +87,7 @@ export default function BankModal({
         </div>
 
         {agencies.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 p-4">
             {agencies.map((agency) => (
               <div
                 key={agency}
@@ -105,7 +105,6 @@ export default function BankModal({
           </div>
         )}
 
-        {/* BOTÕES DE AÇÃO */}
         <div className="flex justify-end gap-2 pt-4">
           <Button
             text="Cancelar"
