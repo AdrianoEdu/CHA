@@ -31,17 +31,10 @@ export default function SideBar() {
         </Link>
 
         <Link
-          href="/web/view/home/employee"
-          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
-        >
-          <span className="ml-3">Funcionários</span>
-        </Link>
-
-        <Link
           href="/web/view/home/register"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
-          <span className="ml-3">Cadastro</span>
+          <span className="ml-3">Registro</span>
         </Link>
       </nav>
       <div className="p-4 border-t border-gray-800">

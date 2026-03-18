@@ -38,7 +38,9 @@ export default function EmployeeScreen() {
   const router = useRouter();
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
-    router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
+    router.push(
+      `/web/view/home/register/employee/advanced/${row.id}/${row.name}`,
+    );
   };
 
   const handleRegisterEmployee = async (name: string): Promise<void> => {

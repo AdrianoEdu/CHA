@@ -12,9 +12,15 @@ export enum ActionEnum {
   FindByName,
 }
 
+export enum CustomerType {
+  CLIENT,
+  SUPPLIER,
+}
+
 export enum RegisterAction {
   General = "General",
   Bank = "Bank",
   Financial = "Financial",
   Costumer = "Costumer",
+  Employee = "Employee",
 }

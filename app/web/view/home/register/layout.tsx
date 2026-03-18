@@ -25,6 +25,7 @@ export default function RegisterLayout({
       [RegisterAction.Bank]: `${base}/bank`,
       [RegisterAction.Costumer]: `${base}/customer`,
       [RegisterAction.Financial]: `${base}/financial`,
+      [RegisterAction.Employee]: `${base}/employee`,
     };
 
     router.push(routeMap[item.value as RegisterAction]);
@@ -34,6 +35,8 @@ export default function RegisterLayout({
     if (pathname.includes("bank")) return RegisterAction.Bank;
     if (pathname.includes("customer")) return RegisterAction.Costumer;
     if (pathname.includes("financial")) return RegisterAction.Financial;
+    if (pathname.includes("employee")) return RegisterAction.Employee;
+
     return RegisterAction.General;
   };
 
@@ -45,6 +48,7 @@ export default function RegisterLayout({
           { label: "Banco", value: RegisterAction.Bank },
           { label: "Cliente", value: RegisterAction.Costumer },
           { label: "Financeiro", value: RegisterAction.Financial },
+          { label: "Funcionários", value: RegisterAction.Employee },
         ]}
         active={getActive()}
         onChange={handleNavigation}

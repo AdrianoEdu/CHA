@@ -40,8 +40,6 @@ enum FinancialStatus {
 enum CustomerType {
   CLIENT
   SUPPLIER
-  SERVICE
-  GOVERNMENT
 }
 
 enum UserStatus {
