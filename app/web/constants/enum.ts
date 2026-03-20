@@ -24,3 +24,8 @@ export enum RegisterAction {
   Costumer = "Costumer",
   Employee = "Employee",
 }
+
+enum FinancialFlowType {
+  IN = "In",
+  OUT = "Out",
+}
