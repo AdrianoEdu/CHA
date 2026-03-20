@@ -8,15 +8,17 @@
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 
+const { cancelButton, registerButton, UpdateStatusEmployee } =
+  i18n["Pt-Br"].Modal;
+
 const {
   activateTitle,
   deactivateTitle,
   activateDescription,
   deactivateDescription,
-  cancelButton,
   confirmActivateButton,
   confirmDeactivateButton,
-} = i18n["Pt-Br"].Modal.UpdateStatusEmployee;
+} = UpdateStatusEmployee;
 
 export type ToggleEmployeeStatusModalProps = {
   isActive?: boolean;

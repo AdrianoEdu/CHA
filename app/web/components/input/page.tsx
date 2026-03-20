@@ -6,12 +6,18 @@
 "use client";
 
 import { InputHTMLAttributes, useState } from "react";
+import {
+  formatCNPJ,
+  formatMoney,
+  FormatterResult,
+} from "../../utils/inputFormatter";
 
 export enum InputType {
   Text = "text",
   Password = "password",
   Number = "number",
   Money = "money",
+  Cnpj = "Cnpj",
 }
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -40,32 +46,28 @@ export default function Input({
     return "text";
   }
 
-  function formatMoney(value: string) {
-    const numbers = value.replace(/\D/g, "");
-    const number = Number(numbers) / 100;
-
-    return number.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
+  const formatters: Partial<
+    Record<InputType, (value: string) => { raw: string; formatted: string }>
+  > = {
+    [InputType.Money]: formatMoney,
+    [InputType.Cnpj]: formatCNPJ,
+  };
 
   function handleOnPress(e: React.ChangeEvent<HTMLInputElement>) {
     let value = e.target.value;
 
-    if (inputType === InputType.Money) {
-      const raw = value.replace(/\D/g, "");
-      const formatted = formatMoney(raw);
+    const formatter = formatters[inputType];
+
+    if (formatter) {
+      const { raw, formatted } = formatter(value);
 
       setDisplayValue(formatted);
-
-      const numericValue = Number(raw) / 100;
 
       rest.onChange?.({
         ...e,
         target: {
           ...e.target,
-          value: numericValue.toString(),
+          value: raw,
         },
       } as React.ChangeEvent<HTMLInputElement>);
 
@@ -87,12 +89,16 @@ export default function Input({
       <div className="relative w-72">
         <input
           id={rest.name}
-          name={rest.name}
           placeholder={" "}
+          name={displayValue}
           disabled={rest.disabled}
           onChange={handleOnPress}
           type={resolveHtmlType(inputType)}
-          value={inputType === InputType.Money ? displayValue : rest.value}
+          value={
+            [InputType.Money, InputType.Cnpj].includes(inputType)
+              ? displayValue
+              : rest.value
+          }
           className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />
 

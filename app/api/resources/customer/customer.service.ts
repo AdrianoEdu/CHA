@@ -48,10 +48,14 @@ class CustomerService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    return await this.databaseService.customer.findMany({
+    return this.databaseService.customer.findMany({
       ...baseQuery,
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async findByName({ name }: Partial<CreateCustomerDto>) {
+    return this.databaseService.customer.findMany({ where: { name } });
   }
 }
 

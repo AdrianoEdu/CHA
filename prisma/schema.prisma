@@ -113,13 +113,13 @@ model AdvanceReason {
 model Customer {
   id                 String @id @default(uuid())
   name               String
-  code               Int
+  code               String
 
   receivedChecks     ReceivedCheck[]
   accountsPayable    AccountsPayable[]
   accountsReceivable AccountsReceivable[]
 
-  type               CustomerType
+  customerType               CustomerType
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

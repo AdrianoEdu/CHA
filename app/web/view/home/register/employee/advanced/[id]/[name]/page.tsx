@@ -11,6 +11,7 @@ import { ActionEnum } from "@/app/web/constants/enum";
 import { GetAllEmployeeAdvanceDto } from "@/app/web/dto/employee-advance.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeAdvanceService } from "@/app/web/services/employeeAdvanceService/employeeAdvanceService";
+import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -35,38 +36,19 @@ export default function EmployeeAdvanced() {
     handleFilterAdvanceReason();
   }, [filter]);
 
-  const handleFilterAdvanceReason = async (): Promise<void> => {
-    if (filter === "") {
-      setEmployeeAdvancedList(oldEmployeeAdvanceList);
-      return;
-    }
-
-    const local = oldEmployeeAdvanceList.filter((emp) =>
-      emp.reasonName.toLowerCase().includes(filter),
-    );
-
-    if (local.length > 0) {
-      setEmployeeAdvancedList(local);
-      return;
-    }
-
-    try {
-      const apiResult = await employeeAdvanceService.findByName({
-        reasonName: filter,
-        employeeId: id as string,
-        type: ActionEnum.FindByName,
-      });
-
-      if (!apiResult || apiResult.length === 0) {
-        setEmployeeAdvancedList([]);
-        return;
-      }
-
-      setEmployeeAdvancedList(apiResult);
-    } catch (error) {
-      console.error(error);
-      setEmployeeAdvancedList(oldEmployeeAdvanceList);
-    }
+  const handleFilterAdvanceReason = async () => {
+    await handleGenericFilter({
+      originalList: oldEmployeeAdvanceList,
+      filter,
+      setList: setEmployeeAdvancedList,
+      getSearchField: (emp) => emp.reasonName,
+      fetchFromApi: async (value) => {
+        return employeeAdvanceService.findByName({
+          reasonName: value,
+          type: ActionEnum.FindByName,
+        });
+      },
+    });
   };
 
   const onHandleGetAllEmployeeAdvanced = async (): Promise<void> => {

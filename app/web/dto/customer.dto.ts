@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Customer, CustomerType } from "@/app/generated/prisma";
+import { ActionEnum, CustomerType } from "../constants/enum";
 
 export type CreateCustomerDto = {
   name: string;
@@ -21,4 +21,8 @@ export type GetCustomerDto = {
   code: string;
   customerType: CustomerType;
   createdAt: Date;
+};
+
+export type SendCreateCustomerDto = Partial<CreateCustomerDto> & {
+  type: ActionEnum;
 };

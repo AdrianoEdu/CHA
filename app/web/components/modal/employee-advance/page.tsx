@@ -14,12 +14,11 @@ import ComboBox from "../../combobox/page";
 import { advanceReasonService } from "@/app/web/services/advanceReasonService/advanceReasonService";
 import { FindAdvanceReasonDto } from "@/app/web/dto/advance-reason.dto";
 
-const {
-  cancelButton,
-  inputNamePlaceholder,
-  inputAmountPlaceholder,
-  registerButton,
-} = i18n["Pt-Br"].Modal.RegisterEmployeeAdvanced;
+const { cancelButton, registerButton, RegisterEmployeeAdvanced } =
+  i18n["Pt-Br"].Modal;
+
+const { inputNamePlaceholder, inputAmountPlaceholder } =
+  RegisterEmployeeAdvanced;
 
 export type RegisterEmployeeAdvanceProps = {
   employeeId: string;
@@ -76,7 +75,7 @@ export default function RegisterEmployeeAdvanceModal({
 
       <Input
         value={amout}
-        regex={Regex.employeeName}
+        regex={Regex.onlyText}
         inputType={InputType.Money}
         name={inputAmountPlaceholder}
         className={"flex-1 appearance-none no-spinner"}

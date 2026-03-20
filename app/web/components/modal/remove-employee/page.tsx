@@ -8,8 +8,9 @@
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { cancelButton, confirmButton, description, message } =
-  i18n["Pt-Br"].Modal.RemoveEmployee;
+const { RemoveEmployee, cancelButton } = i18n["Pt-Br"].Modal;
+
+const { confirmButton, description, message } = RemoveEmployee;
 
 export type RemoveEmployeeModalContentProps = {
   onConfirm: () => Promise<void> | void;

@@ -19,8 +19,8 @@ class CustomerController {
     this.customerService = customerService;
   }
 
-  async create(data: CreateCustomerDto): Promise<void> {
-    await this.customerService.create(data);
+  async create(data: CreateCustomerDto) {
+    return this.customerService.create(data);
   }
 
   async update(data: UpdateCustomerDto): Promise<void> {
@@ -41,6 +41,15 @@ class CustomerController {
       console.error("Erro ao buscar Customer:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
+  }
+
+  async findByName(req: Request) {
+    try {
+      const { searchParams } = new URL(req.url);
+      const name = searchParams.get("name") ?? "";
+
+      return await this.customerService.findByName({ name });
+    } catch (error) {}
   }
 }
 

@@ -11,13 +11,10 @@ import Input from "../../input/page";
 import { Regex } from "@/app/web/constants/regex";
 import { i18n } from "@/app/web/constants/i18n";
 
-const {
-  cancelButton,
-  errorEmptyName,
-  errorInvalidName,
-  inputNamePlaceholder,
-  registerButton,
-} = i18n["Pt-Br"].Modal.RegisterEmployee;
+const { cancelButton, RegisterEmployee, registerButton } = i18n["Pt-Br"].Modal;
+
+const { errorEmptyName, errorInvalidName, inputNamePlaceholder } =
+  RegisterEmployee;
 
 export type RegisterEmployeeProps = {
   onRegister: (value: string) => Promise<void>;
@@ -48,7 +45,7 @@ export default function RegisterEmployeeModal({
       <Input
         value={name}
         className="flex-1"
-        regex={Regex.employeeName}
+        regex={Regex.onlyText}
         regexError={showErrorRegex}
         name={inputNamePlaceholder}
         onRegexError={setShowErrorRegex}

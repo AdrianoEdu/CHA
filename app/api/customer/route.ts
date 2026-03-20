@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return Response.json({ error: error.message });
     }
 
-    return Response.json({ error: "Erro interno" }, { status: 500 });
+    return Response.json({ error: `Erro interno: ${error}` }, { status: 500 });
   }
 }
 
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
         result = await customerController.findAll(req);
         break;
       case ActionEnum.FindByName:
-        // result = await customerController.findByName(req);
+        result = await customerController.findByName(req);
         break;
       default:
         break;

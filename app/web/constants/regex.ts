@@ -4,5 +4,6 @@
 // All rights reserved.
 
 export const Regex = {
-  employeeName: new RegExp("^[A-Za-zÀ-ÿ\\s]+$"),
+  onlyText: new RegExp("^[A-Za-zÀ-ÿ\\s]+$"),
+  onlyCNPJ: new RegExp("^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$"),
 };

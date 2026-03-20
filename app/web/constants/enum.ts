@@ -13,8 +13,8 @@ export enum ActionEnum {
 }
 
 export enum CustomerType {
-  CLIENT,
-  SUPPLIER,
+  CLIENT = "CLIENT",
+  SUPPLIER = "SUPPLIER",
 }
 
 export enum RegisterAction {

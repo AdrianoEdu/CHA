@@ -10,8 +10,6 @@ export const PtBr = {
       inputNamePlaceholder: "Informe o nome do funcionário",
       errorEmptyName: "Por favor, informe o nome do funcionário.",
       errorInvalidName: "Por favor, informe um nome válido (apenas letras).",
-      cancelButton: "Cancelar",
-      registerButton: "Registrar",
       successRegisterEmployee: "Funcionário registrado com sucesso",
     },
     RegisterEmployeeAdvanced: {
@@ -21,8 +19,6 @@ export const PtBr = {
       errorEmptyName: "Por favor, informe o motivo do adiantamento.",
       errorInvalidName:
         "Por favor, insira somente caracteres válidos (apenas letras).",
-      cancelButton: "Cancelar",
-      registerButton: "Registrar",
       successRegisterEmployeeAdvance: "Adiantamento registrado com sucesso!",
     },
     UpdateStatusEmployee: {
@@ -32,7 +28,6 @@ export const PtBr = {
         "Tem certeza que deseja ativar este funcionário? Ele poderá acessar o sistema novamente.",
       deactivateDescription:
         "Tem certeza que deseja desativar este funcionário? Ele não poderá acessar o sistema enquanto estiver desativado.",
-      cancelButton: "Cancelar",
       confirmActivateButton: "Ativar",
       confirmDeactivateButton: "Desativar",
       successActiveEmployee: "O funcionário foi ativado com sucesso.",
@@ -44,8 +39,9 @@ export const PtBr = {
       description:
         "Após a remoção, o funcionário não poderá mais ser utilizado no sistema. Utilize esta opção apenas quando o cadastro tiver sido realizado de forma incorreta.",
       confirmButton: "Remover",
-      cancelButton: "Cancelar",
       successRemoveEmployee: "funcionário removido com sucesso.",
     },
+    cancelButton: "Cancelar",
+    registerButton: "Registrar",
   },
 };

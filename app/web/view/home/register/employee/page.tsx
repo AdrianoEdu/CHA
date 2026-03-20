@@ -19,6 +19,7 @@ import DisableIcon from "@/app/web/icons/disable-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
+import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -119,6 +120,21 @@ export default function EmployeeScreen() {
     setEmployeeList(result);
   };
 
+  const handleFilterEmployeeName = async () => {
+    await handleGenericFilter({
+      originalList: oldEmployeeList,
+      filter,
+      setList: setEmployeeList,
+      getSearchField: (emp) => emp.name,
+      fetchFromApi: async (value) => {
+        return employeeService.findByName({
+          name: value,
+          type: ActionEnum.FindByName,
+        });
+      },
+    });
+  };
+
   const handleSetFilterEmployeeName = (name: string) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -127,39 +143,6 @@ export default function EmployeeScreen() {
     debounceRef.current = setTimeout(() => {
       setFilter(name);
     }, 500);
-  };
-
-  const handleFilterEmployeeName = async (): Promise<void> => {
-    if (filter === "") {
-      setEmployeeList(oldEmployeeList);
-      return;
-    }
-
-    const local = oldEmployeeList.filter((emp) =>
-      emp.name.toLowerCase().includes(filter),
-    );
-
-    if (local.length > 0) {
-      setEmployeeList(local);
-      return;
-    }
-
-    try {
-      const apiResult = await employeeService.findByName({
-        name: filter,
-        type: ActionEnum.FindByName,
-      });
-
-      if (!apiResult || apiResult.length === 0) {
-        setEmployeeList([]);
-        return;
-      }
-
-      setEmployeeList(apiResult);
-    } catch (error) {
-      console.error(error);
-      setEmployeeList(oldEmployeeList);
-    }
   };
 
   useEffect(() => {
