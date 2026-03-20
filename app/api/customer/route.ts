@@ -30,7 +30,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function UPDATE(req: Request) {
+export async function PUT(req: Request) {
   try {
     authGuard(req);
 

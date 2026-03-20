@@ -5,7 +5,7 @@
 
 "use client";
 
-import { InputHTMLAttributes, useState } from "react";
+import { InputHTMLAttributes, useEffect, useState } from "react";
 import {
   formatCNPJ,
   formatMoney,
@@ -36,9 +36,20 @@ export default function Input({
   onRegexError,
   ...rest
 }: Readonly<InputProps>) {
-  const [displayValue, setDisplayValue] = useState<string>(
-    String(rest.value ?? ""),
-  );
+  const [displayValue, setDisplayValue] = useState<string>("");
+
+  useEffect(() => {
+    const rawValue = String(rest.value ?? "");
+
+    const formatter = formatters[inputType as InputType];
+
+    if (formatter) {
+      setDisplayValue(formatter(rawValue).formatted);
+      return;
+    }
+
+    setDisplayValue(rawValue);
+  }, [rest.value]);
 
   function resolveHtmlType(type: InputType) {
     if (type === InputType.Number) return "number";

@@ -5,10 +5,14 @@
 
 "use client";
 
-import { RegisterCustomer } from "@/app/web/components/modal/register-customer/page";
+import { UpsertCustomer } from "@/app/web/components/modal/register-customer/page";
 import Table from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
-import { CreateCustomerDto, GetCustomerDto } from "@/app/web/dto/customer.dto";
+import {
+  CreateCustomerDto,
+  GetCustomerDto,
+  UpdateCustomerDto,
+} from "@/app/web/dto/customer.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
@@ -35,7 +39,7 @@ export default function Customer() {
 
   const hanleOpenModalRegisterCustomer = (): void => {
     openModal(
-      <RegisterCustomer
+      <UpsertCustomer
         onClose={closeModal}
         onRegister={handleRegisterCustomer}
       />,
@@ -59,6 +63,16 @@ export default function Customer() {
   ): Promise<void> => {
     await customerService.create(data).then(() => {
       toast.success("Cliente registrado com sucesso");
+      handleGetAllCustomers();
+      closeModal();
+    });
+  };
+
+  const handleUpdateCustomer = async (
+    data: UpdateCustomerDto,
+  ): Promise<void> => {
+    await customerService.update(data).then(() => {
+      toast.success("Cliente Atualizado com sucesso");
       handleGetAllCustomers();
       closeModal();
     });
@@ -89,7 +103,17 @@ export default function Customer() {
     }, 500);
   };
 
-  const handleOpenModalEditCustomer = (): void => {};
+  const handleOpenModalEditCustomer = (row: UpdateCustomerDto): void => {
+    openModal(
+      <UpsertCustomer
+        data={row}
+        onClose={closeModal}
+        onUpdated={handleUpdateCustomer}
+        onRegister={handleRegisterCustomer}
+      />,
+      "Editar Cliente",
+    );
+  };
 
   return (
     <div>

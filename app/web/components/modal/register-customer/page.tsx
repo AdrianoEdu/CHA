@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input, { InputType } from "../../input/page";
 import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
@@ -11,7 +11,10 @@ import ComboBox from "../../combobox/page";
 import { CustomerType } from "@/app/web/constants/enum";
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
-import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
+import {
+  CreateCustomerDto,
+  UpdateCustomerDto,
+} from "@/app/web/dto/customer.dto";
 
 export type SelectComboboxProps = {
   label: string;
@@ -31,22 +34,46 @@ const options: SelectComboboxProps[] = (
 }));
 
 type RegisterCustomerProps = {
+  data?: UpdateCustomerDto;
   onClose: () => void;
+  onUpdated?: (data: UpdateCustomerDto) => void;
   onRegister: (data: CreateCustomerDto) => void;
 };
 
-const { cancelButton, registerButton } = i18n["Pt-Br"].Modal;
+const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
-export function RegisterCustomer({
+export function UpsertCustomer({
+  data,
   onClose,
+  onUpdated,
   onRegister,
 }: Readonly<RegisterCustomerProps>) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [showErrorRegex, setShowErrorRegex] = useState(false);
-  const [selected, setSelected] = useState<SelectComboboxProps>();
+  const [selected, setSelected] = useState<SelectComboboxProps | undefined>();
 
-  const handleRegisterCustomer = (): void => {
+  useEffect(() => {
+    if (!data) return;
+
+    setName(data.name!);
+    setCode(data.code!);
+    setSelected(
+      data.customerType
+        ? {
+            label: customerTypeLabels[data.customerType],
+            value: data.customerType,
+          }
+        : undefined,
+    );
+  }, [data]);
+
+  const handleUpsertCustomer = (): void => {
+    if (onUpdated) {
+      onUpdated({ id: data?.id!, code, name, customerType: selected?.value });
+      return;
+    }
+
     onRegister({ code, name, customerType: selected?.value! });
   };
 
@@ -88,9 +115,9 @@ export function RegisterCustomer({
       <div className="mt-6 flex justify-end gap-4">
         <Button text={cancelButton} onPress={onClose} />
         <Button
-          text={registerButton}
           disabled={showErrorRegex}
-          onPress={handleRegisterCustomer}
+          onPress={handleUpsertCustomer}
+          text={!data ? registerButton : updateButton}
         />
       </div>
     </div>

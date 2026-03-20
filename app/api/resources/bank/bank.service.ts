@@ -16,8 +16,6 @@ class BankService {
   }
 
   async update(data: UpdateBankDto): Promise<void> {
-    console.log(data);
-
     await this.databaseService.bank.update({
       where: { id: data.id },
       data,

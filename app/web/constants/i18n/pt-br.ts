@@ -42,6 +42,7 @@ export const PtBr = {
       successRemoveEmployee: "funcionário removido com sucesso.",
     },
     cancelButton: "Cancelar",
+    updateButton: "Atualizar",
     registerButton: "Registrar",
   },
 };

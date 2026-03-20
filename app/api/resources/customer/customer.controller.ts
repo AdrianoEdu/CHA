@@ -23,8 +23,8 @@ class CustomerController {
     return this.customerService.create(data);
   }
 
-  async update(data: UpdateCustomerDto): Promise<void> {
-    await this.customerService.update(data);
+  async update(data: UpdateCustomerDto) {
+    return this.customerService.update(data);
   }
 
   async findAll(req: Request) {
