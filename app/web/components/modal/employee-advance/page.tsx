@@ -12,7 +12,11 @@ import { Regex } from "@/app/web/constants/regex";
 import { i18n } from "@/app/web/constants/i18n";
 import ComboBox from "../../combobox/page";
 import { advanceReasonService } from "@/app/web/services/advanceReasonService/advanceReasonService";
-import { FindAdvanceReasonDto } from "@/app/web/dto/advance-reason.dto";
+import {
+  FindAdvanceReasonDto,
+  SelectOptionAEmployeeAdvance,
+} from "@/app/web/dto/advance-reason.dto";
+import { ActionEnum } from "@/app/web/constants/enum";
 
 const { cancelButton, registerButton, RegisterEmployeeAdvanced } =
   i18n["Pt-Br"].Modal;
@@ -37,10 +41,11 @@ export default function RegisterEmployeeAdvanceModal({
   const [advanceReasonList, setAdvanceReasonList] = useState<
     FindAdvanceReasonDto[]
   >([]);
-  const [selectedOption, setSelectedOption] = useState<FindAdvanceReasonDto>({
-    id: "",
-    name: "",
-  });
+  const [selectedOption, setSelectedOption] =
+    useState<SelectOptionAEmployeeAdvance>({
+      id: "",
+      name: "",
+    });
 
   useEffect(() => {
     setName(employeeName);
@@ -48,7 +53,12 @@ export default function RegisterEmployeeAdvanceModal({
   }, []);
 
   const handleGetAllAdvanceReason = async (): Promise<void> => {
-    const result = await advanceReasonService.findAll();
+    const result = await advanceReasonService.findAll({
+      skip: 0,
+      take: 20,
+      type: ActionEnum.FindAll,
+    });
+    alert(result);
     setAdvanceReasonList(result);
   };
 

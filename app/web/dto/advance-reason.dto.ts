@@ -19,3 +19,5 @@ export type FindAdvanceReasonDto = CreateAdvanceReasonDto & {
 };
 
 export type SendAdvanceReasonDto = ActionDto & Partial<UpdateAdavanceReasonDto>;
+
+export type SelectOptionAEmployeeAdvance = UpdateAdavanceReasonDto;
