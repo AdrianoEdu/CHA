@@ -61,22 +61,27 @@ class AdvanceReasonService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.databaseService.employeeAdvance.findMany({
+    const count = await this.databaseService.employeeAdvance.count({
       where: { reasonId: id },
     });
 
-    if (result.length > 0) {
+    if (count > 0) {
       throw new HttpException(
         "Já existem registros de adiantamento associados a este motivo.",
         400,
       );
     }
 
-    const resultAdvanceReason =
-      await this.databaseService.advanceReason.findFirst({ where: { id } });
+    const reason = await this.databaseService.advanceReason.findUnique({
+      where: { id },
+    });
+
+    if (!reason) {
+      throw new HttpException("Motivo de adiantamento não encontrado.", 404);
+    }
 
     await this.databaseService.advanceReason.delete({
-      where: { id: resultAdvanceReason?.id },
+      where: { id },
     });
   }
 }
