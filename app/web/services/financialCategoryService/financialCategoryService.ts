@@ -16,7 +16,7 @@ class FinancialCategoryService {
   private readonly url: string;
 
   constructor() {
-    this.url = "/customer";
+    this.url = "/financial-category";
   }
 
   update(data: UpdateFinancialCategoryDto) {

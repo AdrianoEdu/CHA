@@ -25,7 +25,7 @@ export enum RegisterAction {
   Employee = "Employee",
 }
 
-enum FinancialFlowType {
-  IN = "In",
-  OUT = "Out",
+export enum FinancialFlowType {
+  IN = "IN",
+  OUT = "OUT",
 }

@@ -5,7 +5,7 @@
 
 "use client";
 
-import { UpsertCustomer } from "@/app/web/components/modal/register-customer/page";
+import { UpsertCustomer } from "@/app/web/components/modal/upsert-customer/page";
 import Table from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {
@@ -128,7 +128,12 @@ export default function Customer() {
           { label: "Criado em", accessor: "createdAt" },
           { label: "Nome do cliente", accessor: "name" },
           { label: "CNPJ", accessor: "code" },
-          { label: "Tipo", accessor: "customerType" },
+          {
+            label: "Tipo",
+            accessor: "customerType",
+            render: (row) =>
+              row.customerType === "CLIENT" ? "Cliente" : "Fornecedor",
+          },
         ]}
       />
     </div>

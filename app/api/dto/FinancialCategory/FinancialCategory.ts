@@ -1,9 +1,9 @@
-// Copyright (c) 2026-03-20
+// Copyright (c) 2026-03-22
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ActionEnum, FinancialFlowType } from "../constants/enum";
+import { FinancialFlowType } from "@/app/generated/prisma";
 
 export type CreateFinancialCategoryDto = {
   name: string;
@@ -19,8 +19,4 @@ export type GetFinancialCategoryDto = {
   name: string;
   createdAt: Date;
   financialFlowType: FinancialFlowType;
-};
-
-export type SendFinancialCategoryDto = UpdateFinancialCategoryDto & {
-  type: ActionEnum;
 };

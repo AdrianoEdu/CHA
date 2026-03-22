@@ -1,4 +1,4 @@
-// Copyright (c) 2026-03-18
+// Copyright (c) 2026-03-22
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -8,48 +8,47 @@ import Input, { InputType } from "../../input/page";
 import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
 import ComboBox from "../../combobox/page";
-import { CustomerType } from "@/app/web/constants/enum";
+import { FinancialFlowType } from "@/app/web/constants/enum";
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 import {
-  CreateCustomerDto,
-  UpdateCustomerDto,
-} from "@/app/web/dto/customer.dto";
+  CreateFinancialCategoryDto,
+  UpdateFinancialCategoryDto,
+} from "@/app/web/dto/financial.dto";
 
 export type SelectComboboxProps = {
   label: string;
-  value: CustomerType;
+  value: FinancialFlowType;
 };
 
-const customerTypeLabels: Record<CustomerType, string> = {
-  CLIENT: "Cliente",
-  SUPPLIER: "Fornecedor",
+const financialCategoryTypeLabels: Record<FinancialFlowType, string> = {
+  IN: "Entrada",
+  OUT: "Saída",
 };
 
 const options: SelectComboboxProps[] = (
-  Object.values(CustomerType) as CustomerType[]
+  Object.values(FinancialFlowType) as FinancialFlowType[]
 ).map((type) => ({
   value: type,
-  label: customerTypeLabels[type],
+  label: financialCategoryTypeLabels[type],
 }));
 
-type RegisterCustomerProps = {
-  data?: UpdateCustomerDto;
+type FinancialCategoryProps = {
+  data?: UpdateFinancialCategoryDto;
   onClose: () => void;
-  onUpdated?: (data: UpdateCustomerDto) => void;
-  onRegister: (data: CreateCustomerDto) => void;
+  onUpdated?: (data: UpdateFinancialCategoryDto) => void;
+  onRegister?: (data: CreateFinancialCategoryDto) => void;
 };
 
 const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
-export function UpsertCustomer({
+export function UpsertFinancialCategory({
   data,
   onClose,
   onUpdated,
   onRegister,
-}: Readonly<RegisterCustomerProps>) {
+}: Readonly<FinancialCategoryProps>) {
   const [name, setName] = useState("");
-  const [code, setCode] = useState("");
   const [showErrorRegex, setShowErrorRegex] = useState(false);
   const [selected, setSelected] = useState<SelectComboboxProps | undefined>();
 
@@ -57,24 +56,23 @@ export function UpsertCustomer({
     if (!data) return;
 
     setName(data.name!);
-    setCode(data.code!);
     setSelected(
-      data.customerType
+      data.financialFlowType
         ? {
-            label: customerTypeLabels[data.customerType],
-            value: data.customerType,
+            label: financialCategoryTypeLabels[data.financialFlowType],
+            value: data.financialFlowType,
           }
         : undefined,
     );
   }, [data]);
 
-  const handleUpsertCustomer = (): void => {
+  const handleUpsertFinancialCategory = (): void => {
     if (onUpdated) {
-      onUpdated({ id: data?.id!, code, name, customerType: selected?.value });
+      onUpdated({ id: data?.id!, name, financialFlowType: selected?.value });
       return;
     }
 
-    onRegister({ code, name, customerType: selected?.value! });
+    if (onRegister) onRegister({ name, financialFlowType: selected?.value! });
   };
 
   return (
@@ -85,24 +83,11 @@ export function UpsertCustomer({
         regex={Regex.onlyText}
         regexError={showErrorRegex}
         onRegexError={setShowErrorRegex}
-        name={"Informe o nome do cliente"}
+        name={"Infome a categoria financeira"}
         onChange={(e) => setName(e.target.value)}
         regexMessageError={
           "Por favor informar caracteres válidos (apenas texto)"
         }
-      />
-
-      <Input
-        value={code}
-        maxLength={14}
-        className="flex-1"
-        regex={Regex.onlyCNPJ}
-        name={"Informe o CNPJ"}
-        inputType={InputType.Cnpj}
-        regexError={showErrorRegex}
-        onRegexError={setShowErrorRegex}
-        onChange={(e) => setCode(e.target.value)}
-        regexMessageError={"Por favor informar caracteres válidos"}
       />
 
       <ComboBox
@@ -112,11 +97,12 @@ export function UpsertCustomer({
         selected={selected}
         onSelectOption={setSelected}
       />
+
       <div className="mt-6 flex justify-end gap-4">
         <Button text={cancelButton} onPress={onClose} />
         <Button
           disabled={showErrorRegex}
-          onPress={handleUpsertCustomer}
+          onPress={handleUpsertFinancialCategory}
           text={!data ? registerButton : updateButton}
         />
       </div>
