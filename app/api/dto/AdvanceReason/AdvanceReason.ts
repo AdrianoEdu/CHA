@@ -7,6 +7,16 @@ export type CreateAdvanceReasonDto = {
   name: string;
 };
 
-export type FindAdvanceReason = CreateAdvanceReasonDto & {
+export type FindAdvanceReasonDto = CreateAdvanceReasonDto & {
   id: string;
+  createdAt: Date;
 };
+
+export type UpdateAdvanceReasonDto = Partial<CreateAdvanceReasonDto> & {
+  id: string;
+  createdAt?: Date;
+};
+
+export type FindAdvanceReasonByFilters = Partial<CreateAdvanceReasonDto> & {};
+
+export type RemoveAdvanceReason = { id: string };

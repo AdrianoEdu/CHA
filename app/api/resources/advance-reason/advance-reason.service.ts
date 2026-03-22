@@ -3,11 +3,16 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import {
   CreateAdvanceReasonDto,
-  FindAdvanceReason,
+  FindAdvanceReasonByFilters,
+  FindAdvanceReasonDto,
+  UpdateAdvanceReasonDto,
 } from "../../dto/AdvanceReason/AdvanceReason";
+import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
+import { HttpException } from "../../error/HttpException";
 
 class AdvanceReasonService {
   private databaseService;
@@ -20,8 +25,59 @@ class AdvanceReasonService {
     return this.databaseService.advanceReason.create({ data });
   }
 
-  async findAll(): Promise<FindAdvanceReason[]> {
-    return this.databaseService.advanceReason.findMany();
+  async update({ id, name }: UpdateAdvanceReasonDto) {
+    return this.databaseService.advanceReason.update({
+      where: { id },
+      data: { name },
+    });
+  }
+
+  async findAll(
+    params: PaginationDto<
+      Prisma.AdvanceReasonWhereInput,
+      Prisma.AdvanceReasonSelect,
+      Prisma.AdvanceReasonInclude,
+      Prisma.AdvanceReasonOrderByWithRelationInput
+    >,
+  ): Promise<FindAdvanceReasonDto[]> {
+    const baseQuery: Prisma.AdvanceReasonFindManyArgs = {
+      skip: params.skip,
+      where: params.where,
+      take: params.take,
+      orderBy: params.orderBy,
+    };
+
+    if (params.select) baseQuery.select = params.select;
+    if (params.include) baseQuery.include = params.include;
+
+    return this.databaseService.advanceReason.findMany({
+      ...baseQuery,
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findByName({ name }: FindAdvanceReasonByFilters) {
+    return this.databaseService.advanceReason.findMany({ where: { name } });
+  }
+
+  async remove(id: string): Promise<void> {
+    const result = await this.databaseService.employeeAdvance.findMany({
+      where: { reasonId: id },
+    });
+
+    if (result.length > 0) {
+      throw new HttpException(
+        "Já existem registros de adiantamento associados a este motivo.",
+        400,
+      );
+    }
+
+    const resultAdvanceReason =
+      await this.databaseService.advanceReason.findFirst({ where: { id } });
+
+    await this.databaseService.advanceReason.delete({
+      where: { id: resultAdvanceReason?.id },
+    });
   }
 }
 

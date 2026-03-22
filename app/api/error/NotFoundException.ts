@@ -6,7 +6,7 @@
 import { HttpException } from "./HttpException";
 
 export class NotFoundException extends HttpException {
-  constructor(message = "NãNão encontrado") {
+  constructor(message = "Não encontrado") {
     super(message, 404);
   }
 }

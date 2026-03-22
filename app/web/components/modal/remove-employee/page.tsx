@@ -10,16 +10,18 @@ import { i18n } from "@/app/web/constants/i18n";
 
 const { RemoveEmployee, cancelButton } = i18n["Pt-Br"].Modal;
 
-const { confirmButton, description, message } = RemoveEmployee;
+const { confirmButton, message } = RemoveEmployee;
 
 export type RemoveEmployeeModalContentProps = {
-  onConfirm: () => Promise<void> | void;
+  description: string;
   onClose: () => void;
+  onConfirm: () => Promise<void> | void;
 };
 
-export default function RemoveEmployeeModal({
-  onConfirm,
+export default function RemoveModal({
+  description,
   onClose,
+  onConfirm,
 }: Readonly<RemoveEmployeeModalContentProps>) {
   return (
     <div className="flex flex-col w-full">

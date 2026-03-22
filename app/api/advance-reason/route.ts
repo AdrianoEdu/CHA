@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ActionEnum } from "../dto/Auth/Auth";
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
@@ -34,16 +35,78 @@ export async function POST(req: Request) {
   }
 }
 
+export async function PUT(req: Request) {
+  try {
+    authGuard(req);
+
+    const body = await req.json();
+    const payload = body?.payload;
+
+    if (!payload) throw new Error("Payload ausente no request");
+
+    const decrypted = await decryptMiddleware(payload);
+    const result = await advanceReasonController.update(decrypted);
+    return Response.json(result);
+  } catch (error) {
+    if (error instanceof HttpException) {
+      return Response.json({ error: error.message });
+    }
+
+    return Response.json({ error: "Erro interno" }, { status: 500 });
+  }
+}
+
 export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    const result = await advanceReasonController.findAll();
+    const { searchParams } = new URL(req.url);
+    const type = Number(searchParams.get("type"));
+
+    let result;
+
+    switch (type) {
+      case ActionEnum.FindAll:
+        result = await advanceReasonController.findAll(req);
+        break;
+      case ActionEnum.FindByName:
+        result = await advanceReasonController.findByName(req);
+        break;
+      default:
+        break;
+    }
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,
     });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    authGuard(req);
+
+    const body = await req.json();
+
+    const payload = body?.payload;
+
+    if (!payload) throw new Error("Payload ausente no request");
+
+    const decrypted = await decryptMiddleware(payload);
+
+    await advanceReasonController.remove(decrypted);
+
+    return Response.json({ success: true });
+  } catch (error) {
+    if (error instanceof HttpException) {
+      return Response.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    return Response.json({ error: "Erro interno" }, { status: 500 });
   }
 }

@@ -41,6 +41,10 @@ export const PtBr = {
       confirmButton: "Remover",
       successRemoveEmployee: "funcionário removido com sucesso.",
     },
+    AdvanceReason: {
+      description:
+        "Tem certeza de que deseja remover este registro? Após a exclusão, não será possível recuperar esta informação.",
+    },
     cancelButton: "Cancelar",
     updateButton: "Atualizar",
     registerButton: "Registrar",

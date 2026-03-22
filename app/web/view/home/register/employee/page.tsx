@@ -8,7 +8,7 @@
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/page";
 import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/page";
-import RemoveEmployeeModal from "@/app/web/components/modal/remove-employee/page";
+import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/page";
 import Table from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
@@ -26,6 +26,8 @@ import { toast } from "react-toastify";
 
 const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
   i18n["Pt-Br"].Modal;
+
+const { description } = RemoveEmployee;
 
 let oldEmployeeList: EmployeeDto[] = [];
 
@@ -83,10 +85,15 @@ export default function EmployeeScreen() {
     );
   };
 
-  const handleOpenRemoveEmployeeModal = (employeeId?: string): void => {
+  const handleOpenRemoveEmployeeModal = (
+    e: React.MouseEvent,
+    employeeId?: string,
+  ): void => {
+    e.stopPropagation();
     openModal(
-      <RemoveEmployeeModal
+      <RemoveModal
         onClose={closeModal}
+        description={description}
         onConfirm={() => handleRemoverEmployee(employeeId)}
       />,
       RemoveEmployee.title,
@@ -94,9 +101,11 @@ export default function EmployeeScreen() {
   };
 
   const handleOpenStatusEmployeeModal = (
+    e: React.MouseEvent,
     status?: boolean,
     employeeId?: string,
   ): void => {
+    e.stopPropagation();
     openModal(
       <UpdateStatusEmployeeModal
         isActive={status}
@@ -181,27 +190,25 @@ export default function EmployeeScreen() {
                     <Button
                       className="bg-red-500"
                       icon={<DisableIcon />}
-                      onClick={() =>
-                        handleOpenStatusEmployeeModal(row.isActive, row.id)
+                      onClick={(e) =>
+                        handleOpenStatusEmployeeModal(e, row.isActive, row.id)
                       }
                     />
                   ) : (
                     <Button
                       className="bg-green-500"
                       icon={<EnableIcon />}
-                      onClick={() =>
-                        handleOpenStatusEmployeeModal(row.isActive, row.id)
+                      onClick={(e) =>
+                        handleOpenStatusEmployeeModal(e, row.isActive, row.id)
                       }
                     />
                   )}
 
-                  {isAdmin && (
-                    <Button
-                      className="bg-gray-700"
-                      icon={<DeleteIcon />}
-                      onClick={() => handleOpenRemoveEmployeeModal(row.id)}
-                    />
-                  )}
+                  <Button
+                    className="bg-red-500"
+                    icon={<DeleteIcon />}
+                    onClick={(e) => handleOpenRemoveEmployeeModal(e, row.id)}
+                  />
                 </div>
               );
             },
