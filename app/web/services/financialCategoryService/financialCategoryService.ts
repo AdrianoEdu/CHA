@@ -46,6 +46,10 @@ class FinancialCategoryService {
       GetFinancialCategoryDto[]
     >(this.url, { name });
   }
+
+  delete(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const financialCategoryService = new FinancialCategoryService();

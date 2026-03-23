@@ -20,3 +20,7 @@ export type GetFinancialCategoryDto = {
   createdAt: Date;
   financialFlowType: FinancialFlowType;
 };
+
+export type RemoveFinancialCategoryDto = {
+  id: string;
+};

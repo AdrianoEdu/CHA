@@ -2,12 +2,12 @@
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 
-import FinancialCategory from "@/app/web/view/home/register/financial/page";
 import {
   CreateFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "../../dto/FinancialCategory/FinancialCategory";
 import { financialCategoryService } from "./financial-category.service";
+import { RemoveAdvanceReason } from "../../dto/AdvanceReason/AdvanceReason";
 
 class FinancialCategoryController {
   private financialCategoryService;
@@ -47,6 +47,10 @@ class FinancialCategoryController {
 
       return await this.financialCategoryService.findByName({ name });
     } catch (error) {}
+  }
+
+  async remove({ id }: RemoveAdvanceReason) {
+    return await this.financialCategoryService.delete({ id });
   }
 }
 

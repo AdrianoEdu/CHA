@@ -5,14 +5,19 @@
 
 "use client";
 
+import { UserRole } from "@/app/generated/prisma";
+import Button from "@/app/web/components/button/page";
+import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import { UpsertCustomer } from "@/app/web/components/modal/upsert-customer/page";
-import Table from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateCustomerDto,
   GetCustomerDto,
   UpdateCustomerDto,
 } from "@/app/web/dto/customer.dto";
+import { DeleteIcon } from "@/app/web/icons";
+import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
@@ -27,7 +32,10 @@ export default function Customer() {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { user } = useAuth();
   const { closeModal, openModal } = useModal();
+
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
     handleGetAllCustomers();
@@ -115,26 +123,69 @@ export default function Customer() {
     );
   };
 
+  const handleRemoveCustomer = (customerId: string): void => {
+    customerService.delete(customerId).then(() => {
+      closeModal();
+      toast.success("Cliente removido com sucesso");
+      handleGetAllCustomers();
+    });
+  };
+
+  const handleOpenModalRemove = (
+    e: React.MouseEvent,
+    customerId: string,
+  ): void => {
+    e.stopPropagation();
+
+    const remove = (): void => handleRemoveCustomer(customerId);
+
+    openModal(<RemoveModal onClose={closeModal} onConfirm={remove} />);
+  };
+
+  const getColumns = (): TableColumn<GetCustomerDto>[] => {
+    const columns: TableColumn<GetCustomerDto>[] = [
+      { label: "Criado em", accessor: "createdAt" },
+      { label: "Nome do cliente", accessor: "name" },
+      { label: "CNPJ", accessor: "code" },
+      {
+        label: "Tipo",
+        accessor: "customerType",
+        render: (row) =>
+          row.customerType === "CLIENT" ? "Cliente" : "Fornecedor",
+      },
+    ];
+
+    if (isAdmin)
+      columns.push({
+        label: "Ações",
+        render: (row) => {
+          return (
+            <div className="flex gap-2 justify-center">
+              {isAdmin && (
+                <Button
+                  icon={<DeleteIcon />}
+                  className="bg-red-500"
+                  onClick={(e) => handleOpenModalRemove(e, row.id)}
+                />
+              )}
+            </div>
+          );
+        },
+      });
+
+    return columns;
+  };
+
   return (
     <div>
       <Table
         enableFilter
         title={"Clientes"}
         rows={customerList}
+        columns={getColumns()}
         onRowClick={handleOpenModalEditCustomer}
         onFilterChange={handleSetFilterCustomerName}
         onActionClicked={hanleOpenModalRegisterCustomer}
-        columns={[
-          { label: "Criado em", accessor: "createdAt" },
-          { label: "Nome do cliente", accessor: "name" },
-          { label: "CNPJ", accessor: "code" },
-          {
-            label: "Tipo",
-            accessor: "customerType",
-            render: (row) =>
-              row.customerType === "CLIENT" ? "Cliente" : "Fornecedor",
-          },
-        ]}
       />
     </div>
   );

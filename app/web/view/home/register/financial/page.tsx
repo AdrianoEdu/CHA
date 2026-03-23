@@ -5,14 +5,19 @@
 
 "use client";
 
+import { UserRole } from "@/app/generated/prisma";
+import Button from "@/app/web/components/button/page";
+import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import { UpsertFinancialCategory } from "@/app/web/components/modal/upsert-financial-category/page";
-import Table from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "@/app/web/dto/financial.dto";
+import { DeleteIcon } from "@/app/web/icons";
+import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
@@ -26,9 +31,12 @@ export default function FinancialCategory() {
     useState<GetFinancialCategoryDto[]>();
   const [filter, setFilter] = useState("");
 
+  const { user } = useAuth();
   const { closeModal, openModal } = useModal();
 
   const debounceRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const isAdmin = user.role === UserRole.ADMIN;
 
   useEffect(() => {
     handleGetAllFinancialCategory();
@@ -116,25 +124,71 @@ export default function FinancialCategory() {
       },
     });
   };
+
+  const handleRemoveFinancialCategory = (categoryId: string): void => {
+    financialCategoryService.delete(categoryId).then(() => {
+      closeModal();
+      toast.success("Categoria financeira removida com sucesso");
+      handleGetAllFinancialCategory();
+    });
+  };
+
+  const handleOpenModalRemove = (
+    e: React.MouseEvent,
+    categoryId: string,
+  ): void => {
+    e.stopPropagation();
+
+    const remove = (): void => {
+      handleRemoveFinancialCategory(categoryId);
+    };
+
+    openModal(<RemoveModal onClose={closeModal} onConfirm={remove} />);
+  };
+
+  const getColumns = (): TableColumn<GetFinancialCategoryDto>[] => {
+    const columns: TableColumn<GetFinancialCategoryDto>[] = [
+      { label: "Criado em", accessor: "createdAt" },
+      { label: "Nome", accessor: "name" },
+      {
+        label: "Tipo",
+        accessor: "financialFlowType",
+        render: (row) => (row.financialFlowType === "IN" ? "Entrada" : "Saída"),
+      },
+    ];
+
+    if (isAdmin)
+      if (isAdmin)
+        columns.push({
+          label: "Ações",
+          render: (row) => {
+            return (
+              <div className="flex gap-2 justify-center">
+                {isAdmin && (
+                  <Button
+                    icon={<DeleteIcon />}
+                    className="bg-red-500"
+                    onClick={(e) => handleOpenModalRemove(e, row.id)}
+                  />
+                )}
+              </div>
+            );
+          },
+        });
+
+    return columns;
+  };
+
   return (
     <div>
       <Table
         enableFilter
-        title={"Entradas e saídas"}
         rows={financialList}
+        columns={getColumns()}
+        title={"Entradas e saídas"}
         onFilterChange={handleSetFilterChange}
         onRowClick={handleOpenModalEditFinancialCategory}
         onActionClicked={handleOpenModalRegisterFinancialCategory}
-        columns={[
-          { label: "Criado em", accessor: "createdAt" },
-          { label: "Nome", accessor: "name" },
-          {
-            label: "Tipo",
-            accessor: "financialFlowType",
-            render: (row) =>
-              row.financialFlowType === "IN" ? "Entrada" : "Saída",
-          },
-        ]}
       />
     </div>
   );

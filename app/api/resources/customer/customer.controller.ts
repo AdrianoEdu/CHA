@@ -3,14 +3,12 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { SendPaginationDto } from "@/app/web/dto/pagination.dto";
 import {
   CreateCustomerDto,
   UpdateCustomerDto,
 } from "../../dto/Customer/Customer";
 import { customerService } from "./customer.service";
-import { PaginationDto } from "../../dto/Pagination/Pagination";
-import { Prisma } from "@/app/generated/prisma";
+import { RemoveAdvanceReason } from "../../dto/AdvanceReason/AdvanceReason";
 
 class CustomerController {
   private customerService;
@@ -50,6 +48,10 @@ class CustomerController {
 
       return await this.customerService.findByName({ name });
     } catch (error) {}
+  }
+
+  async remove({ id }: RemoveAdvanceReason) {
+    return await customerService.remove({ id });
   }
 }
 

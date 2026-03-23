@@ -22,3 +22,7 @@ export type GetCustomerDto = {
   customerType: CustomerType;
   createdAt: Date;
 };
+
+export type RemoverCustomerDto = {
+  id: string;
+};

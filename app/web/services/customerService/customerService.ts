@@ -40,6 +40,10 @@ class CustomerService {
       GetCustomerDto[]
     >(this.url, { name });
   }
+
+  delete(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const customerService = new CustomerService();

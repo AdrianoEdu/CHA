@@ -52,12 +52,11 @@ class BankService {
       where: { bankId: id },
     });
 
-    if (count > 0) {
+    if (count > 0)
       throw new HttpException(
         "Já existem registros de adiantamento associados a este motivo.",
         400,
       );
-    }
 
     const removedBank = await this.databaseService.bank.findFirst({
       where: { id },

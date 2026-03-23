@@ -7,10 +7,12 @@ import { Prisma } from "@/app/generated/prisma";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
+  RemoveFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "../../dto/FinancialCategory/FinancialCategory";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
+import { HttpException } from "../../error/HttpException";
 
 class FinancialCategoryService {
   private databaseService;
@@ -56,6 +58,31 @@ class FinancialCategoryService {
 
   async findByName({ name }: Partial<UpdateFinancialCategoryDto>) {
     return this.databaseService.customer.findMany({ where: { name } });
+  }
+
+  async delete({ id }: RemoveFinancialCategoryDto) {
+    const [countReceived, countPayable] = await Promise.all([
+      this.databaseService.accountsReceivable.count({
+        where: { categoryId: id },
+      }),
+      this.databaseService.accountsPayable.count({ where: { categoryId: id } }),
+    ]);
+
+    if (countPayable > 0 || countReceived > 0)
+      throw new HttpException(
+        "Já existem registros de categoria financeira associados.",
+        400,
+      );
+
+    const removedFinancialCategory =
+      await this.databaseService.financialCategory.findFirst({ where: { id } });
+
+    if (!removedFinancialCategory)
+      throw new HttpException("Categoria financieira não encotrada", 404);
+
+    await this.databaseService.financialCategory.delete({
+      where: { id: removedFinancialCategory.id },
+    });
   }
 }
 
