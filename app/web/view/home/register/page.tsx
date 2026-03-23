@@ -9,7 +9,7 @@ import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/page";
 import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import { UpsertAdvanceReason } from "@/app/web/components/modal/upsert-adavence-reason/page";
-import Table from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import {
@@ -35,9 +35,11 @@ export default function General() {
     FindAdvanceReasonDto[]
   >([]);
 
-  const { closeModal, openModal } = useModal();
   const { user } = useAuth();
+  const { closeModal, openModal } = useModal();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
     handleGetAllAdvanceReason();
@@ -136,13 +138,38 @@ export default function General() {
 
   const handleOpenModalRemove = (e: React.MouseEvent, id: string): void => {
     e.stopPropagation();
-    openModal(
-      <RemoveModal
-        description={description}
-        onClose={closeModal}
-        onConfirm={() => handleRemoveAdvanceReason(id)}
-      />,
-    );
+
+    const remove = (): void => {
+      handleRemoveAdvanceReason(id);
+    };
+
+    openModal(<RemoveModal onConfirm={remove} onClose={closeModal} />);
+  };
+
+  const getColumns = (): TableColumn<FindAdvanceReasonDto>[] => {
+    const columns: TableColumn<FindAdvanceReasonDto>[] = [
+      { label: "Criado em", accessor: "createdAt" },
+      { label: "Motivo", accessor: "name" },
+    ];
+
+    if (isAdmin)
+      columns.push({
+        label: "Ações",
+        isAction: true,
+        render: (row) => {
+          return (
+            <div className="flex gap-2 justify-center">
+              <Button
+                className="bg-red-500"
+                icon={<DeleteIcon />}
+                onClick={(e) => handleOpenModalRemove(e, row.id)}
+              />
+            </div>
+          );
+        },
+      });
+
+    return columns;
   };
 
   return (
@@ -150,33 +177,11 @@ export default function General() {
       <Table
         enableFilter
         title={"Motivos"}
+        columns={getColumns()}
         rows={advanceReasonList}
         onRowClick={handleOpenModalEditAdvanceReason}
         onFilterChange={handleSetFilterAdvanceReasonName}
         onActionClicked={hanleOpenModalRegisterAdvanceReason}
-        columns={[
-          { label: "Criado em", accessor: "createdAt" },
-          { label: "Motivo", accessor: "name" },
-          {
-            label: "Ações",
-            isAction: true,
-            render: (row) => {
-              const isAdmin = user?.role === UserRole.ADMIN;
-
-              return (
-                <div className="flex gap-2 justify-center">
-                  {isAdmin && (
-                    <Button
-                      className="bg-red-500"
-                      icon={<DeleteIcon />}
-                      onClick={(e) => handleOpenModalRemove(e, row.id)}
-                    />
-                  )}
-                </div>
-              );
-            },
-          },
-        ]}
       />
     </div>
   );

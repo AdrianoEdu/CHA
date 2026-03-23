@@ -10,7 +10,7 @@ import Button from "@/app/web/components/button/page";
 import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/page";
 import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/page";
-import Table from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
@@ -27,8 +27,6 @@ import { toast } from "react-toastify";
 const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
   i18n["Pt-Br"].Modal;
 
-const { description } = RemoveEmployee;
-
 let oldEmployeeList: EmployeeDto[] = [];
 
 export default function EmployeeScreen() {
@@ -39,6 +37,16 @@ export default function EmployeeScreen() {
   const { openModal, closeModal } = useModal();
   const { user } = useAuth();
   const router = useRouter();
+
+  const isAdmin = user?.role === UserRole.ADMIN;
+
+  useEffect(() => {
+    handleFindEmployees();
+  }, []);
+
+  useEffect(() => {
+    handleFilterEmployeeName();
+  }, [filter]);
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
     router.push(
@@ -90,12 +98,13 @@ export default function EmployeeScreen() {
     employeeId?: string,
   ): void => {
     e.stopPropagation();
+
+    const remove = (): void => {
+      handleRemoverEmployee(employeeId);
+    };
+
     openModal(
-      <RemoveModal
-        onClose={closeModal}
-        description={description}
-        onConfirm={() => handleRemoverEmployee(employeeId)}
-      />,
+      <RemoveModal onClose={closeModal} onConfirm={remove} />,
       RemoveEmployee.title,
     );
   };
@@ -154,66 +163,64 @@ export default function EmployeeScreen() {
     }, 500);
   };
 
-  useEffect(() => {
-    handleFindEmployees();
-  }, []);
+  const getColumns = (): TableColumn<EmployeeDto>[] => {
+    const columns: TableColumn<EmployeeDto>[] = [
+      { label: "Criado em", accessor: "createdAt" },
+      { label: "Nome", accessor: "name" },
+      {
+        label: "Ativo",
+        render: (row) => (row.isActive ? "Sim" : "Não"),
+      },
+    ];
 
-  useEffect(() => {
-    handleFilterEmployeeName();
-  }, [filter]);
+    if (isAdmin)
+      columns.push({
+        label: "Ações",
+        isAction: true,
+        render: (row) => {
+          return (
+            <div className="flex gap-2 justify-center">
+              {row.isActive ? (
+                <Button
+                  className="bg-red-500"
+                  icon={<DisableIcon />}
+                  onClick={(e) =>
+                    handleOpenStatusEmployeeModal(e, row.isActive, row.id)
+                  }
+                />
+              ) : (
+                <Button
+                  className="bg-green-500"
+                  icon={<EnableIcon />}
+                  onClick={(e) =>
+                    handleOpenStatusEmployeeModal(e, row.isActive, row.id)
+                  }
+                />
+              )}
+
+              <Button
+                className="bg-red-500"
+                icon={<DeleteIcon />}
+                onClick={(e) => handleOpenRemoveEmployeeModal(e, row.id)}
+              />
+            </div>
+          );
+        },
+      });
+
+    return columns;
+  };
 
   return (
     <div>
       <Table
         enableFilter
         rows={employeeList}
-        title="Funcionários"
+        title={"Funcionários"}
+        columns={getColumns()}
         onFilterChange={handleSetFilterEmployeeName}
         onRowClick={handleNavigateEmployeeAdvancedScreen}
         onActionClicked={handleOpenRegisterEmployeeModal}
-        columns={[
-          { label: "Criado em", accessor: "createdAt" },
-          { label: "Nome", accessor: "name" },
-          {
-            label: "Ativo",
-            render: (row) => (row.isActive ? "Sim" : "Não"),
-          },
-          {
-            label: "Ações",
-            isAction: true,
-            render: (row) => {
-              const isAdmin = user?.role === UserRole.ADMIN;
-
-              return (
-                <div className="flex gap-2 justify-center">
-                  {row.isActive ? (
-                    <Button
-                      className="bg-red-500"
-                      icon={<DisableIcon />}
-                      onClick={(e) =>
-                        handleOpenStatusEmployeeModal(e, row.isActive, row.id)
-                      }
-                    />
-                  ) : (
-                    <Button
-                      className="bg-green-500"
-                      icon={<EnableIcon />}
-                      onClick={(e) =>
-                        handleOpenStatusEmployeeModal(e, row.isActive, row.id)
-                      }
-                    />
-                  )}
-
-                  <Button
-                    className="bg-red-500"
-                    icon={<DeleteIcon />}
-                    onClick={(e) => handleOpenRemoveEmployeeModal(e, row.id)}
-                  />
-                </div>
-              );
-            },
-          },
-        ]}
       />
     </div>
   );

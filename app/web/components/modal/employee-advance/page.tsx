@@ -58,7 +58,6 @@ export default function RegisterEmployeeAdvanceModal({
       take: 20,
       type: ActionEnum.FindAll,
     });
-    alert(result);
     setAdvanceReasonList(result);
   };
 

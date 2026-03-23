@@ -6,6 +6,7 @@
 import { Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { bankService } from "./bank.service";
+import { RemoveBankDto } from "../../dto/Bank/bank";
 
 export class BankController {
   private bankService;
@@ -52,4 +53,10 @@ export class BankController {
       return Response.json({ error: error.message }, { status: 500 });
     }
   }
+
+  async remove({ id }: RemoveBankDto) {
+    return await this.bankService.remove({ id });
+  }
 }
+
+export const bankController = new BankController();

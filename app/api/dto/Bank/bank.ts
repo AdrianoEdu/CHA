@@ -11,3 +11,7 @@ export interface BankDto {
 }
 
 export type UpdateBankDto = Partial<BankDto>;
+
+export type RemoveBankDto = {
+  id: string;
+};

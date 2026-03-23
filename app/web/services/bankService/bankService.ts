@@ -32,6 +32,10 @@ class BankService {
   findAll(data: SendPaginationDto) {
     return requestService.getAll<SendPaginationDto, BankDto[]>(this.url, data);
   }
+
+  remove(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const bankService = new BankService();

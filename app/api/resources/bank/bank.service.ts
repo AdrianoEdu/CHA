@@ -4,9 +4,10 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
-import { BankDto, UpdateBankDto } from "../../dto/Bank/bank";
+import { BankDto, RemoveBankDto, UpdateBankDto } from "../../dto/Bank/bank";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
+import { HttpException } from "../../error/HttpException";
 
 class BankService {
   private databaseService = databaseService;
@@ -44,6 +45,29 @@ class BankService {
       ...baseQuery,
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async remove({ id }: RemoveBankDto) {
+    const count = await this.databaseService.receivedCheck.count({
+      where: { bankId: id },
+    });
+
+    if (count > 0) {
+      throw new HttpException(
+        "Já existem registros de adiantamento associados a este motivo.",
+        400,
+      );
+    }
+
+    const removedBank = await this.databaseService.bank.findFirst({
+      where: { id },
+    });
+
+    if (!removedBank) {
+      throw new HttpException("Banco não encontrado.", 404);
+    }
+
+    await this.databaseService.bank.delete({ where: { id: removedBank?.id } });
   }
 }
 

@@ -38,15 +38,18 @@ export const PtBr = {
       message: "Atenção: você realmente deseja remover este funcionário?",
       description:
         "Após a remoção, o funcionário não poderá mais ser utilizado no sistema. Utilize esta opção apenas quando o cadastro tiver sido realizado de forma incorreta.",
-      confirmButton: "Remover",
       successRemoveEmployee: "funcionário removido com sucesso.",
     },
     AdvanceReason: {
       description:
         "Tem certeza de que deseja remover este registro? Após a exclusão, não será possível recuperar esta informação.",
     },
+    removeButton: "Remover",
     cancelButton: "Cancelar",
     updateButton: "Atualizar",
     registerButton: "Registrar",
+    titleRemove: "Confirmação de exclusão",
+    descriptionRemove:
+      "Tem certeza de que deseja remover este registro? Esta ação não poderá ser desfeita.",
   },
 };

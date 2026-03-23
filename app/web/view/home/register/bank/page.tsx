@@ -5,18 +5,26 @@
 
 "use client";
 
+import { UserRole } from "@/app/generated/prisma";
+import Button from "@/app/web/components/button/page";
+import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import BankModal from "@/app/web/components/modal/upsert-bank/page";
-import Table from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/page";
 import { BankDto } from "@/app/web/dto/bank.dto";
+import { DeleteIcon } from "@/app/web/icons";
+import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankService } from "@/app/web/services/bankService/bankService";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 export default function BankScreen() {
+  const { user } = useAuth();
   const { openModal, closeModal } = useModal();
 
   const [listBank, setListBank] = useState<BankDto[]>([]);
+
+  const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
     handleFindBanks();
@@ -44,6 +52,14 @@ export default function BankScreen() {
     closeModal();
   };
 
+  const handleRemoveBank = (id: string): void => {
+    bankService.remove(id).then(() => {
+      closeModal();
+      toast.success("Agência bancária com sucessp");
+      handleFindBanks();
+    });
+  };
+
   const handleOpenBankModal = (row?: BankDto): void => {
     openModal(
       <BankModal
@@ -55,38 +71,75 @@ export default function BankScreen() {
     );
   };
 
+  const handleOpenModalRemove = async (
+    e: React.MouseEvent,
+    id: string,
+  ): Promise<void> => {
+    e.stopPropagation();
+
+    const remove = (): void => {
+      handleRemoveBank(id);
+    };
+
+    openModal(<RemoveModal onClose={closeModal} onConfirm={remove} />);
+  };
+
+  const getColumns = (): TableColumn<BankDto>[] => {
+    const columns: TableColumn<BankDto>[] = [
+      { label: "Criado em", accessor: "createdAt" },
+      { label: "Nome", accessor: "name" },
+      {
+        label: "Agências",
+        render: (row) => {
+          return (
+            <div className="flex flex-wrap justify-center gap-2">
+              {row.agencies?.map((agency: string, index: number) => (
+                <div
+                  key={agency}
+                  className="flex items-center gap-1 rounded text-base"
+                >
+                  {row.agencies.length === index + 1 ? (
+                    <span>{agency}</span>
+                  ) : (
+                    <span>{`${agency},`}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          );
+        },
+      },
+    ];
+
+    if (isAdmin)
+      columns.push({
+        label: "Ações",
+        render: (row) => {
+          return (
+            <div className="flex gap-2 justify-center">
+              {isAdmin && (
+                <Button
+                  icon={<DeleteIcon />}
+                  className="bg-red-500"
+                  onClick={(e) => handleOpenModalRemove(e, row.id)}
+                />
+              )}
+            </div>
+          );
+        },
+      });
+
+    return columns;
+  };
+
   return (
     <div>
       <Table
-        title={"Agências bancárias"}
         rows={listBank}
+        columns={getColumns()}
+        title={"Agências bancárias"}
         onRowClick={handleOpenBankModal}
         onActionClicked={handleOpenBankModal}
-        columns={[
-          { label: "Criado em", accessor: "createdAt" },
-          { label: "Nome", accessor: "name" },
-          {
-            label: "Agências",
-            render: (row) => {
-              return (
-                <div className="flex flex-wrap justify-center gap-2">
-                  {row.agencies?.map((agency: string, index: number) => (
-                    <div
-                      key={agency}
-                      className="flex items-center gap-1 rounded text-base"
-                    >
-                      {row.agencies.length === index + 1 ? (
-                        <span>{agency}</span>
-                      ) : (
-                        <span>{`${agency},`}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            },
-          },
-        ]}
       />
     </div>
   );

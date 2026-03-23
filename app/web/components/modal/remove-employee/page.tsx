@@ -8,34 +8,31 @@
 import Button from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { RemoveEmployee, cancelButton } = i18n["Pt-Br"].Modal;
-
-const { confirmButton, message } = RemoveEmployee;
+const { removeButton, cancelButton, titleRemove, descriptionRemove } =
+  i18n["Pt-Br"].Modal;
 
 export type RemoveEmployeeModalContentProps = {
-  description: string;
   onClose: () => void;
   onConfirm: () => Promise<void> | void;
 };
 
 export default function RemoveModal({
-  description,
   onClose,
   onConfirm,
 }: Readonly<RemoveEmployeeModalContentProps>) {
   return (
     <div className="flex flex-col w-full">
-      <p className="text-sm font-medium">{message}</p>
+      <p className="text-sm font-medium">{titleRemove}</p>
 
-      <p className="text-sm text-gray-600 mt-2">{description}</p>
+      <p className="text-sm text-gray-600 mt-2">{descriptionRemove}</p>
 
       <div className="mt-6 flex justify-end gap-4">
         <Button text={cancelButton} onPress={onClose} />
 
         <Button
-          className="bg-red-500"
-          text={confirmButton}
+          text={removeButton}
           onPress={onConfirm}
+          className={"bg-red-500"}
         />
       </div>
     </div>
