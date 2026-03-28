@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { authService } from "../services/authService/authService";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AuthDto } from "../dto/auth.dto";
 import { ActionEnum } from "../constants/enum";
+import LoadingModal from "../components/modal/loaded/page";
+import { useModal } from "./ModalProvider";
 
 interface User {
   id: string;
@@ -22,6 +24,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const defaultPath = "/web/view";
+const homePath = `${defaultPath}/home`;
+const loginPath = `${defaultPath}/login`;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthDto>({
@@ -30,9 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     role: undefined,
   });
 
+  const pathname = usePathname();
+  const { openModal, closeModal } = useModal();
+
   useEffect(() => {
     isAuthenticated();
-  }, []);
+  }, [pathname]);
+
   const auth = async (userName: string, password: string): Promise<void> => {
     try {
       const result = (await authService.login({
@@ -42,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })) as AuthDto;
 
       setUser(result);
-      router.push("home");
+      router.push(homePath);
       toast.success("Auntenticação bem sucedida");
     } catch (err) {
       toast.error("Erro na autenticação");
@@ -51,18 +61,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAuthenticated = async (): Promise<void> => {
     try {
+      startLoading();
+
       const result = await authService.isLogged({ type: ActionEnum.IsLogged });
 
-      if (!result.name && !result.lastName) {
-        router.push("/web/view/login");
+      const isLogged = result.name && result.lastName;
+
+      if (!isLogged) {
+        router.push(loginPath);
         return;
       }
 
       setUser(result);
-      router.push("/web/view/home");
-      toast.success("Usuário Autenticado");
+
+      if (
+        pathname === "/" ||
+        pathname === loginPath ||
+        pathname === defaultPath
+      ) {
+        router.push(homePath);
+        toast.success("Usuário Autenticado");
+      }
     } catch {
-      router.push("/web/view/login");
+      router.push(loginPath);
+    } finally {
+      stopLoading();
     }
   };
 
@@ -70,11 +93,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.logout({ type: ActionEnum.Logout });
 
-      router.replace("/web/view/login");
+      router.replace(loginPath);
       toast.success("Logout feito com sucesso");
     } catch (error) {
       toast.error("Erro ao fazer logout");
     }
+  };
+
+  const startLoading = (): void => {
+    openModal(<LoadingModal />, "", false);
+  };
+
+  const stopLoading = (): void => {
+    closeModal();
   };
 
   return (

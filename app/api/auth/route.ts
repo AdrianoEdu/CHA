@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { encrypt } from "../lib/decrypt";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
-import { AuthController } from "../resources/auth/auth-controller";
+import { AuthController } from "../resources/auth/auth.controller";
 import { ActionEnum } from "@/app/api/dto/Auth/Auth";
 
 const authController = new AuthController();

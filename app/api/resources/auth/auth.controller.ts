@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import { AuthDto, AuthLoggedDto, LoginDto } from "@/app/api/dto/Auth/Auth";
-import { authService } from "./auth-service";
+import { authService } from "./auth.service";
 
 export class AuthController {
   private authService;

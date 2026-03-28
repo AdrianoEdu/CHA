@@ -4,7 +4,11 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import Modal from "../components/modal/page";
 
 interface ModalContextType {
-  openModal: (content: ReactNode, title?: string) => void;
+  openModal: (
+    content: ReactNode,
+    title?: string,
+    showCloseButton?: boolean,
+  ) => void;
   closeModal: () => void;
 }
 
@@ -14,8 +18,14 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
   const [title, setTitle] = useState<string | undefined>();
+  const [showCloseButton, setShowCloseButton] = useState(true);
 
-  function openModal(component: ReactNode, modalTitle?: string) {
+  function openModal(
+    component: ReactNode,
+    modalTitle?: string,
+    showCloseButton?: boolean,
+  ) {
+    setShowCloseButton(showCloseButton ?? true);
     setContent(component);
     setTitle(modalTitle);
     setIsOpen(true);
@@ -25,6 +35,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     setIsOpen(false);
     setContent(null);
     setTitle(undefined);
+    setShowCloseButton(true);
   }
 
   return (
@@ -32,7 +43,11 @@ export function ModalProvider({ children }: { children: ReactNode }) {
       {children}
 
       {isOpen && (
-        <Modal onClose={closeModal} title={title}>
+        <Modal
+          title={title}
+          onClose={closeModal}
+          showCloseButton={showCloseButton}
+        >
           {content}
         </Modal>
       )}

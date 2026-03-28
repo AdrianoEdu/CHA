@@ -6,8 +6,8 @@ import { ModalProvider } from "./ModalProvider";
 
 export function WebProviders({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <ModalProvider>
+    <ModalProvider>
+      <AuthProvider>
         {children}
         <ToastContainer
           position="top-right"
@@ -21,7 +21,7 @@ export function WebProviders({ children }: { children: React.ReactNode }) {
           pauseOnHover
           theme="light"
         />
-      </ModalProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ModalProvider>
   );
 }
