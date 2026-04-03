@@ -36,6 +36,13 @@ export default function SideBar() {
         >
           <span className="ml-3">Registro</span>
         </Link>
+
+        <Link
+          href="/web/view/home/settings"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Configurações</span>
+        </Link>
       </nav>
       <div className="p-4 border-t border-gray-800">
         <button
