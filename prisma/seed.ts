@@ -4,23 +4,25 @@
 // All rights reserved.
 
 import { PrismaClient } from "@/app/generated/prisma";
-import { seedUsers } from './seeds/user-seed';
+import { seedUsers } from "./seeds/user-seed";
+import { seedSystemConfig } from "./seeds/config-system-seeds";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seeds...');
+  console.log("🌱 Iniciando seeds...");
 
   await seedUsers(prisma);
+  await seedSystemConfig(prisma);
 
-  console.log('✅ Seeds finalizadas');
+  console.log("✅ Seeds finalizadas");
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Erro ao rodar seeds', e);
+    console.error("❌ Erro ao rodar seeds", e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-});
+  });

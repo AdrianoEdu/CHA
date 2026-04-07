@@ -5,14 +5,9 @@
 
 "use client";
 
-import { useState } from "react";
-
-type SystemConfig = {
-  enabled: boolean;
-  intervalHours?: number;
-  runAtHour?: number;
-  lastBackupAt?: string;
-};
+import { SystemConfigDto } from "@/app/web/dto/config-system.dto";
+import { configSystemService } from "@/app/web/services/configSystemService/configSystemService";
+import { useEffect, useState } from "react";
 
 function validateIntervalHours(value: any) {
   if (value === "" || value === undefined) {
@@ -32,7 +27,6 @@ function validateIntervalHours(value: any) {
   return { valid: true, value: num };
 }
 
-// 🔥 Valida horário (0 a 23) ou vazio
 function validateRunHour(value: any) {
   if (value === "" || value === undefined) {
     return { valid: true, value: undefined };
@@ -52,9 +46,19 @@ function validateRunHour(value: any) {
 }
 
 export default function SystemConfigPage() {
-  const [config, setConfig] = useState<SystemConfig>({
+  const [config, setConfig] = useState<SystemConfigDto>({
     enabled: true,
   });
+
+  useEffect(() => {
+    handleGetSystemConfigStatus();
+  }, []);
+
+  const handleGetSystemConfigStatus = async (): Promise<void> => {
+    const [configSystem] = await configSystemService.get();
+
+    setConfig(configSystem);
+  };
 
   const handleSave = () => {
     const interval = validateIntervalHours(config.intervalHours);
@@ -75,8 +79,9 @@ export default function SystemConfigPage() {
       return;
     }
 
-    console.log("Salvando config:", config);
-    alert("Configuração salva com sucesso!");
+    configSystemService.update(config).then(() => {
+      alert("Configuração de backup atualizada com sucesso!");
+    });
   };
 
   const handleBackupNow = () => {
@@ -91,7 +96,6 @@ export default function SystemConfigPage() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
-      {/* ATIVAR BACKUP */}
       <div className="bg-white p-4 rounded-xl shadow">
         <h2 className="text-lg font-semibold mb-4">Backup do Sistema</h2>
 
@@ -110,12 +114,10 @@ export default function SystemConfigPage() {
         </label>
       </div>
 
-      {/* CONFIG EXECUÇÃO */}
       <div className="bg-white p-4 rounded-xl shadow">
         <h2 className="text-lg font-semibold mb-4">Configuração de Execução</h2>
 
         <div className="space-y-4">
-          {/* INTERVALO */}
           <div>
             <label className="block mb-1">Intervalo (1 a 12 horas)</label>
             <input
@@ -140,7 +142,6 @@ export default function SystemConfigPage() {
 
           <div className="text-center text-gray-400 text-sm">OU</div>
 
-          {/* HORÁRIO FIXO */}
           <div>
             <label className="block mb-1">
               Executar em horário fixo (0 a 23)
@@ -167,7 +168,6 @@ export default function SystemConfigPage() {
         </div>
       </div>
 
-      {/* BACKUP INFO */}
       <div className="bg-white p-4 rounded-xl shadow">
         <h2 className="text-lg font-semibold mb-4">Backup</h2>
 
@@ -188,7 +188,6 @@ export default function SystemConfigPage() {
         </button>
       </div>
 
-      {/* SALVAR */}
       <div className="flex justify-end">
         <button
           onClick={handleSave}

@@ -241,7 +241,7 @@ model AccountsReceivable {
 model SystemConfig {
   id            String   @id @default(uuid())
   enabled       Boolean  @default(true)
-  intervalHours Int      
+  intervalHours Int?     
   runAtHour     Int?     
   lastBackupAt  DateTime?
 
