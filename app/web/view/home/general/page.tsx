@@ -27,8 +27,6 @@ import { toast } from "react-toastify";
 
 let oldAdvanceReasonList: FindAdvanceReasonDto[] = [];
 
-const { description } = i18n["Pt-Br"].Modal.AdvanceReason;
-
 export default function General() {
   const [filter, setFilter] = useState("");
   const [advanceReasonList, setAdvanceReasonList] = useState<

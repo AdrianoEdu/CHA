@@ -141,30 +141,22 @@ model Bank {
 }
 
 model ReceivedCheck {
-  id String @id @default(uuid())
-
-  receivedAt DateTime
-
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-
-  bankId String
-  bank   Bank @relation(fields: [bankId], references: [id])
-
-  agency String
-  checkNumber String
-
+  id            String @id @default(uuid())
+  receivedAt    DateTime
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  bankId        String
+  bank          Bank @relation(fields: [bankId], references: [id])
+  agency        String
+  checkNumber   String
   totalAmount   Decimal @db.Decimal(15,2)
   currentAmount Decimal @db.Decimal(15,2)
-
-  goodForAt DateTime?
-
-  status ReceivedCheckStatus @default(RECEIVED)
-
-  usages CheckUsage[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  goodForAt     DateTime?
+  status        ReceivedCheckStatus @default(RECEIVED)
+  usages        CheckUsage[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("received_checks")
 }

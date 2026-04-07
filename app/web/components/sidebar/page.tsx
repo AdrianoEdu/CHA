@@ -23,25 +23,60 @@ export default function SideBar() {
         </span>
       </div>
       <nav className="flex-1 text-center px-3 py-4 space-y-2">
-        <Link
+        {/* <Link
           href="/web/view/home/dashboard"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
           <span className="ml-3">Dashboard</span>
+        </Link> */}
+
+        <Link
+          href="/web/view/home/bank"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Banco</span>
         </Link>
 
         <Link
-          href="/web/view/home/register"
+          href="/web/view/home/receive-check"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
-          <span className="ml-3">Registro</span>
+          <span className="ml-3">Check Recebidos</span>
+        </Link>
+
+        <Link
+          href="/web/view/home/customer"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Clientes</span>
+        </Link>
+
+        <Link
+          href="/web/view/home/financial"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Financeiro</span>
+        </Link>
+
+        <Link
+          href="/web/view/home/employee"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Funcionários</span>
+        </Link>
+
+        <Link
+          href="/web/view/home/general"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Motivos de adiantamento</span>
         </Link>
 
         <Link
           href="/web/view/home/settings"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >
-          <span className="ml-3">Configurações</span>
+          <span className="ml-3">Sistema</span>
         </Link>
       </nav>
       <div className="p-4 border-t border-gray-800">
