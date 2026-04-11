@@ -119,7 +119,7 @@ export default function FinancialCategory() {
       fetchFromApi: async (value) => {
         return financialCategoryService.findByName({
           name: value,
-          type: ActionEnum.FindByName,
+          type: ActionEnum.FindByFilters,
         });
       },
     });

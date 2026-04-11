@@ -43,7 +43,7 @@ export async function GET(req: Request) {
       case ActionEnum.FindAll:
         result = await employeeController.findAll(req);
         break;
-      case ActionEnum.FindByName:
+      case ActionEnum.FindByFilters:
         result = await employeeController.findByName(req);
         break;
       default:

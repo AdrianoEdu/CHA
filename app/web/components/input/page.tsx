@@ -6,11 +6,7 @@
 "use client";
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
-import {
-  formatCNPJ,
-  formatMoney,
-  FormatterResult,
-} from "../../utils/inputFormatter";
+import { formatCNPJ, formatMoney } from "../../utils/inputFormatter";
 
 export enum InputType {
   Text = "text",
@@ -18,6 +14,7 @@ export enum InputType {
   Number = "number",
   Money = "money",
   Cnpj = "Cnpj",
+  Date = "date",
 }
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -41,19 +38,20 @@ export default function Input({
   useEffect(() => {
     const rawValue = String(rest.value ?? "");
 
-    const formatter = formatters[inputType as InputType];
+    const formatter = formatters[inputType];
 
-    if (formatter) {
+    if (formatter && inputType !== InputType.Date) {
       setDisplayValue(formatter(rawValue).formatted);
       return;
     }
 
     setDisplayValue(rawValue);
-  }, [rest.value]);
+  }, [rest.value, inputType]);
 
   function resolveHtmlType(type: InputType) {
     if (type === InputType.Number) return "number";
     if (type === InputType.Password) return "password";
+    if (type === InputType.Date) return "date"; // ✅ suporte a date
     return "text";
   }
 
@@ -69,7 +67,7 @@ export default function Input({
 
     const formatter = formatters[inputType];
 
-    if (formatter) {
+    if (formatter && inputType !== InputType.Date) {
       const { raw, formatted } = formatter(value);
 
       setDisplayValue(formatted);
@@ -96,19 +94,18 @@ export default function Input({
   }
 
   return (
-    <div className="bg-transparent p-4 rounded-lg">
+    <div className="bg-transparent p-2 rounded-lg">
       <div className="relative w-72">
         <input
           id={rest.name}
-          placeholder={" "}
-          name={displayValue}
+          placeholder=" "
           disabled={rest.disabled}
           onChange={handleOnPress}
           type={resolveHtmlType(inputType)}
           value={
             [InputType.Money, InputType.Cnpj].includes(inputType)
               ? displayValue
-              : rest.value
+              : (rest.value ?? "")
           }
           className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />

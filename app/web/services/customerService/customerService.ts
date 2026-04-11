@@ -27,7 +27,7 @@ class CustomerService {
     return requestService.post<CreateCustomerDto, void>(this.url, data);
   }
 
-  findAll(data: SendPaginationDto) {
+  findAll(data?: SendPaginationDto) {
     return requestService.getAll<SendPaginationDto, GetCustomerDto[]>(
       this.url,
       data,

@@ -29,7 +29,7 @@ class BankService {
     return requestService.post<BankDto, void>(this.url, data);
   }
 
-  findAll(data: SendPaginationDto) {
+  findAll(data?: SendPaginationDto) {
     return requestService.getAll<SendPaginationDto, BankDto[]>(this.url, data);
   }
 

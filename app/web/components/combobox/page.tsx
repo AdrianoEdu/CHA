@@ -10,9 +10,10 @@ import { SelectHTMLAttributes } from "react";
 export interface ComboboxProps<
   T,
 > extends SelectHTMLAttributes<HTMLSelectElement> {
-  label?: string;
   selected?: T;
   options: T[];
+  label?: string;
+  labelOption?: string;
   onSelectOption: (data: T) => void;
 
   valueKey: keyof T & string;
@@ -20,12 +21,13 @@ export interface ComboboxProps<
 }
 
 export default function ComboBox<T>({
-  label = "Selecione...",
+  label,
   options,
   selected,
-  onSelectOption,
   valueKey,
   labelKey,
+  labelOption = "Selecione...",
+  onSelectOption,
   ...rest
 }: Readonly<ComboboxProps<T>>) {
   const handleSelectOptions = (value: string): void => {
@@ -35,7 +37,8 @@ export default function ComboBox<T>({
   };
 
   return (
-    <div className="relative w-72 p-4">
+    <div className="relative w-72 pl-2 pr-2">
+      {label && <p className=" text-sm text-gray-500 mb-2">{label}</p>}
       <select
         {...rest}
         value={selected ? String(selected[valueKey]) : ""}
@@ -50,10 +53,6 @@ export default function ComboBox<T>({
           </option>
         ))}
       </select>
-
-      <p className="mt-2 text-sm text-gray-500">
-        Selecionado: {selected ? String(selected[labelKey]) : "Nenhum"}
-      </p>
     </div>
   );
 }

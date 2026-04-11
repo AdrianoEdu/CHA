@@ -20,7 +20,6 @@ export async function handleGenericFilter<T>({
   setList,
   fetchFromApi,
 }: FilterOptions<T>): Promise<void> {
-  // 🔄 reset se vazio
   if (!filter || filter.trim() === "") {
     setList(originalList);
     return;

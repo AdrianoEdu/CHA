@@ -25,7 +25,7 @@ export type CreateReceivedCheckDTO = {
   agency: string;
   checkNumber: string;
   totalAmount: number;
-  goodForAt?: string | null;
+  goodForAt?: Date;
 };
 
 export type UpdateReceivedCheckDTO = {

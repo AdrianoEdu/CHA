@@ -59,7 +59,7 @@ export async function GET(req: Request) {
       case ActionEnum.FindAll:
         result = await financialCategoryController.findAll(req);
         break;
-      case ActionEnum.FindByName:
+      case ActionEnum.FindByFilters:
         result = await financialCategoryController.findByName(req);
         break;
       default:

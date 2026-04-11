@@ -3,6 +3,8 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ActionDto } from "./auth.dto";
+
 export type ReceivedCheckDTO = {
   id: string;
   receivedAt: string;
@@ -14,7 +16,7 @@ export type ReceivedCheckDTO = {
   checkNumber: string;
   totalAmount: number;
   currentAmount: number;
-  goodForAt: string | null;
+  goodForAt?: Date;
   status: string;
   createdAt: Date;
 };
@@ -25,20 +27,29 @@ export type CreateReceivedCheckDTO = {
   agency: string;
   checkNumber: string;
   totalAmount: number;
-  goodForAt?: string | null;
+  goodForAt?: Date;
 };
 
 export type UpdateReceivedCheckDTO = {
-  id: string;
-  customerId?: string;
+  id?: string;
   bankId?: string;
   agency?: string;
+  status?: string;
+  goodForAt?: Date;
+  customerId?: string;
   checkNumber?: string;
   totalAmount?: number;
-  goodForAt?: string | null;
-  status?: string;
 };
 
 export type RemoveReceivedCheckDto = {
   id: string;
 };
+
+export type UpsertReceivedCheckDto = CreateReceivedCheckDTO &
+  UpdateReceivedCheckDTO;
+
+export interface SendUpdateReceiveCheckDto
+  extends ActionDto, UpdateReceivedCheckDTO {}
+
+export interface SendCreateReceiveCheckDto
+  extends ActionDto, CreateReceivedCheckDTO {}

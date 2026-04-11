@@ -5,11 +5,22 @@
 
 "use client";
 
+import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
-import { ReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
-import { useState } from "react";
+import { ActionEnum } from "@/app/web/constants/enum";
+import {
+  ReceivedCheckDTO,
+  UpsertReceivedCheckDto,
+} from "@/app/web/dto/receive-check.dto";
+import { useModal } from "@/app/web/providers/ModalProvider";
+import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
+import { handleGenericFilter } from "@/app/web/utils/filters";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
-export const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
+let oldReceiveChecks: ReceivedCheckDTO[] = [];
+
+const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
   { label: "Criado em", accessor: "createdAt" },
   { label: "Nome do cliente", accessor: "customerName" },
   { label: "Banco", accessor: "bankName" },
@@ -52,19 +63,88 @@ export const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
 ];
 
 export default function ReceiveCheck() {
-  const [receivedChecks, setReceivedChecks] = useState();
+  const [filter, setFilter] = useState("");
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [receivedChecks, setReceivedChecks] = useState<ReceivedCheckDTO[]>();
 
-  function handleOpenModalEditReceivedCheck(row: ReceivedCheckDTO): void {
-    throw new Error("Function not implemented.");
-  }
+  const { closeModal, openModal } = useModal();
 
-  function handleSetFilterReceivedCheckName(value: string): void {
-    throw new Error("Function not implemented.");
-  }
+  useEffect(() => {
+    handleFindReceiveChecks();
+  }, []);
 
-  function hanleOpenModalRegisterReceivedCheck(): void {
-    throw new Error("Function not implemented.");
-  }
+  useEffect(() => {
+    handleFilterReceiveCheck();
+  }, [filter]);
+
+  const handleUpserData = async (
+    data: UpsertReceivedCheckDto,
+    isEdit?: boolean,
+  ): Promise<void> => {
+    const { id, ...check } = data;
+
+    if (isEdit)
+      receiveCheckService.patch({ ...check, id }).then(() => {
+        toast.success("Recebimento de cheque atualizado com sucesso");
+      });
+
+    receiveCheckService.create({ ...check }).then(() => {
+      toast.success("Recebimento de cheque registrado com sucesso");
+    });
+  };
+
+  const handleOpenModalEditReceivedCheck = (row: ReceivedCheckDTO): void => {
+    openModal(
+      <UpsertReceivedCheckModal
+        isEdit
+        editData={row}
+        onClose={closeModal}
+        onSubmit={handleUpserData}
+      />,
+    );
+  };
+
+  const hanleOpenModalRegisterReceivedCheck = (): void => {
+    openModal(
+      <UpsertReceivedCheckModal onClose={closeModal} onSubmit={() => {}} />,
+    );
+  };
+
+  const handleFindReceiveChecks = async (): Promise<void> => {
+    const result = await receiveCheckService.findAll({
+      skip: 0,
+      take: 20,
+      type: ActionEnum.FindAll,
+    });
+
+    oldReceiveChecks = result;
+    setReceivedChecks(result);
+  };
+
+  const handleFilterReceiveCheck = async () => {
+    await handleGenericFilter({
+      originalList: oldReceiveChecks,
+      filter,
+      setList: setReceivedChecks,
+      getSearchField: (emp) => emp.checkNumber,
+      fetchFromApi: async (value) => {
+        return receiveCheckService.findByCheckNumber({
+          checkNumber: value,
+          type: ActionEnum.FindByFilters,
+        });
+      },
+    });
+  };
+
+  const handleSetFilterCheckNumber = (checkNumber: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      setFilter(checkNumber);
+    }, 500);
+  };
 
   return (
     <div>
@@ -73,96 +153,10 @@ export default function ReceiveCheck() {
         rows={receivedChecks}
         columns={getColumns()}
         title={"Cheques recebidos"}
+        onFilterChange={handleSetFilterCheckNumber}
         onRowClick={handleOpenModalEditReceivedCheck}
-        onFilterChange={handleSetFilterReceivedCheckName}
         onActionClicked={hanleOpenModalRegisterReceivedCheck}
       />
     </div>
   );
 }
-
-// export default function ReceivedCheckForm() {
-//   const [form, setForm] = useState({
-//     customerId: "",
-//     bankId: "",
-//     agency: "",
-//     checkNumber: "",
-//     totalAmount: "",
-//     goodForAt: "",
-//   });
-
-//   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-//     const { name, value } = e.target;
-//     setForm((prev) => ({ ...prev, [name]: value }));
-//   }
-
-//   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-//     e.preventDefault();
-
-//     console.log("DADOS DO FORM:", form);
-//     alert("Dados capturados! Veja no console.");
-//   }
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="bg-white p-6 rounded-2xl shadow-md w-full max-w-md space-y-4"
-//       >
-//         <h1 className="text-xl font-bold text-center">
-//           Cadastro de Cheque Recebido
-//         </h1>
-
-//         <input
-//           name="customerId"
-//           placeholder="Customer ID"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <input
-//           name="bankId"
-//           placeholder="Bank ID"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <input
-//           name="agency"
-//           placeholder="Agência"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <input
-//           name="checkNumber"
-//           placeholder="Número do cheque"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <input
-//           name="totalAmount"
-//           type="number"
-//           placeholder="Valor"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <input
-//           name="goodForAt"
-//           type="date"
-//           className="w-full border p-2 rounded"
-//           onChange={handleChange}
-//         />
-
-//         <button
-//           type="submit"
-//           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-//         >
-//           Capturar Dados
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }

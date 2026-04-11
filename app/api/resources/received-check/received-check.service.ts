@@ -22,8 +22,8 @@ import {
 class ReceivedCheckService {
   private databaseService = databaseService;
 
-  async create(data: CreateReceivedCheckDTO): Promise<ReceivedCheckDTO> {
-    const created = await databaseService.receivedCheck.create({
+  async create(data: CreateReceivedCheckDTO): Promise<void> {
+    await databaseService.receivedCheck.create({
       data: {
         receivedAt: new Date(),
         customerId: data.customerId,
@@ -32,29 +32,9 @@ class ReceivedCheckService {
         totalAmount: data.totalAmount,
         currentAmount: data.totalAmount,
         checkNumber: data.checkNumber,
-        goodForAt: data.goodForAt ? new Date(data.goodForAt) : null,
-      },
-      include: {
-        customer: true,
-        bank: true,
+        goodForAt: data.goodForAt,
       },
     });
-
-    return {
-      id: created.id,
-      createdAt: created.createdAt
-      receivedAt: created.receivedAt.toISOString(),
-      customerId: created.customer.id,
-      customerName: created.customer.name,
-      bankId: created.bank.id,
-      bankName: created.bank.name,
-      agency: created.agency,
-      checkNumber: created.checkNumber,
-      totalAmount: created.totalAmount.toNumber(),
-      currentAmount: created.currentAmount.toNumber(),
-      goodForAt: created.goodForAt ? created.goodForAt.toISOString() : null,
-      status: created.status,
-    };
   }
 
   async update(data: UpdateReceivedCheckDTO): Promise<void> {

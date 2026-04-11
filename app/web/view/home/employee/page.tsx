@@ -49,9 +49,7 @@ export default function EmployeeScreen() {
   }, [filter]);
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
-    router.push(
-      `/web/view/home/register/employee/advanced/${row.id}/${row.name}`,
-    );
+    router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
   };
 
   const handleRegisterEmployee = async (name: string): Promise<void> => {
@@ -147,7 +145,7 @@ export default function EmployeeScreen() {
       fetchFromApi: async (value) => {
         return employeeService.findByName({
           name: value,
-          type: ActionEnum.FindByName,
+          type: ActionEnum.FindByFilters,
         });
       },
     });

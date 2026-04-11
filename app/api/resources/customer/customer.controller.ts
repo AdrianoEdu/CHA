@@ -31,9 +31,9 @@ class CustomerController {
       const skip = searchParams.get("skip");
       const take = searchParams.get("take");
 
-      return this.customerService.findAll({
-        skip: Number(skip),
-        take: Number(take),
+      return await this.customerService.findAll({
+        skip: skip ? Number(skip) : undefined,
+        take: take ? Number(take) : undefined,
       });
     } catch (error: any) {
       console.error("Erro ao buscar Customer:", error);

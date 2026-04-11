@@ -45,7 +45,7 @@ export default function EmployeeAdvanced() {
       fetchFromApi: async (value) => {
         return employeeAdvanceService.findByName({
           reasonName: value,
-          type: ActionEnum.FindByName,
+          type: ActionEnum.FindByFilters,
         });
       },
     });

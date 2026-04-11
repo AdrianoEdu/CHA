@@ -97,7 +97,7 @@ export default function General() {
       fetchFromApi: async (value) => {
         return advanceReasonService.findByName({
           name: value,
-          type: ActionEnum.FindByName,
+          type: ActionEnum.FindByFilters,
         });
       },
     });

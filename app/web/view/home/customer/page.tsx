@@ -95,7 +95,7 @@ export default function Customer() {
       fetchFromApi: async (value) => {
         return customerService.findByName({
           name: value,
-          type: ActionEnum.FindByName,
+          type: ActionEnum.FindByFilters,
         });
       },
     });

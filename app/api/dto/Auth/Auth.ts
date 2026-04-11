@@ -11,7 +11,7 @@ export enum ActionEnum {
   IsLogged,
 
   FindAll,
-  FindByName,
+  FindByFilters,
 }
 
 export interface LoginDto {

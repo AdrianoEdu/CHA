@@ -74,7 +74,7 @@ export async function GET(req: Request) {
       case ActionEnum.FindAll:
         result = await employeeAdvanceController.findAll(req);
         break;
-      case ActionEnum.FindByName:
+      case ActionEnum.FindByFilters:
         result = await employeeAdvanceController.findByName(req);
         break;
       default:
