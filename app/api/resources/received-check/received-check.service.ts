@@ -7,7 +7,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
+import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
 import { BankDto, RemoveBankDto, UpdateBankDto } from "../../dto/Bank/bank";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
@@ -36,11 +36,16 @@ class ReceivedCheckService {
       },
     });
   }
-
   async update(data: UpdateReceivedCheckDTO): Promise<void> {
-    await this.databaseService.bank.update({
+    const { bankId, customerId, status, ...receivedUpdated } = data;
+    await this.databaseService.receivedCheck.update({
       where: { id: data.id },
-      data,
+      data: {
+        ...receivedUpdated,
+        status: this.parseStatus(data.status!),
+        bank: { connect: { id: data.bankId } },
+        customer: { connect: { id: data.customerId } },
+      },
     });
   }
 
@@ -121,6 +126,22 @@ class ReceivedCheckService {
     await this.databaseService.receivedCheck.delete({
       where: { id: check.id },
     });
+  }
+
+  async findByFilters({ checkNumber }: Partial<ReceivedCheckDTO>) {
+    return this.databaseService.receivedCheck.findMany({
+      where: { checkNumber },
+    });
+  }
+
+  private parseStatus(status: string): ReceivedCheckStatus {
+    const statusUpper = status.toUpperCase();
+
+    const value = ReceivedCheckStatus[statusUpper as ReceivedCheckStatus];
+
+    if (value) return value;
+
+    throw new Error(`Status inválido: ${status}`);
   }
 }
 

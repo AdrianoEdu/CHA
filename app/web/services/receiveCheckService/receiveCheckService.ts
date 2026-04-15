@@ -15,15 +15,15 @@ class ReceiveCheckService {
   private readonly url: string;
 
   constructor() {
-    this.url = "/receive-check";
+    this.url = "/received-check";
   }
 
   create(data: SendCreateReceiveCheckDto) {
     return requestService.post(this.url, data);
   }
 
-  patch(data: SendUpdateReceiveCheckDto) {
-    return requestService.patch(this.url, data);
+  update(data: SendUpdateReceiveCheckDto) {
+    return requestService.update(this.url, data);
   }
 
   findAll(data: SendPaginationDto) {

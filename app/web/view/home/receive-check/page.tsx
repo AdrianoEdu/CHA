@@ -7,7 +7,7 @@
 
 import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
-import { ActionEnum } from "@/app/web/constants/enum";
+import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
 import {
   ReceivedCheckDTO,
   UpsertReceivedCheckDto,
@@ -26,6 +26,7 @@ const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
   { label: "Banco", accessor: "bankName" },
   { label: "Agência", accessor: "agency" },
   { label: "Cheque", accessor: "checkNumber" },
+  { label: "Bom para", accessor: "goodForAt" },
   {
     label: "Valor",
     accessor: "totalAmount",
@@ -35,14 +36,14 @@ const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
     label: "Status",
     accessor: "status",
     render: (row) => {
-      const statusMap: Record<string, string> = {
+      const statusMap: Record<ReceivedCheckStatus, string> = {
         RECEIVED: "Recebido",
         IN_USE: "Em uso",
         FINALIZED: "Finalizado",
         CANCELLED: "Cancelado",
       };
 
-      const colorMap: Record<string, string> = {
+      const colorMap: Record<ReceivedCheckStatus, string> = {
         RECEIVED: "bg-green-100 text-green-800",
         IN_USE: "bg-yellow-100 text-yellow-800",
         FINALIZED: "bg-blue-100 text-blue-800",
@@ -64,10 +65,10 @@ const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const [receivedChecks, setReceivedChecks] = useState<ReceivedCheckDTO[]>();
 
   const { closeModal, openModal } = useModal();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     handleFindReceiveChecks();
@@ -78,19 +79,56 @@ export default function ReceiveCheck() {
   }, [filter]);
 
   const handleUpserData = async (
-    data: UpsertReceivedCheckDto,
+    {
+      id,
+      agency,
+      status,
+      bankId,
+      goodForAt,
+      customerId,
+      checkNumber,
+      totalAmount,
+    }: UpsertReceivedCheckDto,
     isEdit?: boolean,
   ): Promise<void> => {
-    const { id, ...check } = data;
+    console.log(goodForAt);
+    if (isEdit) {
+      receiveCheckService
+        .update({
+          id,
+          agency,
+          bankId,
+          status,
+          checkNumber,
+          customerId,
+          totalAmount,
+          goodForAt,
+        })
+        .then(() => {
+          toast.success("Recebimento de cheque atualizado com sucesso");
+          handleFindReceiveChecks();
+        })
+        .catch((err) => toast.error("Erro ao Atualizar cheque recebido", err));
+      closeModal();
+      return;
+    }
 
-    if (isEdit)
-      receiveCheckService.patch({ ...check, id }).then(() => {
-        toast.success("Recebimento de cheque atualizado com sucesso");
-      });
+    receiveCheckService
+      .create({
+        agency,
+        bankId,
+        checkNumber,
+        customerId,
+        totalAmount,
+        goodForAt,
+      })
+      .then(() => {
+        toast.success("Recebimento de cheque registrado com sucesso");
+        handleFindReceiveChecks();
+      })
+      .catch((err) => toast.error("Erro ao cadastrar cheque recebido", err));
 
-    receiveCheckService.create({ ...check }).then(() => {
-      toast.success("Recebimento de cheque registrado com sucesso");
-    });
+    closeModal();
   };
 
   const handleOpenModalEditReceivedCheck = (row: ReceivedCheckDTO): void => {
@@ -106,7 +144,10 @@ export default function ReceiveCheck() {
 
   const hanleOpenModalRegisterReceivedCheck = (): void => {
     openModal(
-      <UpsertReceivedCheckModal onClose={closeModal} onSubmit={() => {}} />,
+      <UpsertReceivedCheckModal
+        onClose={closeModal}
+        onSubmit={handleUpserData}
+      />,
     );
   };
 

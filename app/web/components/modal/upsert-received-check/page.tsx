@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/page";
 import Button from "../../button/page";
 import {
@@ -15,13 +15,16 @@ import {
 import { bankService } from "@/app/web/services/bankService/bankService";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import ComboBox from "../../combobox/page";
-import { ActionEnum } from "@/app/web/constants/enum";
-import { sortStringNumbers } from "@/app/web/utils/conversionList";
+import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
+import {
+  getListStatusReceiveCheck,
+  sortStringNumbers,
+} from "@/app/web/utils/conversionList";
 
 interface ReceivedCheckModalProps {
-  editData?: UpdateReceivedCheckDTO;
   isEdit?: boolean;
   onClose: () => void;
+  editData?: UpdateReceivedCheckDTO;
   onSubmit: (data: UpsertReceivedCheckDto, isEdit?: boolean) => void;
 }
 
@@ -32,7 +35,7 @@ export default function UpsertReceivedCheckModal({
   onClose,
   onSubmit,
   isEdit = false,
-}: ReceivedCheckModalProps) {
+}: ReceivedCheckModalProps): JSX.Element {
   const [data, setData] = useState<UpsertReceivedCheckDto>({
     checkNumber: "0",
     totalAmount: 0,
@@ -43,8 +46,8 @@ export default function UpsertReceivedCheckModal({
   });
 
   const [date, setDate] = useState("");
-
   const [listBank, setListBank] = useState<SelectOption[]>([]);
+  const [statusList, setStatusList] = useState<SelectOption[]>([]);
   const [customerList, setCustomerList] = useState<SelectOption[]>([]);
 
   const [bankOption, setBankOption] = useState<SelectOption>({
@@ -63,11 +66,16 @@ export default function UpsertReceivedCheckModal({
     name: "",
   });
 
+  const [statusOption, setStatusOption] = useState<SelectOption>({
+    id: "",
+    name: "",
+  });
+
   useEffect(() => {
-    fetchAllData();
+    handleFetchAllData();
   }, []);
 
-  const fetchAllData = async (): Promise<void> => {
+  const handleFetchAllData = async (): Promise<void> => {
     try {
       const [banks, customers] = await Promise.all([
         bankService.findAll().then((list) =>
@@ -91,6 +99,15 @@ export default function UpsertReceivedCheckModal({
 
   useEffect(() => {
     if (!editData || listBank.length === 0) return;
+
+    const statusList = getListStatusReceiveCheck();
+    setStatusList(statusList);
+
+    const currentStatus = statusList
+      .filter((status) => status.id === editData.status)
+      .at(0);
+
+    setStatusOption(currentStatus!);
 
     const bank = listBank.find((b) => b.id === editData.bankId);
 
@@ -139,7 +156,16 @@ export default function UpsertReceivedCheckModal({
     setAgencieOption({ id: "", name: "" });
   };
 
-  const handleSelectCustomerOption = (option: SelectOption) => {
+  const handleSelectStatusOption = (option: SelectOption): void => {
+    setStatusOption(option);
+
+    setData((prev) => ({
+      ...prev,
+      status: option.id as ReceivedCheckStatus,
+    }));
+  };
+
+  const handleSelectCustomerOption = (option: SelectOption): void => {
     setCustomerOption(option);
 
     setData((prev) => ({
@@ -157,15 +183,13 @@ export default function UpsertReceivedCheckModal({
     }));
   };
 
-  function handleSubmit(): void {
+  const handleSubmit = (): void => {
     if (isEdit) {
       onSubmit({ ...data, id: editData?.id }, isEdit);
     } else {
       onSubmit(data);
     }
-  }
-
-  async function handleUpsertData(): Promise<void> {}
+  };
 
   return (
     <div className="flex flex-col p-6 space-y-2 gap-4">
@@ -178,6 +202,7 @@ export default function UpsertReceivedCheckModal({
       <ComboBox
         valueKey="id"
         labelKey="name"
+        disabled={isEdit}
         options={customerList}
         selected={customerOption}
         label="Selecione o cliente"
@@ -187,6 +212,7 @@ export default function UpsertReceivedCheckModal({
       <ComboBox
         valueKey="id"
         labelKey="name"
+        disabled={isEdit}
         options={listBank}
         selected={bankOption}
         label="Selecione a instituição financeira"
@@ -220,6 +246,7 @@ export default function UpsertReceivedCheckModal({
       />
 
       <Input
+        disabled={isEdit}
         value={data.totalAmount}
         inputType={InputType.Money}
         name="Informe o valor do cheque"
@@ -245,6 +272,17 @@ export default function UpsertReceivedCheckModal({
           }));
         }}
       />
+
+      {isEdit && (
+        <ComboBox
+          valueKey="id"
+          labelKey="name"
+          options={statusList}
+          selected={statusOption}
+          label="Selecione o estado atual do cheque"
+          onSelectOption={handleSelectStatusOption}
+        />
+      )}
 
       <div className="flex justify-end gap-2 pt-4">
         <Button

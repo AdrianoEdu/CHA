@@ -3,22 +3,23 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ReceivedCheckStatus } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
 
 export type ReceivedCheckDTO = {
   id: string;
+  bankId: string;
+  agency: string;
+  createdAt: Date;
+  bankName: string;
+  goodForAt?: Date;
   receivedAt: string;
   customerId: string;
-  customerName: string;
-  bankId: string;
-  bankName: string;
-  agency: string;
   checkNumber: string;
   totalAmount: number;
+  customerName: string;
   currentAmount: number;
-  goodForAt?: Date;
-  status: string;
-  createdAt: Date;
+  status: ReceivedCheckStatus;
 };
 
 export type CreateReceivedCheckDTO = {
@@ -34,11 +35,11 @@ export type UpdateReceivedCheckDTO = {
   id?: string;
   bankId?: string;
   agency?: string;
-  status?: string;
   goodForAt?: Date;
   customerId?: string;
   checkNumber?: string;
   totalAmount?: number;
+  status?: ReceivedCheckStatus;
 };
 
 export type RemoveReceivedCheckDto = {

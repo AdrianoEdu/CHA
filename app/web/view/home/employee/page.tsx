@@ -70,6 +70,7 @@ export default function EmployeeScreen() {
           ? UpdateStatusEmployee.successDeactiveEmployee
           : UpdateStatusEmployee.successActiveEmployee,
       );
+      handleFindEmployees();
       closeModal();
     });
   };
@@ -77,6 +78,7 @@ export default function EmployeeScreen() {
   const handleRemoverEmployee = async (id?: string): Promise<void> => {
     employeeService.delete(id ?? "").then(() => {
       toast.success(RemoveEmployee.successRemoveEmployee);
+      handleFindEmployees();
       closeModal();
     });
   };

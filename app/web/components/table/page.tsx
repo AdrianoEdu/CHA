@@ -24,24 +24,27 @@ interface TableProps<T> {
 }
 
 function formatValue(value: unknown) {
-  if (value === null || value === undefined) return "-";
-
   if (typeof value === "string") {
-    const date = new Date(value);
+    const isDateLike = /^\d{4}-\d{2}-\d{2}/.test(value); // yyyy-mm-dd
 
-    if (!isNaN(date.getTime())) {
-      return date.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    if (isDateLike) {
+      const date = new Date(value);
+
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
     }
-  }
 
-  return String(value);
+    return value;
+  }
 }
+
 export default function Table<T>({
   title = "Tabela",
   columns,

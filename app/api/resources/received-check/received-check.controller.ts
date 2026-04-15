@@ -3,8 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
-import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { receivedCheckService } from "./received-check.service";
 import { RemoveReceivedCheckDto } from "../../dto/ReceivedCheck/ReceivedCheck";
 
@@ -17,8 +15,8 @@ export class ReceivedCheckController {
 
   async create(decryptedBody: any) {
     try {
-      const check = await this.receivedCheckService.create(decryptedBody);
-      return Response.json(check, { status: 201 });
+      await this.receivedCheckService.create(decryptedBody);
+      return Response.json("success", { status: 201 });
     } catch (error: any) {
       console.error("Erro ao criar recebimento de cheque:", error);
       return Response.json({ error: error.message }, { status: 500 });
@@ -38,18 +36,28 @@ export class ReceivedCheckController {
     }
   }
 
-  async findAll(
-    params: PaginationDto<
-      Prisma.ReceivedCheckWhereInput,
-      Prisma.ReceivedCheckSelect,
-      Prisma.ReceivedCheckInclude,
-      Prisma.ReceivedCheckOrderByWithRelationInput
-    >,
-  ) {
+  async findAll(req: Request) {
     try {
-      return await this.receivedCheckService.findAll(params);
+      const { searchParams } = new URL(req.url);
+
+      const skip = Number(searchParams.get("skip"));
+      const take = Number(searchParams.get("take"));
+
+      return await this.receivedCheckService.findAll({ skip, take });
     } catch (error: any) {
       console.error("Erro ao buscar cheques recebidos:", error);
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+  }
+
+  async findByFilters(req: Request) {
+    try {
+      const { searchParams } = new URL(req.url);
+      const checkNumber = searchParams.get("checkNumber") ?? "";
+
+      return receivedCheckService.findByFilters({ checkNumber });
+    } catch (error: any) {
+      console.error("Erro ao buscar cheque recebido:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
   }
