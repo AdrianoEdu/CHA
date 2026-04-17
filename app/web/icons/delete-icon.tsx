@@ -3,11 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-interface IconProps {
-  size?: number;
-  className?: string;
-  color?: string;
-}
+import { IconProps } from ".";
 
 export default function DeleteIcon({ size = 20, className, color }: IconProps) {
   return (

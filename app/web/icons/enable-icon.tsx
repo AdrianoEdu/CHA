@@ -3,16 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-// Copyright (c) 2026-03-04
-// Contabilidade H. Alvarenga LTDA
-// Developed by Adriano Trentin Jr.
-// All rights reserved.
-
-interface IconProps {
-  size?: number;
-  className?: string;
-  color?: string;
-}
+import { IconProps } from ".";
 
 export default function EnableIcon({ size = 20, className, color }: IconProps) {
   return (

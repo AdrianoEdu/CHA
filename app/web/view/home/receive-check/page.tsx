@@ -5,6 +5,7 @@
 
 "use client";
 
+import Button from "@/app/web/components/button/page";
 import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
@@ -12,15 +13,23 @@ import {
   ReceivedCheckDTO,
   UpsertReceivedCheckDto,
 } from "@/app/web/dto/receive-check.dto";
+import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 let oldReceiveChecks: ReceivedCheckDTO[] = [];
 
-const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
+type GetColumnsProps = {
+  handleEdit: (row: ReceivedCheckDTO) => void;
+};
+
+const getColumns = ({
+  handleEdit,
+}: GetColumnsProps): TableColumn<ReceivedCheckDTO>[] => [
   { label: "Criado em", accessor: "createdAt" },
   { label: "Nome do cliente", accessor: "customerName" },
   { label: "Banco", accessor: "bankName" },
@@ -61,12 +70,28 @@ const getColumns = (): TableColumn<ReceivedCheckDTO>[] => [
       );
     },
   },
+  {
+    label: "Ações",
+    isAction: true,
+    render: (row) => {
+      return (
+        <div className="flex gap-2 justify-center">
+          <Button
+            icon={<EditIcon />}
+            className="bg-blue-default"
+            onClick={(e) => handleEdit(row)}
+          />
+        </div>
+      );
+    },
+  },
 ];
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
   const [receivedChecks, setReceivedChecks] = useState<ReceivedCheckDTO[]>();
 
+  const router = useRouter();
   const { closeModal, openModal } = useModal();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -187,16 +212,22 @@ export default function ReceiveCheck() {
     }, 500);
   };
 
+  const handleNavigateCheckUsageScreen = (row: ReceivedCheckDTO): void => {
+    router.push(
+      `/web/view/home/receive-check/usage/${row.id}/${row.checkNumber}/${row.status}`,
+    );
+  };
+
   return (
     <div>
       <Table
         enableFilter
         rows={receivedChecks}
-        columns={getColumns()}
         title={"Cheques recebidos"}
         onFilterChange={handleSetFilterCheckNumber}
-        onRowClick={handleOpenModalEditReceivedCheck}
+        onRowClick={handleNavigateCheckUsageScreen}
         onActionClicked={hanleOpenModalRegisterReceivedCheck}
+        columns={getColumns({ handleEdit: handleOpenModalEditReceivedCheck })}
       />
     </div>
   );

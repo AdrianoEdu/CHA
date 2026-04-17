@@ -1,11 +1,11 @@
-// Copyright (c) 2026-03-12
+// Copyright (c) 2026-04-15
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
 import { IconProps } from ".";
 
-export default function AddIcon({ size = 20, className, color }: IconProps) {
+export default function EditIcon({ size = 20, className, color }: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -19,9 +19,8 @@ export default function AddIcon({ size = 20, className, color }: IconProps) {
       strokeLinejoin="round"
       className={className}
     >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="16" />
-      <line x1="8" y1="12" x2="16" y2="12" />
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
     </svg>
   );
 }
