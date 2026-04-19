@@ -66,7 +66,7 @@ export default function RegisterEmployeeAdvanceModal({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-2">
       <Input
         disabled
         value={name}
@@ -84,11 +84,13 @@ export default function RegisterEmployeeAdvanceModal({
 
       <Input
         value={amout}
-        regex={Regex.onlyText}
         inputType={InputType.Money}
         name={inputAmountPlaceholder}
         className={"flex-1 appearance-none no-spinner"}
-        onChange={(e) => setAmout(Number(e.target.value))}
+        onChange={(e) => {
+          const rawValue = e.target.value.replace(/\./g, "").replace(",", ".");
+          setAmout(Number(rawValue));
+        }}
       />
 
       <div className="mt-6 flex justify-end gap-4">

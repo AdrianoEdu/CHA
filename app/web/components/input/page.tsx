@@ -17,8 +17,18 @@ export enum InputType {
   Date = "date",
 }
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+// 🔥 Remove onChange do HTML padrão pra controlar corretamente
+type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
+
+interface InputProps extends BaseInputProps {
   inputType?: InputType;
+
+  // evento padrão (string)
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+
+  // valor tratado (number no money)
+  onValueChange?: (value: number | string) => void;
+
   regex?: RegExp;
   regexError?: boolean;
   regexMessageError?: string;
@@ -31,13 +41,29 @@ export default function Input({
   regexError,
   regexMessageError,
   onRegexError,
+  onChange,
+  onValueChange,
   ...rest
 }: Readonly<InputProps>) {
   const [displayValue, setDisplayValue] = useState<string>("");
 
-  useEffect(() => {
-    const rawValue = String(rest.value ?? "");
+  const formatters: Partial<
+    Record<InputType, (value: string) => { raw: string; formatted: string }>
+  > = {
+    [InputType.Money]: formatMoney,
+    [InputType.Cnpj]: formatCNPJ,
+  };
 
+  useEffect(() => {
+    if (inputType === InputType.Money) {
+      const numeric = typeof rest.value === "number" ? rest.value : 0;
+      const cents = Math.round(numeric * 100).toString();
+
+      setDisplayValue(formatMoney(cents).formatted);
+      return;
+    }
+
+    const rawValue = String(rest.value ?? "");
     const formatter = formatters[inputType];
 
     if (formatter && inputType !== InputType.Date) {
@@ -51,19 +77,32 @@ export default function Input({
   function resolveHtmlType(type: InputType) {
     if (type === InputType.Number) return "number";
     if (type === InputType.Password) return "password";
-    if (type === InputType.Date) return "date"; // ✅ suporte a date
+    if (type === InputType.Date) return "date";
     return "text";
   }
 
-  const formatters: Partial<
-    Record<InputType, (value: string) => { raw: string; formatted: string }>
-  > = {
-    [InputType.Money]: formatMoney,
-    [InputType.Cnpj]: formatCNPJ,
-  };
-
   function handleOnPress(e: React.ChangeEvent<HTMLInputElement>) {
-    let value = e.target.value;
+    const value = e.target.value;
+
+    // 💰 MONEY (corrigido)
+    if (inputType === InputType.Money) {
+      const onlyNumbers = value.replace(/\D/g, "");
+
+      const numeric = Number(onlyNumbers) / 100;
+      const safeValue = isNaN(numeric) ? 0 : numeric;
+
+      const formatted = formatMoney(onlyNumbers).formatted;
+
+      setDisplayValue(formatted);
+
+      // valor real (number)
+      onValueChange?.(safeValue);
+
+      // evento padrão (string)
+      onChange?.(e);
+
+      return;
+    }
 
     const formatter = formatters[inputType];
 
@@ -72,13 +111,8 @@ export default function Input({
 
       setDisplayValue(formatted);
 
-      rest.onChange?.({
-        ...e,
-        target: {
-          ...e.target,
-          value: raw,
-        },
-      } as React.ChangeEvent<HTMLInputElement>);
+      onValueChange?.(raw);
+      onChange?.(e);
 
       return;
     }
@@ -90,7 +124,8 @@ export default function Input({
       else onRegexError(false);
     }
 
-    rest.onChange?.(e);
+    onValueChange?.(value);
+    onChange?.(e);
   }
 
   return (
@@ -103,7 +138,7 @@ export default function Input({
           onChange={handleOnPress}
           type={resolveHtmlType(inputType)}
           value={
-            [InputType.Money, InputType.Cnpj].includes(inputType)
+            inputType === InputType.Money || inputType === InputType.Cnpj
               ? displayValue
               : (rest.value ?? "")
           }

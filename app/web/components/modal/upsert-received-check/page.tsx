@@ -7,7 +7,7 @@
 
 import { JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/page";
-import Button from "../../button/page";
+import Button, { ButtonStatusEnum } from "../../button/page";
 import {
   UpdateReceivedCheckDTO,
   UpsertReceivedCheckDto,
@@ -287,14 +287,15 @@ export default function UpsertReceivedCheckModal({
       <div className="flex justify-end gap-2 pt-4">
         <Button
           text="Cancelar"
-          className="bg-gray-300 text-black px-4 py-2"
           onClick={onClose}
+          status={ButtonStatusEnum.CANCEL}
         />
 
         <Button
-          text={isEdit ? "Atualizar" : "Criar"}
           className="px-4 py-2"
           onClick={handleSubmit}
+          text={isEdit ? "Atualizar" : "Criar"}
+          status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />
       </div>
     </div>

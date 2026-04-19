@@ -9,7 +9,7 @@ import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
 import ComboBox from "../../combobox/page";
 import { FinancialFlowType } from "@/app/web/constants/enum";
-import Button from "../../button/page";
+import Button, { ButtonStatusEnum } from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateFinancialCategoryDto,
@@ -76,7 +76,7 @@ export function UpsertFinancialCategory({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-4">
       <Input
         value={name}
         className="flex-1"
@@ -99,11 +99,16 @@ export function UpsertFinancialCategory({
       />
 
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onClose} />
+        <Button
+          text={cancelButton}
+          onPress={onClose}
+          status={ButtonStatusEnum.CANCEL}
+        />
         <Button
           disabled={showErrorRegex}
           onPress={handleUpsertFinancialCategory}
           text={!data ? registerButton : updateButton}
+          status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
         />
       </div>
     </div>

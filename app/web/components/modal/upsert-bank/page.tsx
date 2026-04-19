@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Input, { InputType } from "../../input/page";
-import Button from "../../button/page";
+import Button, { ButtonStatusEnum } from "../../button/page";
 import { AddIcon, DeleteIcon } from "@/app/web/icons";
 import { BankDto } from "@/app/web/dto/bank.dto";
 
@@ -81,8 +81,9 @@ export default function BankModal({
 
           <Button
             icon={<AddIcon />}
-            className="h-10.5 px-3 flex items-center justify-center"
             onClick={handleAddAgency}
+            className="h-10.5 px-3 flex items-center justify-center"
+            status={isEdit ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
           />
         </div>
 
@@ -97,7 +98,8 @@ export default function BankModal({
 
                 <Button
                   icon={<DeleteIcon />}
-                  className="px-2 py-1"
+                  className={"px-2 py-1"}
+                  status={ButtonStatusEnum.CANCEL}
                   onClick={() => handleRemoveAgency(agency)}
                 />
               </div>
@@ -108,14 +110,15 @@ export default function BankModal({
         <div className="flex justify-end gap-2 pt-4">
           <Button
             text="Cancelar"
-            className="bg-gray-300 text-black px-4 py-2"
             onClick={onClose}
+            status={ButtonStatusEnum.CANCEL}
           />
 
           <Button
-            text={isEdit ? "Atualizar" : "Criar"}
-            className="px-4 py-2"
             onClick={handleSubmit}
+            className={"px-4 py-2"}
+            text={isEdit ? "Atualizar" : "Criar"}
+            status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
           />
         </div>
       </div>

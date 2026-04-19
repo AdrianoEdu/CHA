@@ -9,7 +9,7 @@ import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
 import ComboBox from "../../combobox/page";
 import { CustomerType } from "@/app/web/constants/enum";
-import Button from "../../button/page";
+import Button, { ButtonStatusEnum } from "../../button/page";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateCustomerDto,
@@ -78,7 +78,7 @@ export function UpsertCustomer({
   };
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full gap-2">
       <Input
         value={name}
         className="flex-1"
@@ -113,11 +113,16 @@ export function UpsertCustomer({
         onSelectOption={setSelected}
       />
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onClose} />
+        <Button
+          text={cancelButton}
+          onPress={onClose}
+          status={ButtonStatusEnum.CANCEL}
+        />
         <Button
           disabled={showErrorRegex}
           onPress={handleUpsertCustomer}
           text={!data ? registerButton : updateButton}
+          status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
         />
       </div>
     </div>

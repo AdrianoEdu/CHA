@@ -7,18 +7,39 @@
 
 import React from "react";
 
+export enum ButtonStatusEnum {
+  CONFIRM,
+  UPDATE,
+  CANCEL,
+}
+
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   text?: string;
   icon?: React.ReactNode;
+  status?: ButtonStatusEnum;
   onPress?: () => void;
 };
 
 export default function Button({
   text,
   icon,
+  status = ButtonStatusEnum.CONFIRM,
   onPress,
   ...rest
 }: Readonly<ButtonProps>) {
+  const getColorButton = (): string => {
+    if (rest.disabled) return "bg-gray-400 text-gray-200";
+
+    switch (status) {
+      case ButtonStatusEnum.CANCEL:
+        return "bg-red-500 text-white";
+      case ButtonStatusEnum.UPDATE:
+        return "bg-green-500 text-white";
+      default:
+        return "bg-blue-default text-white";
+    }
+  };
+
   return (
     <button
       onClick={onPress}
@@ -36,12 +57,7 @@ export default function Button({
         text-center
         transition
 
-        ${
-          rest.disabled
-            ? "bg-gray-400 text-gray-200 opacity-60 cursor-not-allowed"
-            : "bg-blue-600 text-white hover:bg-blue-700"
-        }
-
+        ${getColorButton()}
         ${rest.className ?? ""}
       `}
     >

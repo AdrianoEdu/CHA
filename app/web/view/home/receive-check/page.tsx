@@ -5,7 +5,7 @@
 
 "use client";
 
-import Button from "@/app/web/components/button/page";
+import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
 import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
@@ -78,8 +78,10 @@ const getColumns = ({
         <div className="flex gap-2 justify-center">
           <Button
             icon={<EditIcon />}
-            className="bg-blue-default"
-            onClick={(e) => handleEdit(row)}
+            status={ButtonStatusEnum.UPDATE}
+            onClick={(e) => {
+              (e.stopPropagation(), handleEdit(row));
+            }}
           />
         </div>
       );
