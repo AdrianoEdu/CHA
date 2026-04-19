@@ -3,8 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
-import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { EmployeeDto } from "../../dto/Employee/Employee";
 import { employeeService } from "./employee.service";
 

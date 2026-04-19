@@ -115,9 +115,8 @@ model Customer {
   name               String
   code               String
 
+  transaction        Transaction[]
   receivedChecks     ReceivedCheck[]
-  accountsPayable    AccountsPayable[]
-  accountsReceivable AccountsReceivable[]
 
   customerType               CustomerType
   createdAt          DateTime @default(now())
@@ -190,44 +189,30 @@ model FinancialCategory {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  receivables       AccountsReceivable[]
-  payables          AccountsPayable[]
+  transaction       Transaction[]
 
   @@map("financial_categories")
 }
 
-model AccountsPayable {
-  id         String @id @default(uuid())
-
+model Transaction {
+  id         String   @id @default(uuid())
+  type       TransactionType
   categoryId String
   category   FinancialCategory @relation(fields: [categoryId], references: [id])
-
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-
-  amount     Decimal @db.Decimal(15,2)
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  amount     Decimal  @db.Decimal(15,2)
   dueDate    DateTime
-  paidAt     DateTime?
-  status     FinancialStatus @default(OPEN)
+  settledAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@map("accounts_payables")
+  @@map("transactions")
 }
 
-model AccountsReceivable {
-  id         String @id @default(uuid())
-
-  categoryId String
-  category   FinancialCategory @relation(fields: [categoryId], references: [id])
-
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-
-  amount     Decimal @db.Decimal(15,2)
-  dueDate    DateTime
-  receivedAt DateTime?
-  status     FinancialStatus @default(OPEN)
-
-  @@map("accounts_receivables")
+enum TransactionType {
+  PAYABLE
+  RECEIVABLE
 }
 
 model SystemConfig {
