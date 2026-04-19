@@ -53,6 +53,11 @@ enum UserRole {
   USER
 }
 
+enum TransactionType {
+  PAYABLE
+  RECEIVABLE
+}
+
 model User {
   id        String @id @default(uuid())
 
@@ -162,21 +167,14 @@ model ReceivedCheck {
 
 model CheckUsage {
   id              String @id @default(uuid())
-
   receivedCheckId String
   receivedCheck   ReceivedCheck @relation(fields: [receivedCheckId], references: [id])
-
   usageType       CheckUsageType
-
-  referenceTable  String
-  referenceId     String
-
   usedAt          DateTime
   amount          Decimal @db.Decimal(15,2)
-
   notes           String?
-
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("check_usages")
 }
@@ -185,7 +183,6 @@ model FinancialCategory {
   id                String @id @default(uuid())
   name              String
   financialFlowType FinancialFlowType
-
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -208,11 +205,6 @@ model Transaction {
   updatedAt  DateTime @updatedAt
 
   @@map("transactions")
-}
-
-enum TransactionType {
-  PAYABLE
-  RECEIVABLE
 }
 
 model SystemConfig {
