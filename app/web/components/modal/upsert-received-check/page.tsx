@@ -30,6 +30,19 @@ interface ReceivedCheckModalProps {
 
 type SelectOption = { id: string; name: string; list?: string[] };
 
+function parseMoneyToNumber(value: string): number {
+  if (!value) return 0;
+
+  return Number(
+    value
+      .replace(/\s/g, "")
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .trim(),
+  );
+}
+
 export default function UpsertReceivedCheckModal({
   editData,
   onClose,
@@ -37,11 +50,13 @@ export default function UpsertReceivedCheckModal({
   isEdit = false,
 }: ReceivedCheckModalProps): JSX.Element {
   const [data, setData] = useState<UpsertReceivedCheckDto>({
-    checkNumber: "0",
-    totalAmount: 0,
+    id: "",
     bankId: "",
     agency: "",
     customerId: "",
+    totalAmount: 0,
+    checkNumber: "0",
+    currentAmount: 0,
     goodForAt: new Date(),
   });
 
@@ -184,11 +199,11 @@ export default function UpsertReceivedCheckModal({
   };
 
   const handleSubmit = (): void => {
-    if (isEdit) {
-      onSubmit({ ...data, id: editData?.id }, isEdit);
-    } else {
-      onSubmit(data);
-    }
+    alert(JSON.stringify(data));
+
+    isEdit
+      ? onSubmit({ ...data, id: editData?.id ?? "" }, isEdit)
+      : onSubmit({ ...data });
   };
 
   return (
@@ -250,12 +265,12 @@ export default function UpsertReceivedCheckModal({
         value={data.totalAmount}
         inputType={InputType.Money}
         name="Informe o valor do cheque"
-        onChange={(e) =>
+        onChange={(e) => {
           setData((prev) => ({
             ...prev,
-            totalAmount: Number(e.target.value),
-          }))
-        }
+            totalAmount: parseMoneyToNumber(e.target.value),
+          }));
+        }}
       />
 
       <Input

@@ -7,7 +7,7 @@ import React from "react";
 
 export interface TableColumn<T> {
   label: string;
-  accessor?: keyof T;
+  accessor?: string;
   render?: (row: T) => React.ReactNode;
   isAction?: boolean;
 }
@@ -43,6 +43,10 @@ function formatValue(value: unknown) {
 
     return value;
   }
+}
+
+function getValue(obj: any, path: string) {
+  return path.split(".").reduce((acc, key) => acc?.[key], obj);
 }
 
 export default function Table<T>({
@@ -144,7 +148,7 @@ export default function Table<T>({
                                 {col.render
                                   ? col.render(row)
                                   : col.accessor
-                                    ? formatValue((row as any)[col.accessor])
+                                    ? formatValue(getValue(row, col.accessor))
                                     : "-"}
                               </td>
                             ))}

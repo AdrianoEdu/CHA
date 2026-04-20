@@ -146,7 +146,6 @@ model Bank {
 
 model ReceivedCheck {
   id            String @id @default(uuid())
-  receivedAt    DateTime
   customerId    String
   customer      Customer @relation(fields: [customerId], references: [id])
   bankId        String

@@ -31,8 +31,8 @@ const getColumns = ({
   handleEdit,
 }: GetColumnsProps): TableColumn<ReceivedCheckDTO>[] => [
   { label: "Criado em", accessor: "createdAt" },
-  { label: "Nome do cliente", accessor: "customerName" },
-  { label: "Banco", accessor: "bankName" },
+  { label: "Nome do cliente", accessor: "customer.name" },
+  { label: "Banco", accessor: "bank.name" },
   { label: "Agência", accessor: "agency" },
   { label: "Cheque", accessor: "checkNumber" },
   { label: "Bom para", accessor: "goodForAt" },
@@ -115,6 +115,7 @@ export default function ReceiveCheck() {
       customerId,
       checkNumber,
       totalAmount,
+      currentAmount,
     }: UpsertReceivedCheckDto,
     isEdit?: boolean,
   ): Promise<void> => {
@@ -126,10 +127,11 @@ export default function ReceiveCheck() {
           agency,
           bankId,
           status,
-          checkNumber,
-          customerId,
-          totalAmount,
           goodForAt,
+          customerId,
+          checkNumber,
+          totalAmount,
+          currentAmount,
         })
         .then(() => {
           toast.success("Recebimento de cheque atualizado com sucesso");
@@ -148,6 +150,7 @@ export default function ReceiveCheck() {
         customerId,
         totalAmount,
         goodForAt,
+        currentAmount,
       })
       .then(() => {
         toast.success("Recebimento de cheque registrado com sucesso");

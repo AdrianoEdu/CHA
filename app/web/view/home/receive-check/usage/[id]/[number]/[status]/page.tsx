@@ -115,6 +115,7 @@ export default function ReceiveCheck() {
       customerId,
       checkNumber,
       totalAmount,
+      currentAmount,
     }: UpsertReceivedCheckDto,
     isEdit?: boolean,
   ): Promise<void> => {
@@ -144,10 +145,11 @@ export default function ReceiveCheck() {
       .create({
         agency,
         bankId,
-        checkNumber,
-        customerId,
-        totalAmount,
         goodForAt,
+        customerId,
+        checkNumber,
+        totalAmount,
+        currentAmount,
       })
       .then(() => {
         toast.success("Recebimento de cheque registrado com sucesso");

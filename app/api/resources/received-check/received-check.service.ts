@@ -8,7 +8,6 @@
 // All rights reserved.
 
 import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
-import { BankDto, RemoveBankDto, UpdateBankDto } from "../../dto/Bank/bank";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
@@ -25,17 +24,17 @@ class ReceivedCheckService {
   async create(data: CreateReceivedCheckDTO): Promise<void> {
     await databaseService.receivedCheck.create({
       data: {
-        receivedAt: new Date(),
-        customerId: data.customerId,
         bankId: data.bankId,
         agency: data.agency,
-        totalAmount: data.totalAmount,
-        currentAmount: data.totalAmount,
-        checkNumber: data.checkNumber,
         goodForAt: data.goodForAt,
+        customerId: data.customerId,
+        checkNumber: data.checkNumber,
+        totalAmount: new Prisma.Decimal(data.totalAmount ?? 0),
+        currentAmount: new Prisma.Decimal(data.currentAmount ?? 0),
       },
     });
   }
+
   async update(data: UpdateReceivedCheckDTO): Promise<void> {
     const { bankId, customerId, status, ...receivedUpdated } = data;
     await this.databaseService.receivedCheck.update({
@@ -76,28 +75,36 @@ class ReceivedCheckService {
         status: true,
         createdAt: true,
         goodForAt: true,
-        receivedAt: true,
         checkNumber: true,
         totalAmount: true,
         currentAmount: true,
-        customer: { select: { id: true, name: true } },
-        bank: { select: { id: true, name: true } },
+        customer: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            customerType: true,
+            createdAt: true,
+          },
+        },
+        bank: { select: { id: true, name: true, agencies: true } },
       },
     });
 
     const checks: ReceivedCheckDTO[] = result.map((check) => ({
       id: check.id,
-      createdAt: check.createdAt,
-      receivedAt: check.receivedAt.toISOString(),
-      customerId: check.customer.id,
-      customerName: check.customer.name,
-      bankId: check.bank.id,
-      bankName: check.bank.name,
+      bank: check.bank,
       agency: check.agency,
+      bankId: check.bank.id,
+      customer: check.customer,
+      bankName: check.bank.name,
+      createdAt: check.createdAt,
+      customerId: check.customer.id,
       checkNumber: check.checkNumber,
+      customerName: check.customer.name,
       totalAmount: Number(check.totalAmount),
+      goodForAt: check.goodForAt ?? undefined,
       currentAmount: Number(check.currentAmount),
-      goodForAt: check.goodForAt ? check.goodForAt.toISOString() : null,
       status: check.status,
     }));
 

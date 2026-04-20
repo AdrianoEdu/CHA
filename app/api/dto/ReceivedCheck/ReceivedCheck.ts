@@ -3,40 +3,43 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { ReceivedCheckStatus } from "@/app/generated/prisma";
+import { BankDto } from "../Bank/bank";
+import { GetCustomerDto } from "../Customer/Customer";
+
 export type ReceivedCheckDTO = {
   id: string;
-  receivedAt: string;
-  customerId: string;
-  customerName: string;
-  bankId: string;
-  bankName: string;
+  bank: BankDto;
   agency: string;
+  createdAt: Date;
+  goodForAt?: Date;
   checkNumber: string;
   totalAmount: number;
   currentAmount: number;
-  goodForAt: string | null;
-  status: string;
-  createdAt: Date;
+  customer: GetCustomerDto;
+  status: ReceivedCheckStatus;
 };
 
 export type CreateReceivedCheckDTO = {
-  customerId: string;
   bankId: string;
   agency: string;
+  customerId: string;
+  goodForAt?: Date;
   checkNumber: string;
   totalAmount: number;
-  goodForAt?: Date;
+  currentAmount: number;
 };
 
 export type UpdateReceivedCheckDTO = {
   id: string;
-  customerId?: string;
   bankId?: string;
   agency?: string;
+  status?: string;
+  goodForAt?: string;
+  customerId?: string;
   checkNumber?: string;
   totalAmount?: number;
-  goodForAt?: string | null;
-  status?: string;
+  currentAmount?: number;
 };
 
 export type RemoveReceivedCheckDto = {

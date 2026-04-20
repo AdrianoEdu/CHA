@@ -5,41 +5,42 @@
 
 import { ReceivedCheckStatus } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
+import { BankDto } from "./bank.dto";
+import { GetCustomerDto } from "./customer.dto";
 
 export type ReceivedCheckDTO = {
   id: string;
-  bankId: string;
+  bank: BankDto;
   agency: string;
   createdAt: Date;
-  bankName: string;
   goodForAt?: Date;
-  receivedAt: string;
-  customerId: string;
   checkNumber: string;
   totalAmount: number;
-  customerName: string;
   currentAmount: number;
+  customer: GetCustomerDto;
   status: ReceivedCheckStatus;
 };
 
 export type CreateReceivedCheckDTO = {
-  customerId: string;
   bankId: string;
   agency: string;
+  customerId: string;
+  goodForAt?: Date;
   checkNumber: string;
   totalAmount: number;
-  goodForAt?: Date;
+  currentAmount: number;
 };
 
 export type UpdateReceivedCheckDTO = {
-  id?: string;
+  id: string;
   bankId?: string;
   agency?: string;
+  status?: string;
   goodForAt?: Date;
   customerId?: string;
   checkNumber?: string;
   totalAmount?: number;
-  status?: ReceivedCheckStatus;
+  currentAmount?: number;
 };
 
 export type RemoveReceivedCheckDto = {
