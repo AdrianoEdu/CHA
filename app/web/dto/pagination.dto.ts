@@ -5,9 +5,13 @@
 
 import { ActionDto } from "./auth.dto";
 
-export interface PaginationDto {
+export type PaginationDto<WHERE, SELECT, INCLUDE, ORDERBY> = {
   skip?: number;
   take?: number;
-}
-
-export interface SendPaginationDto extends ActionDto, PaginationDto {}
+  all?: boolean;
+  where?: WHERE;
+  select?: SELECT;
+  include?: INCLUDE;
+  orderBy?: ORDERBY;
+  lastSynced?: string;
+};

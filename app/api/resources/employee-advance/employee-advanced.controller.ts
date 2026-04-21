@@ -3,7 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import { exployeeAdvancedService } from "./employee-advanced.service";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 
 export class EmployeeAdvanceController {
   private employeeAdvancedService;
@@ -37,14 +39,14 @@ export class EmployeeAdvanceController {
 
   async findAll(req: Request) {
     try {
-      const { searchParams } = new URL(req.url);
-      const skip = searchParams.get("skip");
-      const take = searchParams.get("take");
+      const query = parsePrismaQuery<
+        Prisma.EmployeeAdvanceWhereInput,
+        Prisma.EmployeeAdvanceSelect,
+        Prisma.EmployeeAdvanceInclude,
+        Prisma.EmployeeAdvanceOrderByWithRelationInput
+      >(req);
 
-      return this.employeeAdvancedService.findAll({
-        skip: Number(skip),
-        take: Number(take),
-      });
+      return this.employeeAdvancedService.findCheckUsage(query);
     } catch (error: any) {
       console.error("Erro ao buscar Employee Advance:", error);
       return Response.json({ error: error.message }, { status: 500 });

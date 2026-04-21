@@ -5,12 +5,11 @@
 
 import { requestService } from "../requestService/requestService";
 import {
+  AdvanceReasonParams,
   CreateAdvanceReasonDto,
   FindAdvanceReasonDto,
-  SendAdvanceReasonDto,
   UpdateAdavanceReasonDto,
 } from "../../dto/advance-reason.dto";
-import { SendPaginationDto } from "../../dto/pagination.dto";
 
 class AdvanceReasonService {
   private readonly url: string;
@@ -27,18 +26,11 @@ class AdvanceReasonService {
     return requestService.update(this.url, data);
   }
 
-  findAll(data: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, FindAdvanceReasonDto[]>(
+  findAll(params: AdvanceReasonParams) {
+    return requestService.getAll<AdvanceReasonParams, FindAdvanceReasonDto[]>(
       this.url,
-      data,
+      params,
     );
-  }
-
-  findByName(data: SendAdvanceReasonDto) {
-    return requestService.getByFilters<
-      SendAdvanceReasonDto,
-      FindAdvanceReasonDto[]
-    >(this.url, data);
   }
 
   delete(id: string) {

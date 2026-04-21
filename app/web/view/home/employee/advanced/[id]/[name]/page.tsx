@@ -8,7 +8,10 @@
 import RegisterEmployeeAdvanceModal from "@/app/web/components/modal/employee-advance/page";
 import Table from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
-import { GetAllEmployeeAdvanceDto } from "@/app/web/dto/employee-advance.dto";
+import {
+  CreateEmployeeAdvanceDto,
+  GetAllEmployeeAdvanceDto,
+} from "@/app/web/dto/employee-advance.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeAdvanceService } from "@/app/web/services/employeeAdvanceService/employeeAdvanceService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
@@ -38,15 +41,19 @@ export default function EmployeeAdvanced() {
 
   const handleFilterAdvanceReason = async () => {
     await handleGenericFilter({
-      originalList: oldEmployeeAdvanceList,
       filter,
+      originalList: oldEmployeeAdvanceList,
       setList: setEmployeeAdvancedList,
       getSearchField: (emp) => emp.reasonName,
       fetchFromApi: async (value) => {
-        return employeeAdvanceService.findByName({
-          reasonName: value,
-          type: ActionEnum.FindByFilters,
+        const result = await employeeAdvanceService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          where: { reasonName: value },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };
@@ -55,17 +62,22 @@ export default function EmployeeAdvanced() {
     const result = await employeeAdvanceService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { createdAt: "desc" },
+      include: { reason: { select: { name: true } } },
     });
 
-    oldEmployeeAdvanceList = result;
-    setEmployeeAdvancedList(result);
+    if (Array.isArray(result)) {
+      oldEmployeeAdvanceList = result;
+      setEmployeeAdvancedList(result);
+    }
   };
 
-  const onHandleRegisterEmployeeAdvanceModal = async (
-    reasonId: string,
-    amount: number,
-  ): Promise<void> => {
+  const onHandleRegisterEmployeeAdvanceModal = async ({
+    amount,
+    employeeId,
+    reasonId,
+  }: CreateEmployeeAdvanceDto): Promise<void> => {
     await employeeAdvanceService
       .create({
         amount,

@@ -4,11 +4,11 @@
 // All rights reserved.
 
 import {
-  EmployeeAdvanceDto,
+  CreateEmployeeAdvanceDto,
+  EmployeeAdvanceParams,
   GetAllEmployeeAdvanceDto,
-  SendEmployeeAdvanceDto,
+  UpdateEmployeeAdvanveDto,
 } from "../../dto/employee-advance.dto";
-import { SendPaginationDto } from "../../dto/pagination.dto";
 import { requestService } from "../requestService/requestService";
 
 class EmployeeAdvanceService {
@@ -18,31 +18,19 @@ class EmployeeAdvanceService {
     this.url = "/employee-advance";
   }
 
-  create(data: EmployeeAdvanceDto) {
+  create(data: CreateEmployeeAdvanceDto) {
     return requestService.post(this.url, data);
   }
 
-  patch(data: Partial<EmployeeAdvanceDto>) {
+  patch(data: Partial<UpdateEmployeeAdvanveDto>) {
     return requestService.patch(this.url, data);
   }
 
-  findByName({
-    employeeId,
-    reasonName,
-    reasonId,
-    type,
-  }: Partial<SendEmployeeAdvanceDto>) {
-    return requestService.getByFilters<
-      Partial<SendEmployeeAdvanceDto>,
-      GetAllEmployeeAdvanceDto[]
-    >(this.url, { reasonId, reasonName, employeeId, type });
-  }
-
-  findAll({ skip, take, type }: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, GetAllEmployeeAdvanceDto[]>(
-      this.url,
-      { skip, take, type },
-    );
+  findAll(params: EmployeeAdvanceParams) {
+    return requestService.getAll<
+      EmployeeAdvanceParams,
+      GetAllEmployeeAdvanceDto | GetAllEmployeeAdvanceDto[]
+    >(this.url, params);
   }
 }
 

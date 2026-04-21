@@ -9,8 +9,13 @@ export interface EmployeeAdvanceDto {
   employeeId: string;
 }
 
-export interface GetAllEmployeeAdvanceDto extends EmployeeAdvanceDto {
+export interface GetEmployeeAdvanceDto extends EmployeeAdvanceDto {
   id: string;
   createdAt: Date;
   reasonName: string;
+}
+
+export interface CreateEmployeeAdvanceDto extends GetEmployeeAdvanceDto {
+  employeeId: string;
+  reasonId: string;
 }

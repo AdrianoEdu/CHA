@@ -46,6 +46,7 @@ export default function Input({
   ...rest
 }: Readonly<InputProps>) {
   const [displayValue, setDisplayValue] = useState<string>("");
+  const [rawMoney, setRawMoney] = useState<string>("");
 
   const formatters: Partial<
     Record<InputType, (value: string) => { raw: string; formatted: string }>
@@ -56,10 +57,13 @@ export default function Input({
 
   useEffect(() => {
     if (inputType === InputType.Money) {
-      const numeric = typeof rest.value === "number" ? rest.value : 0;
-      const cents = Math.round(numeric * 100).toString();
+      if (typeof rest.value === "number") {
+        const cents = Math.round(rest.value * 100).toString();
 
-      setDisplayValue(formatMoney(cents).formatted);
+        setRawMoney(cents);
+        setDisplayValue(formatMoney(cents).formatted);
+      }
+
       return;
     }
 
@@ -84,7 +88,6 @@ export default function Input({
   function handleOnPress(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value;
 
-    // 💰 MONEY (corrigido)
     if (inputType === InputType.Money) {
       const onlyNumbers = value.replace(/\D/g, "");
 
@@ -95,11 +98,17 @@ export default function Input({
 
       setDisplayValue(formatted);
 
-      // valor real (number)
-      onValueChange?.(safeValue);
+      // 🔥 CLONA o event com valor correto
+      const newEvent = {
+        ...e,
+        target: {
+          ...e.target,
+          value: formatted,
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
 
-      // evento padrão (string)
-      onChange?.(e);
+      onValueChange?.(safeValue);
+      onChange?.(newEvent);
 
       return;
     }
@@ -138,9 +147,11 @@ export default function Input({
           onChange={handleOnPress}
           type={resolveHtmlType(inputType)}
           value={
-            inputType === InputType.Money || inputType === InputType.Cnpj
-              ? displayValue
-              : (rest.value ?? "")
+            inputType === InputType.Money
+              ? displayValue // 👈 agora NÃO depende mais do rest.value
+              : inputType === InputType.Cnpj
+                ? displayValue
+                : (rest.value ?? "")
           }
           className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
         />

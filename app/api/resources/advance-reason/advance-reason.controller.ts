@@ -11,6 +11,7 @@ import {
 } from "../../dto/AdvanceReason/AdvanceReason";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { advanceReasonService } from "./advance-reason.service";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 
 class AdvanceReasonController {
   async create(data: CreateAdvanceReasonDto) {
@@ -23,14 +24,14 @@ class AdvanceReasonController {
 
   async findAll(req: Request) {
     try {
-      const { searchParams } = new URL(req.url);
-      const skip = searchParams.get("skip");
-      const take = searchParams.get("take");
+      const query = parsePrismaQuery<
+        Prisma.AdvanceReasonWhereInput,
+        Prisma.AdvanceReasonSelect,
+        Prisma.AdvanceReasonInclude,
+        Prisma.AdvanceReasonOrderByWithRelationInput
+      >(req);
 
-      return advanceReasonService.findAll({
-        skip: Number(skip),
-        take: Number(take),
-      });
+      return advanceReasonService.findAdvanceReason(query);
     } catch (error: any) {
       console.error("Erro ao buscar Advance Reason:", error);
       return Response.json({ error: error.message }, { status: 500 });

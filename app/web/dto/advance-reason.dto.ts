@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { ActionDto } from "./auth.dto";
+import { PaginationDto } from "./pagination.dto";
 
 export type CreateAdvanceReasonDto = {
   name: string;
@@ -21,3 +22,12 @@ export type FindAdvanceReasonDto = CreateAdvanceReasonDto & {
 export type SendAdvanceReasonDto = ActionDto & Partial<UpdateAdavanceReasonDto>;
 
 export type SelectOptionAEmployeeAdvance = UpdateAdavanceReasonDto;
+
+export type AdvanceReasonWhere = Partial<UpdateAdavanceReasonDto>;
+
+export type AdvanceReasonParams = PaginationDto<
+  AdvanceReasonWhere,
+  any,
+  any,
+  any
+>;

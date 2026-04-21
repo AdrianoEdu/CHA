@@ -61,7 +61,8 @@ export default function General() {
     const result = await advanceReasonService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { createdAt: "desc" },
     });
 
     oldAdvanceReasonList = result;
@@ -95,10 +96,14 @@ export default function General() {
       setList: setAdvanceReasonList,
       getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        return advanceReasonService.findByName({
-          name: value,
-          type: ActionEnum.FindByFilters,
+        const result = await advanceReasonService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          where: { name: value },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };

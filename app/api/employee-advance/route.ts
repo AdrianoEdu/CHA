@@ -65,25 +65,9 @@ export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    const { searchParams } = new URL(req.url);
-    const type = Number(searchParams.get("type"));
+    const result = await employeeAdvanceController.findAll(req);
 
-    let result;
-
-    switch (type) {
-      case ActionEnum.FindAll:
-        result = await employeeAdvanceController.findAll(req);
-        break;
-      case ActionEnum.FindByFilters:
-        result = await employeeAdvanceController.findByName(req);
-        break;
-      default:
-        break;
-    }
-
-    const banks = await employeeAdvanceController.findAll(req);
-
-    return new Response(JSON.stringify(banks), { status: 200 });
+    return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,

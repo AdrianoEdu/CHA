@@ -36,3 +36,8 @@ export enum ReceivedCheckStatus {
   FINALIZED = "FINALIZED",
   CANCELLED = "CANCELLED",
 }
+
+export enum CheckUsageType {
+  DEPOSIT = "DEPOSIT",
+  PAYABLE = "PAYABLE",
+}

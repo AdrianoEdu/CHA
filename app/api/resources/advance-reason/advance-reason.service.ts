@@ -13,6 +13,7 @@ import {
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class AdvanceReasonService {
   private databaseService;
@@ -32,14 +33,14 @@ class AdvanceReasonService {
     });
   }
 
-  async findAll(
+  async findAdvanceReason(
     params: PaginationDto<
       Prisma.AdvanceReasonWhereInput,
       Prisma.AdvanceReasonSelect,
       Prisma.AdvanceReasonInclude,
       Prisma.AdvanceReasonOrderByWithRelationInput
     >,
-  ): Promise<FindAdvanceReasonDto[]> {
+  ): Promise<FindAdvanceReasonDto | FindAdvanceReasonDto[]> {
     const baseQuery: Prisma.AdvanceReasonFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -50,10 +51,27 @@ class AdvanceReasonService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    return this.databaseService.advanceReason.findMany({
+    if (!params.all) return this.findFirst(baseQuery);
+
+    return this.findMany(baseQuery);
+  }
+
+  async findMany(
+    baseQuery: Prisma.AdvanceReasonFindManyArgs,
+  ): Promise<FindAdvanceReasonDto[]> {
+    return this.databaseService.advanceReason.findMany({ ...baseQuery });
+  }
+
+  async findFirst(
+    baseQuery: Prisma.AdvanceReasonFindManyArgs,
+  ): Promise<FindAdvanceReasonDto> {
+    const result = await this.databaseService.advanceReason.findFirst({
       ...baseQuery,
-      orderBy: { createdAt: "desc" },
     });
+
+    if (!result) throw new NotFoundException();
+
+    return result;
   }
 
   async findByName({ name }: FindAdvanceReasonByFilters) {

@@ -6,6 +6,7 @@
 import { decrypt, encrypt } from "@/app/web/lib/encrypt";
 import { appConfig } from "../../config/appConfig";
 import { deobfuscateKey } from "../../utils/obfuscate";
+import { toQuery } from "../../utils/parseQueryParams";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -50,8 +51,11 @@ class RequestService {
   }
 
   getAll<TBody, TResponse>(url: string, filters?: TBody) {
-    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
-    return this.request<TResponse>(`${url}${query}`, { method: "GET" });
+    const query = toQuery(filters ?? {});
+
+    const fullUrl = query ? `${url}?${query}` : url;
+
+    return this.request<TResponse>(fullUrl, { method: "GET" });
   }
 
   getById<TResponse>(url: string, id: string) {

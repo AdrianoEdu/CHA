@@ -7,17 +7,20 @@
 
 import { SelectHTMLAttributes } from "react";
 
-export interface ComboboxProps<
-  T,
-> extends SelectHTMLAttributes<HTMLSelectElement> {
-  selected?: T;
+type KeyOf<T> = keyof T & string;
+
+export interface ComboboxProps<T> extends Omit<
+  SelectHTMLAttributes<HTMLSelectElement>,
+  "value" | "onChange"
+> {
+  selected: T | null;
   options: T[];
   label?: string;
-  labelOption?: string;
-  onSelectOption: (data: T) => void;
+  placeholder?: string;
+  onSelectOption: (data: T | null) => void;
 
-  valueKey: keyof T & string;
-  labelKey: keyof T & string;
+  valueKey: KeyOf<T>;
+  labelKey: KeyOf<T>;
 }
 
 export default function ComboBox<T>({
@@ -26,32 +29,43 @@ export default function ComboBox<T>({
   selected,
   valueKey,
   labelKey,
-  labelOption = "Selecione...",
+  placeholder = "Selecione...",
   onSelectOption,
+  className,
   ...rest
 }: Readonly<ComboboxProps<T>>) {
-  const handleSelectOptions = (value: string): void => {
+  const selectedValue = selected ? String(selected[valueKey]) : "";
+
+  const handleChange = (value: string) => {
     const item = options.find((o) => String(o[valueKey]) === value);
 
-    if (item) onSelectOption(item);
+    onSelectOption(item ?? null);
   };
 
   return (
-    <div className="relative w-72 pl-2 pr-2">
-      {label && <p className=" text-sm text-gray-500 mb-2">{label}</p>}
+    <div className="relative w-72 px-2">
+      {label && <p className="text-sm text-gray-500 mb-2">{label}</p>}
+
       <select
         {...rest}
-        value={selected ? String(selected[valueKey]) : ""}
-        onChange={(e) => handleSelectOptions(e.target.value)}
-        className={`peer bg-white h-10 w-72 rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none appearance-none ${rest.className ?? ""}`}
+        value={selectedValue}
+        onChange={(e) => handleChange(e.target.value)}
+        className={`peer bg-white h-10 w-72 rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none appearance-none ${className ?? ""}`}
       >
-        <option value="">{label}</option>
+        {/* placeholder controlado */}
+        <option value="" disabled>
+          {placeholder}
+        </option>
 
-        {options.map((item, index) => (
-          <option key={index} value={String(item[valueKey])}>
-            {String(item[labelKey])}
-          </option>
-        ))}
+        {options.map((item) => {
+          const value = String(item[valueKey]);
+
+          return (
+            <option key={value} value={value}>
+              {String(item[labelKey])}
+            </option>
+          );
+        })}
       </select>
     </div>
   );

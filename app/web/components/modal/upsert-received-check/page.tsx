@@ -199,8 +199,6 @@ export default function UpsertReceivedCheckModal({
   };
 
   const handleSubmit = (): void => {
-    alert(JSON.stringify(data));
-
     isEdit
       ? onSubmit({ ...data, id: editData?.id ?? "" }, isEdit)
       : onSubmit({ ...data });

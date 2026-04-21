@@ -8,18 +8,13 @@
 import Image from "next/image";
 import Input, { InputType } from "../../components/input/page";
 import Button from "../../components/button/page";
-import { authService } from "../../services/authService/authService";
 import { useState } from "react";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import { useAuth } from "../../providers/AuthProvider";
 
 export default function Login() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const { auth } = useAuth();
-
-  const router = useRouter();
 
   const onHandlerAuth = async (): Promise<void> => {
     await auth(login, password).then(() => clearFields());

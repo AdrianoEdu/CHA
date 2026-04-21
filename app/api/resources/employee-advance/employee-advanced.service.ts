@@ -6,38 +6,73 @@
 import { EmployeeAdvance, Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
-import { GetAllEmployeeAdvanceDto } from "../../dto/EmployeeAdvance/employeeAdvance";
+import {
+  CreateEmployeeAdvanceDto,
+  GetEmployeeAdvanceDto,
+} from "../../dto/EmployeeAdvance/employeeAdvance";
+import { NotFoundException } from "../../error/NotFoundException";
+import { connect } from "http2";
 
 class EmployeeAdvanceService {
   private databaseService = databaseService;
 
-  async create(data: GetAllEmployeeAdvanceDto): Promise<void> {
+  async create({
+    employeeId,
+    reasonId,
+    ...data
+  }: CreateEmployeeAdvanceDto): Promise<void> {
     await this.databaseService.employeeAdvance.create({
-      data,
+      data: {
+        ...data,
+        reason: { connect: { id: reasonId } },
+        employee: { connect: { id: employeeId } },
+      },
     });
   }
 
-  async update(id: string, data: Partial<GetAllEmployeeAdvanceDto>) {
+  async update(id: string, data: Partial<GetEmployeeAdvanceDto>) {
     await this.databaseService.employeeAdvance.update({
       where: { id },
       data,
     });
   }
 
-  async findByName({ reasonName }: Partial<GetAllEmployeeAdvanceDto>) {
+  async findByName({ reasonName }: Partial<GetEmployeeAdvanceDto>) {
     return this.databaseService.employee.findFirst({
       where: { name: reasonName },
     });
   }
 
-  async findAll(
+  async findMany(
+    baseQuery: Prisma.EmployeeAdvanceFindManyArgs,
+  ): Promise<GetEmployeeAdvanceDto[]> {
+    const result = await this.databaseService.employeeAdvance.findMany({
+      ...baseQuery,
+    });
+
+    return result.map((data) => this.mapEmployeeAdvance(data));
+  }
+
+  async findFirst(
+    baseQuery: Prisma.EmployeeAdvanceFindManyArgs,
+  ): Promise<GetEmployeeAdvanceDto> {
+    const result = await this.databaseService.employeeAdvance.findFirst({
+      ...baseQuery,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return this.mapEmployeeAdvance(result);
+  }
+
+  async findCheckUsage(
     params: PaginationDto<
       Prisma.EmployeeAdvanceWhereInput,
       Prisma.EmployeeAdvanceSelect,
       Prisma.EmployeeAdvanceInclude,
       Prisma.EmployeeAdvanceOrderByWithRelationInput
     >,
-  ): Promise<GetAllEmployeeAdvanceDto[]> {
+  ): Promise<GetEmployeeAdvanceDto[] | GetEmployeeAdvanceDto> {
     const baseQuery: Prisma.EmployeeAdvanceFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -48,22 +83,24 @@ class EmployeeAdvanceService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    const result = await this.databaseService.employeeAdvance.findMany({
-      ...baseQuery,
-      orderBy: { createdAt: "desc" },
-      include: { reason: { select: { name: true } } },
-    });
+    if (!params.all) return this.findFirst(baseQuery);
 
-    return result.map(({ reason, ...employeeAdvance }) => {
-      return {
-        id: employeeAdvance.id,
-        reasonName: reason.name,
-        reasonId: employeeAdvance.reasonId,
-        createdAt: employeeAdvance.createdAt,
-        amount: Number(employeeAdvance.amount),
-        employeeId: employeeAdvance.employeeId,
-      };
-    });
+    return this.findMany(baseQuery);
+  }
+
+  private mapEmployeeAdvance(
+    item: EmployeeAdvance & {
+      reason?: { name: string } | null;
+    },
+  ): GetEmployeeAdvanceDto {
+    return {
+      id: item.id,
+      reasonId: item.reasonId,
+      createdAt: item.createdAt,
+      amount: Number(item.amount),
+      employeeId: item.employeeId,
+      reasonName: item.reason?.name ?? "",
+    };
   }
 }
 
