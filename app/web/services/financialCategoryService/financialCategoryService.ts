@@ -5,11 +5,11 @@
 
 import {
   CreateFinancialCategoryDto,
+  FinancialCategoryParams,
   GetFinancialCategoryDto,
   SendFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "../../dto/financial.dto";
-import { SendPaginationDto } from "../../dto/pagination.dto";
 import { requestService } from "../requestService/requestService";
 
 class FinancialCategoryService {
@@ -33,11 +33,13 @@ class FinancialCategoryService {
     );
   }
 
-  findAll(data: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, GetFinancialCategoryDto[]>(
-      this.url,
-      data,
-    );
+  findAll(
+    data: FinancialCategoryParams,
+  ): Promise<GetFinancialCategoryDto | GetFinancialCategoryDto[]> {
+    return requestService.getAll<
+      FinancialCategoryParams,
+      GetFinancialCategoryDto | GetFinancialCategoryDto[]
+    >(this.url, data);
   }
 
   findByName({ name }: Partial<SendFinancialCategoryDto>) {

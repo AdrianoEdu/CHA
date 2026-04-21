@@ -8,6 +8,7 @@ import { BankDto, RemoveBankDto, UpdateBankDto } from "../../dto/Bank/bank";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class BankService {
   private databaseService = databaseService;
@@ -23,14 +24,14 @@ class BankService {
     });
   }
 
-  async findAll(
+  async findBank(
     params: PaginationDto<
       Prisma.BankWhereInput,
       Prisma.BankSelect,
       Prisma.BankInclude,
       Prisma.BankOrderByWithRelationInput
     >,
-  ): Promise<BankDto[]> {
+  ): Promise<BankDto | BankDto[]> {
     const baseQuery: Prisma.BankFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -41,10 +42,25 @@ class BankService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
+    if (!params.all) return this.findFirst(baseQuery);
+
+    return this.findMany(baseQuery);
+  }
+
+  async findMany(baseQuery: Prisma.BankFindManyArgs): Promise<BankDto[]> {
     return await this.databaseService.bank.findMany({
       ...baseQuery,
-      orderBy: { createdAt: "desc" },
     });
+  }
+
+  async findFirst(baseQuery: Prisma.BankFindManyArgs): Promise<BankDto> {
+    const result = await this.databaseService.bank.findFirst({
+      ...baseQuery,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return result;
   }
 
   async remove({ id }: RemoveBankDto) {

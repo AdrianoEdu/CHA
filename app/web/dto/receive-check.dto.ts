@@ -5,12 +5,12 @@
 
 import { ReceivedCheckStatus } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
-import { BankDto } from "./bank.dto";
+import { GetBankDto } from "./bank.dto";
 import { GetCustomerDto } from "./customer.dto";
 
 export type ReceivedCheckDTO = {
   id: string;
-  bank: BankDto;
+  bank: GetBankDto;
   agency: string;
   createdAt: Date;
   goodForAt?: Date;

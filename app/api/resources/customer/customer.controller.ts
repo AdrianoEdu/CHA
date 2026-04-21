@@ -9,6 +9,8 @@ import {
 } from "../../dto/Customer/Customer";
 import { customerService } from "./customer.service";
 import { RemoveAdvanceReason } from "../../dto/AdvanceReason/AdvanceReason";
+import { Prisma } from "@/app/generated/prisma";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 
 class CustomerController {
   private customerService;
@@ -27,27 +29,18 @@ class CustomerController {
 
   async findAll(req: Request) {
     try {
-      const { searchParams } = new URL(req.url);
-      const skip = searchParams.get("skip");
-      const take = searchParams.get("take");
+      const params = parsePrismaQuery<
+        Prisma.CustomerWhereInput,
+        Prisma.CustomerSelect,
+        Prisma.CustomerInclude,
+        Prisma.CustomerOrderByWithRelationInput
+      >(req);
 
-      return await this.customerService.findAll({
-        skip: skip ? Number(skip) : undefined,
-        take: take ? Number(take) : undefined,
-      });
+      return await this.customerService.findCustomer(params);
     } catch (error: any) {
       console.error("Erro ao buscar Customer:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
-  }
-
-  async findByName(req: Request) {
-    try {
-      const { searchParams } = new URL(req.url);
-      const name = searchParams.get("name") ?? "";
-
-      return await this.customerService.findByName({ name });
-    } catch (error) {}
   }
 
   async remove({ id }: RemoveAdvanceReason) {

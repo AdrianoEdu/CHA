@@ -64,14 +64,7 @@ export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    const { searchParams } = new URL(req.url);
-    const skip = searchParams.get("skip");
-    const take = searchParams.get("take");
-
-    const banks = await bankController.findAll({
-      skip: skip ? Number(skip) : undefined,
-      take: take ? Number(take) : undefined,
-    });
+    const banks = await bankController.findAll(req);
 
     return new Response(JSON.stringify(banks), { status: 200 });
   } catch (error) {

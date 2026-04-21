@@ -73,11 +73,14 @@ export default function FinancialCategory() {
     const result = await financialCategoryService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { createdAt: "desc" },
     });
 
-    setFinancialList(result);
-    oldFinancialList = result;
+    if (Array.isArray(result)) {
+      setFinancialList(result);
+      oldFinancialList = result;
+    }
   };
 
   const handleOpenModalRegisterFinancialCategory = () => {

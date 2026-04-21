@@ -10,7 +10,7 @@ import Button from "@/app/web/components/button/page";
 import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import BankModal from "@/app/web/components/modal/upsert-bank/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
-import { BankDto } from "@/app/web/dto/bank.dto";
+import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { DeleteIcon } from "@/app/web/icons";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
@@ -22,7 +22,7 @@ export default function BankScreen() {
   const { user } = useAuth();
   const { openModal, closeModal } = useModal();
 
-  const [listBank, setListBank] = useState<BankDto[]>([]);
+  const [listBank, setListBank] = useState<GetBankDto[]>([]);
 
   const isAdmin = user?.role === UserRole.ADMIN;
 
@@ -31,12 +31,18 @@ export default function BankScreen() {
   }, []);
 
   const handleFindBanks = async (): Promise<void> => {
-    const result = await bankService.findAll({ skip: 0, take: 20 });
-    setListBank(result);
+    const result = await bankService.findAll({
+      skip: 0,
+      take: 20,
+      all: true,
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (Array.isArray(result)) setListBank(result);
   };
 
   const handleUpsertBank = async (
-    data: BankDto,
+    data: GetBankDto,
     isEdit?: boolean,
   ): Promise<void> => {
     if (isEdit)
@@ -60,7 +66,7 @@ export default function BankScreen() {
     });
   };
 
-  const handleOpenBankModal = (row?: BankDto): void => {
+  const handleOpenBankModal = (row?: GetBankDto): void => {
     openModal(
       <BankModal
         data={row}
@@ -84,8 +90,8 @@ export default function BankScreen() {
     openModal(<RemoveModal onClose={closeModal} onConfirm={remove} />);
   };
 
-  const getColumns = (): TableColumn<BankDto>[] => {
-    const columns: TableColumn<BankDto>[] = [
+  const getColumns = (): TableColumn<GetBankDto>[] => {
+    const columns: TableColumn<GetBankDto>[] = [
       { label: "Criado em", accessor: "createdAt" },
       { label: "Nome", accessor: "name" },
       {

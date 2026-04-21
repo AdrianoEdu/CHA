@@ -8,11 +8,12 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { request } from "http";
-import { ActionDto, AuthDto, LoginDto } from "../../dto/auth.dto";
-import { BankDto } from "../../dto/bank.dto";
+import {
+  BankParams,
+  GetBankDto as CreateBankDto,
+  UpdateBankDto,
+} from "../../dto/bank.dto";
 import { requestService } from "../requestService/requestService";
-import { SendPaginationDto } from "../../dto/pagination.dto";
 
 class BankService {
   private readonly url: string;
@@ -21,16 +22,16 @@ class BankService {
     this.url = "/bank";
   }
 
-  update(data: BankDto) {
-    return requestService.update<BankDto, void>(this.url, data);
+  update(data: UpdateBankDto) {
+    return requestService.update<UpdateBankDto, void>(this.url, data);
   }
 
-  create(data: BankDto) {
-    return requestService.post<BankDto, void>(this.url, data);
+  create(data: CreateBankDto) {
+    return requestService.post<CreateBankDto, void>(this.url, data);
   }
 
-  findAll(data?: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, BankDto[]>(this.url, data);
+  findAll(data?: BankParams) {
+    return requestService.getAll<BankParams, CreateBankDto[]>(this.url, data);
   }
 
   remove(id: string) {

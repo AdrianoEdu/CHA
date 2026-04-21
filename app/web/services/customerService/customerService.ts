@@ -5,11 +5,10 @@
 
 import {
   CreateCustomerDto,
+  CustomerParams,
   GetCustomerDto,
-  SendCreateCustomerDto,
   UpdateCustomerDto,
 } from "../../dto/customer.dto";
-import { SendPaginationDto } from "../../dto/pagination.dto";
 import { requestService } from "../requestService/requestService";
 
 class CustomerService {
@@ -27,18 +26,11 @@ class CustomerService {
     return requestService.post<CreateCustomerDto, void>(this.url, data);
   }
 
-  findAll(data?: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, GetCustomerDto[]>(
-      this.url,
-      data,
-    );
-  }
-
-  findByName({ name }: Partial<SendCreateCustomerDto>) {
-    return requestService.getByFilters<
-      Partial<SendCreateCustomerDto>,
-      GetCustomerDto[]
-    >(this.url, { name });
+  findAll(data?: CustomerParams): Promise<GetCustomerDto | GetCustomerDto[]> {
+    return requestService.getAll<
+      CustomerParams,
+      GetCustomerDto | GetCustomerDto[]
+    >(this.url, data);
   }
 
   delete(id: string) {

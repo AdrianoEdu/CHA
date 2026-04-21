@@ -7,6 +7,7 @@ import { Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { bankService } from "./bank.service";
 import { RemoveBankDto } from "../../dto/Bank/bank";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 
 export class BankController {
   private bankService;
@@ -38,16 +39,16 @@ export class BankController {
     }
   }
 
-  async findAll(
-    params: PaginationDto<
-      Prisma.BankWhereInput,
-      Prisma.BankSelect,
-      Prisma.BankInclude,
-      Prisma.BankOrderByWithRelationInput
-    >,
-  ) {
+  async findAll(req: Request) {
     try {
-      return await this.bankService.findAll(params);
+      const params = parsePrismaQuery<
+        Prisma.BankWhereInput,
+        Prisma.BankSelect,
+        Prisma.BankInclude,
+        Prisma.BankOrderByWithRelationInput
+      >(req);
+
+      return await this.bankService.findBank(params);
     } catch (error: any) {
       console.error("Erro ao buscar Employees:", error);
       return Response.json({ error: error.message }, { status: 500 });

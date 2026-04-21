@@ -13,6 +13,7 @@ import {
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class FinancialCategoryService {
   private databaseService;
@@ -32,14 +33,14 @@ class FinancialCategoryService {
     });
   }
 
-  async findAll(
+  async findFinancialCategory(
     params: PaginationDto<
       Prisma.FinancialCategoryWhereInput,
       Prisma.FinancialCategorySelect,
       Prisma.FinancialCategoryInclude,
       Prisma.FinancialCategoryOrderByWithRelationInput
     >,
-  ): Promise<GetFinancialCategoryDto[]> {
+  ): Promise<GetFinancialCategoryDto | GetFinancialCategoryDto[]> {
     const baseQuery: Prisma.FinancialCategoryFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -50,9 +51,28 @@ class FinancialCategoryService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
+    if (!params.all) return this.findFirst(baseQuery);
+
+    return this.findMany(baseQuery);
+  }
+
+  async findFirst(
+    baseQuery: Prisma.FinancialCategoryFindManyArgs,
+  ): Promise<GetFinancialCategoryDto> {
+    const result = await this.databaseService.financialCategory.findFirst({
+      ...baseQuery,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return result;
+  }
+
+  async findMany(
+    baseQuery: Prisma.FinancialCategoryFindManyArgs,
+  ): Promise<GetFinancialCategoryDto[]> {
     return this.databaseService.financialCategory.findMany({
       ...baseQuery,
-      orderBy: { createdAt: "desc" },
     });
   }
 

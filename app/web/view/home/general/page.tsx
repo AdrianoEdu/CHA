@@ -65,8 +65,10 @@ export default function General() {
       orderBy: { createdAt: "desc" },
     });
 
-    oldAdvanceReasonList = result;
-    setAdvanceReasonList(result);
+    if (Array.isArray(result)) {
+      oldAdvanceReasonList = result;
+      setAdvanceReasonList(result);
+    }
   };
 
   const handleRegisterAdvanceReason = async (

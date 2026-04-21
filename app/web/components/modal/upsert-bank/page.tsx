@@ -4,13 +4,13 @@ import React, { useState } from "react";
 import Input, { InputType } from "../../input/page";
 import Button, { ButtonStatusEnum } from "../../button/page";
 import { AddIcon, DeleteIcon } from "@/app/web/icons";
-import { BankDto } from "@/app/web/dto/bank.dto";
+import { GetBankDto } from "@/app/web/dto/bank.dto";
 
 interface BankModalProps {
-  data?: BankDto;
+  data?: GetBankDto;
   isEdit?: boolean;
   onClose: () => void;
-  onSubmit: (data: BankDto, isEdit?: boolean) => void;
+  onSubmit: (data: GetBankDto, isEdit?: boolean) => void;
 }
 
 export default function BankModal({

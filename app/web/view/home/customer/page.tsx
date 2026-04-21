@@ -59,11 +59,14 @@ export default function Customer() {
     const result = await customerService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { createdAt: "desc" },
     });
 
-    oldCustomerList = result;
-    setCustomerList(result);
+    if (Array.isArray(result)) {
+      oldCustomerList = result;
+      setCustomerList(result);
+    }
   };
 
   const handleRegisterCustomer = async (
@@ -93,10 +96,14 @@ export default function Customer() {
       setList: setCustomerList,
       getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        return customerService.findByName({
-          name: value,
-          type: ActionEnum.FindByFilters,
+        const result = await customerService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          where: { name: value },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };

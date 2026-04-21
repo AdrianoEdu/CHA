@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { ActionEnum, CustomerType } from "../constants/enum";
+import { PaginationDto } from "./pagination.dto";
 
 export type CreateCustomerDto = {
   name: string;
@@ -23,6 +24,6 @@ export type GetCustomerDto = {
   createdAt: Date;
 };
 
-export type SendCreateCustomerDto = Partial<CreateCustomerDto> & {
-  type: ActionEnum;
-};
+export type CustomerWhere = Partial<GetCustomerDto>;
+
+export type CustomerParams = PaginationDto<CustomerWhere, any, any, any>;

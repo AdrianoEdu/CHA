@@ -13,6 +13,7 @@ import {
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class CustomerService {
   private databaseService;
@@ -32,14 +33,14 @@ class CustomerService {
     });
   }
 
-  async findAll(
+  async findCustomer(
     params: PaginationDto<
       Prisma.CustomerWhereInput,
       Prisma.CustomerSelect,
       Prisma.CustomerInclude,
       Prisma.CustomerOrderByWithRelationInput
     >,
-  ): Promise<GetCustomerDto[]> {
+  ): Promise<GetCustomerDto | GetCustomerDto[]> {
     const baseQuery: Prisma.CustomerFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -50,18 +51,29 @@ class CustomerService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
+    if (!params.all) return this.findFirst(baseQuery);
+
+    return this.findMany(baseQuery);
+  }
+
+  async findMany(baseQuery: Prisma.CustomerFindManyArgs) {
     return this.databaseService.customer.findMany({
       ...baseQuery,
-      orderBy: { createdAt: "desc" },
     });
   }
 
-  async findByName({ name }: Partial<CreateCustomerDto>) {
-    return this.databaseService.customer.findMany({ where: { name } });
+  async findFirst(baseQuery: Prisma.CustomerFindManyArgs) {
+    const result = await this.databaseService.customer.findFirst({
+      ...baseQuery,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return result;
   }
 
   async remove({ id }: RemoverCustomerDto) {
-    const count = await this.databaseService.accountsPayable.count({
+    const count = await this.databaseService.transaction.count({
       where: { customerId: id },
     });
 

@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { ActionEnum, FinancialFlowType } from "../constants/enum";
+import { PaginationDto } from "./pagination.dto";
 
 export type CreateFinancialCategoryDto = {
   name: string;
@@ -24,3 +25,12 @@ export type GetFinancialCategoryDto = {
 export type SendFinancialCategoryDto = UpdateFinancialCategoryDto & {
   type: ActionEnum;
 };
+
+export type FinancialCategoryWhere = Partial<GetFinancialCategoryDto>;
+
+export type FinancialCategoryParams = PaginationDto<
+  FinancialCategoryWhere,
+  any,
+  any,
+  any
+>;
