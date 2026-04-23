@@ -5,6 +5,7 @@
 
 import { CheckUsageType } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
+import { PaginationDto } from "./pagination.dto";
 import { ReceivedCheckDTO } from "./receive-check.dto";
 
 export type CheckUsageDTO = {
@@ -30,9 +31,10 @@ export type UpdateCheckUsageDTO = {
   usedAt?: Date;
   amount?: number;
   notes?: string;
-  receivedCheckId?: string;
+  receivedCheckId: string;
   usageType?: CheckUsageType;
 };
 
-export interface SendUpdateCheckUsageDto
-  extends ActionDto, UpdateCheckUsageDTO {}
+export type CheckUsageWhere = Partial<CheckUsageDTO>;
+
+export type CheckUsageParams = PaginationDto<CheckUsageWhere, any, any, any>;

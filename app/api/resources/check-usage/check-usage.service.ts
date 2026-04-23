@@ -11,6 +11,8 @@ import {
 } from "../../dto/CheckUsage/CheckUsage";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
+import { checkUsageSelect, CheckUsageWithRelations } from "./type";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class CheckUsageService {
   private databaseService = databaseService;
@@ -26,14 +28,34 @@ class CheckUsageService {
     });
   }
 
-  async findAll(
+  async findMany(baseQuery: Prisma.CheckUsageFindManyArgs) {
+    const result = await this.databaseService.checkUsage.findMany({
+      ...baseQuery,
+      select: checkUsageSelect,
+    });
+
+    return result.map((checkUsage) => this.mapperCheckUsage(checkUsage));
+  }
+
+  async findFirst(baseQuery: Prisma.CheckUsageFindManyArgs) {
+    const result = await this.databaseService.checkUsage.findFirst({
+      ...baseQuery,
+      select: checkUsageSelect,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return this.mapperCheckUsage(result);
+  }
+
+  async findCheckUsage(
     params: PaginationDto<
       Prisma.CheckUsageWhereInput,
       Prisma.CheckUsageSelect,
       Prisma.CheckUsageInclude,
       Prisma.CheckUsageOrderByWithRelationInput
     >,
-  ): Promise<CheckUsageDTO[]> {
+  ): Promise<CheckUsageDTO | CheckUsageDTO[]> {
     const baseQuery: Prisma.CheckUsageFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -44,22 +66,13 @@ class CheckUsageService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    const result = await this.databaseService.checkUsage.findMany({
-      ...baseQuery,
-      select: {
-        id: true,
-        notes: true,
-        usedAt: true,
-        amount: true,
-        createdAt: true,
-        usageType: true,
-        receivedCheck: {
-          include: { bank: true, customer: true },
-        },
-      },
-    });
+    if (!params.all) this.findFirst(baseQuery);
 
-    return result.map((item) => ({
+    return this.findMany(baseQuery);
+  }
+
+  mapperCheckUsage(item: CheckUsageWithRelations): CheckUsageDTO {
+    return {
       id: item.id,
       usedAt: item.usedAt,
       createdAt: item.createdAt,
@@ -68,22 +81,17 @@ class CheckUsageService {
       amount: item.amount.toNumber(),
       receiveCheck: {
         id: item.receivedCheck.id,
-        createdAt: item.receivedCheck.createdAt,
-        receivedAt: item.receivedCheck.receivedAt.toISOString(),
-        customerId: item.receivedCheck.customer.id,
-        customerName: item.receivedCheck.customer.name,
-        bankId: item.receivedCheck.bank.id,
-        bankName: item.receivedCheck.bank.name,
-        agency: item.receivedCheck.agency,
-        checkNumber: item.receivedCheck.checkNumber,
-        totalAmount: Number(item.receivedCheck.totalAmount),
-        currentAmount: Number(item.receivedCheck.currentAmount),
-        goodForAt: item.receivedCheck.goodForAt
-          ? item.receivedCheck.goodForAt.toISOString()
-          : null,
+        bank: item.receivedCheck.bank,
         status: item.receivedCheck.status,
+        agency: item.receivedCheck.agency,
+        customer: item.receivedCheck.customer,
+        createdAt: item.receivedCheck.createdAt,
+        checkNumber: item.receivedCheck.checkNumber,
+        goodForAt: item.receivedCheck.goodForAt ?? undefined,
+        totalAmount: item.receivedCheck.totalAmount.toNumber(),
+        currentAmount: item.receivedCheck.currentAmount.toNumber(),
       },
-    }));
+    };
   }
 }
 

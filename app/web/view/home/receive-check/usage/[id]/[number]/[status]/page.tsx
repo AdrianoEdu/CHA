@@ -6,69 +6,46 @@
 "use client";
 
 import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
-import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
-import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
 import {
-  ReceivedCheckDTO,
-  UpsertReceivedCheckDto,
-} from "@/app/web/dto/receive-check.dto";
+  ActionEnum,
+  CheckUsageType,
+  ReceivedCheckStatus,
+} from "@/app/web/constants/enum";
+import { CheckUsageDTO } from "@/app/web/dto/check-usage.dto";
+import { ReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
+import { checkUsageService } from "@/app/web/services/checkUsageService/checkUsageService";
 import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-let oldReceiveChecks: ReceivedCheckDTO[] = [];
+let oldCheckUsageList: CheckUsageDTO[] = [];
 
-type GetColumnsProps = {
-  handleEdit: (row: ReceivedCheckDTO) => void;
+export type GetColumnProps = {
+  handleEdit: (row: CheckUsageDTO) => void;
+};
+
+const statusMap: Record<ReceivedCheckStatus, string> = {
+  RECEIVED: "Recebido",
+  IN_USE: "Em uso",
+  FINALIZED: "Finalizado",
+  CANCELLED: "Cancelado",
 };
 
 const getColumns = ({
   handleEdit,
-}: GetColumnsProps): TableColumn<ReceivedCheckDTO>[] => [
-  { label: "Criado em", accessor: "createdAt" },
-  { label: "Nome do cliente", accessor: "customerName" },
-  { label: "Banco", accessor: "bankName" },
-  { label: "Agência", accessor: "agency" },
-  { label: "Cheque", accessor: "checkNumber" },
-  { label: "Bom para", accessor: "goodForAt" },
+}: GetColumnProps): TableColumn<CheckUsageDTO>[] => [
+  { label: "Criado em", accessor: "usedAt" },
+  { label: "Tipo de pagamento", accessor: "usageType" },
+  { label: "Anotações", accessor: "notes" },
   {
     label: "Valor",
     accessor: "totalAmount",
-    render: (row) => `R$ ${row.totalAmount.toFixed(2)}`,
-  },
-  {
-    label: "Status",
-    accessor: "status",
-    render: (row) => {
-      const statusMap: Record<ReceivedCheckStatus, string> = {
-        RECEIVED: "Recebido",
-        IN_USE: "Em uso",
-        FINALIZED: "Finalizado",
-        CANCELLED: "Cancelado",
-      };
-
-      const colorMap: Record<ReceivedCheckStatus, string> = {
-        RECEIVED: "bg-green-100 text-green-800",
-        IN_USE: "bg-yellow-100 text-yellow-800",
-        FINALIZED: "bg-blue-100 text-blue-800",
-        CANCELLED: "bg-red-100 text-red-800",
-      };
-
-      return (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            colorMap[row.status] || "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {statusMap[row.status] || row.status}
-        </span>
-      );
-    },
+    render: (row) => `R$ ${row.amount.toFixed(2)}`,
   },
   {
     label: "Ações",
@@ -91,117 +68,73 @@ const getColumns = ({
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
-  const [receivedChecks, setReceivedChecks] = useState<ReceivedCheckDTO[]>();
+  const [checkUsageSelected, setCheckUsageSelected] =
+    useState<ReceivedCheckDTO>();
+  const [checkUsageList, setCheckUsageList] = useState<CheckUsageDTO[]>();
 
-  const router = useRouter();
+  const { id, number, status } = useParams();
   const { closeModal, openModal } = useModal();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    handleFindReceiveChecks();
+    handleGetCheckUsageById();
+    handleGetListCheckUsage();
   }, []);
 
-  useEffect(() => {
-    handleFilterReceiveCheck();
-  }, [filter]);
+  useEffect(() => {}, [filter]);
 
-  const handleUpserData = async (
-    {
-      id,
-      agency,
-      status,
-      bankId,
-      goodForAt,
-      customerId,
-      checkNumber,
-      totalAmount,
-      currentAmount,
-    }: UpsertReceivedCheckDto,
-    isEdit?: boolean,
-  ): Promise<void> => {
-    console.log(goodForAt);
-    if (isEdit) {
-      receiveCheckService
-        .update({
-          id,
-          agency,
-          bankId,
-          status,
-          checkNumber,
-          customerId,
-          totalAmount,
-          goodForAt,
-        })
-        .then(() => {
-          toast.success("Recebimento de cheque atualizado com sucesso");
-          handleFindReceiveChecks();
-        })
-        .catch((err) => toast.error("Erro ao Atualizar cheque recebido", err));
-      closeModal();
-      return;
-    }
-
-    receiveCheckService
-      .create({
-        agency,
-        bankId,
-        goodForAt,
-        customerId,
-        checkNumber,
-        totalAmount,
-        currentAmount,
-      })
-      .then(() => {
-        toast.success("Recebimento de cheque registrado com sucesso");
-        handleFindReceiveChecks();
-      })
-      .catch((err) => toast.error("Erro ao cadastrar cheque recebido", err));
-
-    closeModal();
-  };
-
-  const handleOpenModalEditReceivedCheck = (row: ReceivedCheckDTO): void => {
-    openModal(
-      <UpsertReceivedCheckModal
-        isEdit
-        editData={row}
-        onClose={closeModal}
-        onSubmit={handleUpserData}
-      />,
-    );
-  };
-
-  const hanleOpenModalRegisterReceivedCheck = (): void => {
-    openModal(
-      <UpsertReceivedCheckModal
-        onClose={closeModal}
-        onSubmit={handleUpserData}
-      />,
-    );
-  };
-
-  const handleFindReceiveChecks = async (): Promise<void> => {
-    const result = await receiveCheckService.findAll({
-      skip: 0,
-      take: 20,
-      type: ActionEnum.FindAll,
+  const handleGetCheckUsageById = async (): Promise<void> => {
+    const data = await receiveCheckService.findAll({
+      where: {
+        id: id as string,
+      },
+      all: false,
     });
 
-    oldReceiveChecks = result;
-    setReceivedChecks(result);
+    if (!Array.isArray(data)) setCheckUsageSelected(data);
   };
 
-  const handleFilterReceiveCheck = async () => {
+  const handleGetListCheckUsage = async (): Promise<void> => {
+    const result = await checkUsageService.findAll({
+      skip: 0,
+      take: 20,
+      all: true,
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (Array.isArray(result)) {
+      setCheckUsageList(result);
+      oldCheckUsageList = result;
+    }
+  };
+
+  function handleOpenModalEditCheckUsage(row: CheckUsageDTO): void {
+    throw new Error("Function not implemented.");
+  }
+
+  function handleOpenModalRegisterCheckUsage(): void {
+    throw new Error("Function not implemented.");
+  }
+
+  function handleOpenModalEditReceivedCheck(row: CheckUsageDTO): void {
+    throw new Error("Function not implemented.");
+  }
+
+  const handleFilterCheckUsage = async () => {
     await handleGenericFilter({
-      originalList: oldReceiveChecks,
+      originalList: oldCheckUsageList,
       filter,
-      setList: setReceivedChecks,
-      getSearchField: (emp) => emp.checkNumber,
+      setList: setCheckUsageList,
+      getSearchField: (emp) => emp.usageType,
       fetchFromApi: async (value) => {
-        return receiveCheckService.findByCheckNumber({
-          checkNumber: value,
-          type: ActionEnum.FindByFilters,
+        const result = await checkUsageService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          orderBy: { created: "desc" },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };
@@ -216,22 +149,17 @@ export default function ReceiveCheck() {
     }, 500);
   };
 
-  const handleNavigateCheckUsageScreen = (row: ReceivedCheckDTO): void => {
-    router.push(
-      `/web/view/home/receive-check/usage/${row.id}/${row.checkNumber}/${row.status}`,
-    );
-  };
-
   return (
     <div>
+      <h1>{`Número do cheque: ${checkUsageSelected?.checkNumber}`}</h1>
+      <h1>{`Status do cheque: ${statusMap[checkUsageSelected?.status!]}`}</h1>
       <Table
         enableFilter
-        rows={receivedChecks}
-        title={"Cheques recebidos"}
-        onFilterChange={handleSetFilterCheckNumber}
-        onRowClick={handleNavigateCheckUsageScreen}
-        onActionClicked={hanleOpenModalRegisterReceivedCheck}
-        columns={getColumns({ handleEdit: handleOpenModalEditReceivedCheck })}
+        rows={checkUsageList}
+        title={"Cheque utilizado"}
+        onFilterChange={handleFilterCheckUsage}
+        onActionClicked={handleOpenModalRegisterCheckUsage}
+        columns={getColumns({ handleEdit: handleOpenModalEditCheckUsage })}
       />
     </div>
   );
