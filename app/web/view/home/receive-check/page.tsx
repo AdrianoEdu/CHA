@@ -39,7 +39,7 @@ const getColumns = ({
   {
     label: "Valor",
     accessor: "totalAmount",
-    render: (row) => `R$ ${row.totalAmount.toFixed(2)}`,
+    render: (row) => `R$ ${row.totalAmount?.toFixed(2) ?? 0}`,
   },
   {
     label: "Status",
@@ -108,9 +108,11 @@ export default function ReceiveCheck() {
   const handleUpserData = async (
     {
       id,
+      bank,
       agency,
       status,
       bankId,
+      customer,
       goodForAt,
       customerId,
       checkNumber,
@@ -185,11 +187,14 @@ export default function ReceiveCheck() {
     const result = await receiveCheckService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { createdAt: "desc" },
     });
 
-    oldReceiveChecks = result;
-    setReceivedChecks(result);
+    if (Array.isArray(result)) {
+      oldReceiveChecks = result;
+      setReceivedChecks(result);
+    }
   };
 
   const handleFilterReceiveCheck = async () => {
@@ -199,10 +204,15 @@ export default function ReceiveCheck() {
       setList: setReceivedChecks,
       getSearchField: (emp) => emp.checkNumber,
       fetchFromApi: async (value) => {
-        return receiveCheckService.findByCheckNumber({
-          checkNumber: value,
-          type: ActionEnum.FindByFilters,
+        const result = await receiveCheckService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          where: { code: value },
+          orderBy: { createdAt: "desc" },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };

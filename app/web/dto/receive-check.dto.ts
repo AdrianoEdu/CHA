@@ -3,16 +3,18 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { BankDto } from "@/app/api/dto/Bank/bank";
 import { ReceivedCheckStatus } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
 import { GetBankDto } from "./bank.dto";
 import { GetCustomerDto } from "./customer.dto";
+import { PaginationDto } from "./pagination.dto";
 
 export type ReceivedCheckDTO = {
   id: string;
-  bank: GetBankDto;
   agency: string;
   createdAt: Date;
+  bank: GetBankDto;
   goodForAt?: Date;
   checkNumber: string;
   totalAmount: number;
@@ -33,6 +35,7 @@ export type CreateReceivedCheckDTO = {
 
 export type UpdateReceivedCheckDTO = {
   id: string;
+  bank?: BankDto;
   bankId?: string;
   agency?: string;
   status?: string;
@@ -41,6 +44,7 @@ export type UpdateReceivedCheckDTO = {
   checkNumber?: string;
   totalAmount?: number;
   currentAmount?: number;
+  customer?: GetCustomerDto;
 };
 
 export type RemoveReceivedCheckDto = {
@@ -50,8 +54,11 @@ export type RemoveReceivedCheckDto = {
 export type UpsertReceivedCheckDto = CreateReceivedCheckDTO &
   UpdateReceivedCheckDTO;
 
-export interface SendUpdateReceiveCheckDto
-  extends ActionDto, UpdateReceivedCheckDTO {}
+export type ReceivedCheckWhere = Partial<GetCustomerDto>;
 
-export interface SendCreateReceiveCheckDto
-  extends ActionDto, CreateReceivedCheckDTO {}
+export type ReceivedCheckParams = PaginationDto<
+  ReceivedCheckWhere,
+  any,
+  any,
+  any
+>;

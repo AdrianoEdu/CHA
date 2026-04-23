@@ -3,11 +3,11 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { SendPaginationDto } from "../../dto/pagination.dto";
 import {
+  CreateReceivedCheckDTO,
   ReceivedCheckDTO,
-  SendCreateReceiveCheckDto,
-  SendUpdateReceiveCheckDto,
+  ReceivedCheckParams,
+  UpdateReceivedCheckDTO,
 } from "../../dto/receive-check.dto";
 import { requestService } from "../requestService/requestService";
 
@@ -18,26 +18,19 @@ class ReceiveCheckService {
     this.url = "/received-check";
   }
 
-  create(data: SendCreateReceiveCheckDto) {
+  create(data: CreateReceivedCheckDTO) {
     return requestService.post(this.url, data);
   }
 
-  update(data: SendUpdateReceiveCheckDto) {
+  update(data: UpdateReceivedCheckDTO) {
     return requestService.update(this.url, data);
   }
 
-  findAll(data: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, ReceivedCheckDTO[]>(
-      this.url,
-      data,
-    );
-  }
-
-  findByCheckNumber({ checkNumber }: Partial<SendUpdateReceiveCheckDto>) {
-    return requestService.getByFilters<
-      Partial<SendUpdateReceiveCheckDto>,
-      ReceivedCheckDTO[]
-    >(this.url, { checkNumber });
+  findAll(data: ReceivedCheckParams) {
+    return requestService.getAll<
+      ReceivedCheckParams,
+      ReceivedCheckDTO | ReceivedCheckDTO[]
+    >(this.url, data);
   }
 }
 

@@ -15,7 +15,7 @@ import {
 import { bankService } from "@/app/web/services/bankService/bankService";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import ComboBox from "../../combobox/page";
-import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
+import { ReceivedCheckStatus } from "@/app/web/constants/enum";
 import {
   getListStatusReceiveCheck,
   sortStringNumbers,
@@ -54,6 +54,8 @@ export default function UpsertReceivedCheckModal({
     bankId: "",
     agency: "",
     customerId: "",
+    bank: undefined,
+    customer: undefined,
     totalAmount: 0,
     checkNumber: "0",
     currentAmount: 0,
@@ -65,26 +67,12 @@ export default function UpsertReceivedCheckModal({
   const [statusList, setStatusList] = useState<SelectOption[]>([]);
   const [customerList, setCustomerList] = useState<SelectOption[]>([]);
 
-  const [bankOption, setBankOption] = useState<SelectOption>({
-    id: "",
-    name: "",
-    list: [],
-  });
-
-  const [customerOption, setCustomerOption] = useState<SelectOption>({
-    id: "",
-    name: "",
-  });
-
-  const [agencieOption, setAgencieOption] = useState<SelectOption>({
-    id: "",
-    name: "",
-  });
-
-  const [statusOption, setStatusOption] = useState<SelectOption>({
-    id: "",
-    name: "",
-  });
+  const [bankOption, setBankOption] = useState<SelectOption | null>(null);
+  const [customerOption, setCustomerOption] = useState<SelectOption | null>(
+    null,
+  );
+  const [agencieOption, setAgencieOption] = useState<SelectOption | null>(null);
+  const [statusOption, setStatusOption] = useState<SelectOption | null>(null);
 
   useEffect(() => {
     handleFetchAllData();
@@ -93,16 +81,23 @@ export default function UpsertReceivedCheckModal({
   const handleFetchAllData = async (): Promise<void> => {
     try {
       const [banks, customers] = await Promise.all([
-        bankService.findAll().then((list) =>
-          list.map((bank) => ({
-            id: bank.id,
-            name: bank.name,
-            list: sortStringNumbers(bank.agencies),
-          })),
+        bankService
+          .findAll({ all: true, orderBy: { createdAt: "desc" } })
+          .then((list) =>
+            list.map((bank) => ({
+              id: String(bank.id),
+              name: bank.name,
+              list: sortStringNumbers(bank.agencies),
+            })),
+          ),
+        customerService.findAll({ all: true }).then((list) =>
+          Array.isArray(list)
+            ? list.map((c) => ({
+                id: String(c.id),
+                name: c.name,
+              }))
+            : [],
         ),
-        customerService
-          .findAll({ type: ActionEnum.FindAll })
-          .then((list) => list.map((c) => ({ id: c.id, name: c.name }))),
       ]);
 
       setListBank(banks);
@@ -113,42 +108,65 @@ export default function UpsertReceivedCheckModal({
   };
 
   useEffect(() => {
-    if (!editData || listBank.length === 0) return;
+    if (!editData || listBank.length === 0 || customerList.length === 0) return;
 
     const statusList = getListStatusReceiveCheck();
     setStatusList(statusList);
 
-    const currentStatus = statusList
-      .filter((status) => status.id === editData.status)
-      .at(0);
+    const currentStatus = statusList.find(
+      (status) => String(status.id) === String(editData.status),
+    );
 
-    setStatusOption(currentStatus!);
+    setStatusOption(currentStatus ?? null);
 
-    const bank = listBank.find((b) => b.id === editData.bankId);
+    const bank = listBank.find(
+      (b) => String(b.id) === String(editData.bank?.id),
+    );
 
-    const customer = customerList.find((c) => c.id === editData.customerId);
+    const customer = customerList.find(
+      (c) => String(c.id) === String(editData.customer?.id),
+    );
 
     setData((prev) => ({
       ...prev,
       ...editData,
     }));
 
-    if (bank) {
-      setBankOption(bank);
+    // ✅ CORREÇÃO AQUI
+    setBankOption(
+      bank
+        ? {
+            id: String(bank.id),
+            name: bank.name,
+            list: bank.list,
+          }
+        : null,
+    );
 
-      const agency = bank.list?.find((a) => a === editData.agency);
+    if (bank && editData.agency) {
+      const agency = bank.list?.find(
+        (a) => String(a) === String(editData.agency),
+      );
 
-      if (agency) {
-        setAgencieOption({
-          id: agency,
-          name: agency,
-        });
-      }
+      setAgencieOption(
+        agency
+          ? {
+              id: agency,
+              name: agency,
+            }
+          : null,
+      );
     }
 
-    if (customer) {
-      setCustomerOption(customer);
-    }
+    // ✅ CORREÇÃO AQUI
+    setCustomerOption(
+      customer
+        ? {
+            id: String(customer.id),
+            name: customer.name,
+          }
+        : null,
+    );
 
     if (editData.goodForAt) {
       const formatted = new Date(editData.goodForAt)
@@ -159,7 +177,9 @@ export default function UpsertReceivedCheckModal({
     }
   }, [editData, listBank, customerList]);
 
-  const handleSelectBankOption = (option: SelectOption) => {
+  const handleSelectBankOption = (option: SelectOption | null) => {
+    if (!option) return;
+
     setBankOption(option);
 
     setData((prev) => ({
@@ -168,40 +188,52 @@ export default function UpsertReceivedCheckModal({
       agency: "",
     }));
 
-    setAgencieOption({ id: "", name: "" });
+    setAgencieOption(null);
   };
 
-  const handleSelectStatusOption = (option: SelectOption): void => {
+  const handleSelectStatusOption = (option: SelectOption | null): void => {
     setStatusOption(option);
 
     setData((prev) => ({
       ...prev,
-      status: option.id as ReceivedCheckStatus,
+      status: option?.id as ReceivedCheckStatus,
     }));
   };
 
-  const handleSelectCustomerOption = (option: SelectOption): void => {
+  const handleSelectCustomerOption = (option: SelectOption | null): void => {
     setCustomerOption(option);
 
     setData((prev) => ({
       ...prev,
-      customerId: option.id,
+      customerId: option?.id ?? "",
     }));
   };
 
-  const handleSelectAgencieOption = (option: SelectOption) => {
+  const handleSelectAgencieOption = (option: SelectOption | null) => {
     setAgencieOption(option);
 
     setData((prev) => ({
       ...prev,
-      agency: option.name,
+      agency: option?.name ?? "",
     }));
   };
 
   const handleSubmit = (): void => {
     isEdit
-      ? onSubmit({ ...data, id: editData?.id ?? "" }, isEdit)
-      : onSubmit({ ...data });
+      ? onSubmit(
+          {
+            ...data,
+            id: editData?.id ?? "",
+            bankId: editData?.bank?.id ?? "",
+            customerId: editData?.customer?.id ?? "",
+          },
+          isEdit,
+        )
+      : onSubmit({
+          ...data,
+          bankId: bankOption?.id ?? "",
+          customerId: customerOption?.id ?? "",
+        });
   };
 
   return (
@@ -232,11 +264,11 @@ export default function UpsertReceivedCheckModal({
         onSelectOption={handleSelectBankOption}
       />
 
-      {(bankOption.list ?? []).length > 0 && (
+      {(bankOption?.list ?? []).length > 0 && (
         <ComboBox
           valueKey="id"
           labelKey="name"
-          options={(bankOption.list ?? []).map((a) => ({
+          options={(bankOption?.list ?? []).map((a) => ({
             id: a,
             name: a,
           }))}

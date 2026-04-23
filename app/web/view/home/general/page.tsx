@@ -10,8 +10,6 @@ import Button from "@/app/web/components/button/page";
 import RemoveModal from "@/app/web/components/modal/remove-employee/page";
 import { UpsertAdvanceReason } from "@/app/web/components/modal/upsert-adavence-reason/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
-import { ActionEnum } from "@/app/web/constants/enum";
-import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateAdvanceReasonDto,
   FindAdvanceReasonDto,

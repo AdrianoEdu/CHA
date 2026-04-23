@@ -7,7 +7,13 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
+import {
+  Bank,
+  Customer,
+  Prisma,
+  ReceivedCheck,
+  ReceivedCheckStatus,
+} from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
@@ -17,6 +23,8 @@ import {
   RemoveReceivedCheckDto,
   UpdateReceivedCheckDTO,
 } from "../../dto/ReceivedCheck/ReceivedCheck";
+import { receivedCheckSelect, ReceivedCheckWithRelations } from "./types";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class ReceivedCheckService {
   private databaseService = databaseService;
@@ -48,14 +56,14 @@ class ReceivedCheckService {
     });
   }
 
-  async findAll(
+  async findReceivedCheck(
     params: PaginationDto<
       Prisma.ReceivedCheckWhereInput,
       Prisma.ReceivedCheckSelect,
       Prisma.ReceivedCheckInclude,
       Prisma.ReceivedCheckOrderByWithRelationInput
     >,
-  ): Promise<ReceivedCheckDTO[]> {
+  ): Promise<ReceivedCheckDTO | ReceivedCheckDTO[]> {
     const baseQuery: Prisma.ReceivedCheckFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -66,49 +74,37 @@ class ReceivedCheckService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    const result = await this.databaseService.receivedCheck.findMany({
-      ...baseQuery,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        agency: true,
-        status: true,
-        createdAt: true,
-        goodForAt: true,
-        checkNumber: true,
-        totalAmount: true,
-        currentAmount: true,
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            code: true,
-            customerType: true,
-            createdAt: true,
-          },
-        },
-        bank: { select: { id: true, name: true, agencies: true } },
-      },
-    });
+    if (!params.all) return this.findFirst(baseQuery);
 
-    const checks: ReceivedCheckDTO[] = result.map((check) => ({
-      id: check.id,
-      bank: check.bank,
-      agency: check.agency,
-      bankId: check.bank.id,
-      customer: check.customer,
-      bankName: check.bank.name,
-      createdAt: check.createdAt,
-      customerId: check.customer.id,
-      checkNumber: check.checkNumber,
-      customerName: check.customer.name,
-      totalAmount: Number(check.totalAmount),
-      goodForAt: check.goodForAt ?? undefined,
-      currentAmount: Number(check.currentAmount),
-      status: check.status,
-    }));
+    return this.findMany(baseQuery);
+  }
 
-    return checks;
+  async findFirst(
+    baseQuery: Prisma.ReceivedCheckFindManyArgs,
+  ): Promise<ReceivedCheckDTO> {
+    const result: ReceivedCheckWithRelations | null =
+      await this.databaseService.receivedCheck.findFirst({
+        ...baseQuery,
+        select: receivedCheckSelect,
+        orderBy: { createdAt: "desc" },
+      });
+
+    if (!result) throw new NotFoundException();
+
+    return this.mapperCheckUsage(result);
+  }
+
+  async findMany(
+    baseQuery: Prisma.ReceivedCheckFindManyArgs,
+  ): Promise<ReceivedCheckDTO[]> {
+    const result: ReceivedCheckWithRelations[] =
+      await this.databaseService.receivedCheck.findMany({
+        ...baseQuery,
+        select: receivedCheckSelect,
+        orderBy: { createdAt: "desc" },
+      });
+
+    return result.map((receivedCheck) => this.mapperCheckUsage(receivedCheck));
   }
 
   async remove({ id }: RemoveReceivedCheckDto) {
@@ -149,6 +145,32 @@ class ReceivedCheckService {
     if (value) return value;
 
     throw new Error(`Status inválido: ${status}`);
+  }
+
+  private mapperCheckUsage(item: ReceivedCheckWithRelations): ReceivedCheckDTO {
+    return {
+      id: item.id,
+      bank: {
+        id: item.bank?.id,
+        name: item.bank?.name ?? "",
+        createdAt: item.bank?.createdAt,
+        agencies: item.bank?.agencies ?? [],
+      },
+      agency: item.agency,
+      customer: {
+        id: item.customer?.id ?? "",
+        name: item.customer?.name ?? "",
+        code: item.customer?.code ?? "",
+        createdAt: item.customer?.createdAt ?? new Date(),
+        customerType: item.customer?.customerType ?? "CLIENT",
+      },
+      createdAt: item.createdAt,
+      checkNumber: item.checkNumber,
+      totalAmount: Number(item.totalAmount),
+      goodForAt: item.goodForAt ?? undefined,
+      currentAmount: Number(item.currentAmount),
+      status: item.status,
+    };
   }
 }
 

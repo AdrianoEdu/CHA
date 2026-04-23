@@ -1,7 +1,7 @@
 type PrismaPaginationParams<W, S, I, O> = {
   all?: boolean;
-  skip: number;
-  take: number;
+  skip?: number;
+  take?: number;
   where?: W;
   select?: S;
   include?: I;
@@ -28,16 +28,18 @@ export function parsePrismaQuery<
     }
   };
 
-  const parseNumber = (value: string | null, defaultValue: number): number => {
+  const parseNumber = (value: string | null): number | undefined => {
+    if (value === null) return undefined;
+
     const num = Number(value);
-    return Number.isFinite(num) ? num : defaultValue;
+    return Number.isFinite(num) ? num : undefined;
   };
 
   return {
     all: searchParams.get("all") === "true",
 
-    skip: parseNumber(searchParams.get("skip"), 0),
-    take: parseNumber(searchParams.get("take"), 20),
+    skip: parseNumber(searchParams.get("skip")),
+    take: parseNumber(searchParams.get("take")),
 
     where: parseJSON<W>(searchParams.get("where"), "where"),
     select: parseJSON<S>(searchParams.get("select"), "select"),

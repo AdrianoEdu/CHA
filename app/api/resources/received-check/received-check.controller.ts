@@ -5,6 +5,8 @@
 
 import { receivedCheckService } from "./received-check.service";
 import { RemoveReceivedCheckDto } from "../../dto/ReceivedCheck/ReceivedCheck";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
+import { Prisma } from "@/app/generated/prisma";
 
 export class ReceivedCheckController {
   private receivedCheckService;
@@ -40,10 +42,14 @@ export class ReceivedCheckController {
     try {
       const { searchParams } = new URL(req.url);
 
-      const skip = Number(searchParams.get("skip"));
-      const take = Number(searchParams.get("take"));
+      const params = parsePrismaQuery<
+        Prisma.ReceivedCheckWhereInput,
+        Prisma.ReceivedCheckSelect,
+        Prisma.ReceivedCheckInclude,
+        Prisma.ReceivedCheckOrderByWithRelationInput
+      >(req);
 
-      return await this.receivedCheckService.findAll({ skip, take });
+      return await this.receivedCheckService.findReceivedCheck(params);
     } catch (error: any) {
       console.error("Erro ao buscar cheques recebidos:", error);
       return Response.json({ error: error.message }, { status: 500 });
