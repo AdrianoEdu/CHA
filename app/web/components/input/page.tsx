@@ -17,16 +17,13 @@ export enum InputType {
   Date = "date",
 }
 
-// 🔥 Remove onChange do HTML padrão pra controlar corretamente
 type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
 
 interface InputProps extends BaseInputProps {
   inputType?: InputType;
 
-  // evento padrão (string)
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
-  // valor tratado (number no money)
   onValueChange?: (value: number | string) => void;
 
   regex?: RegExp;
@@ -98,7 +95,6 @@ export default function Input({
 
       setDisplayValue(formatted);
 
-      // 🔥 CLONA o event com valor correto
       const newEvent = {
         ...e,
         target: {
@@ -148,7 +144,7 @@ export default function Input({
           type={resolveHtmlType(inputType)}
           value={
             inputType === InputType.Money
-              ? displayValue // 👈 agora NÃO depende mais do rest.value
+              ? displayValue
               : inputType === InputType.Cnpj
                 ? displayValue
                 : (rest.value ?? "")
