@@ -18,7 +18,6 @@ interface TableProps<T> {
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
   onRowClick?: (row: T) => void;
-
   enableFilter?: boolean;
   onFilterChange?: (value: string) => void;
 }

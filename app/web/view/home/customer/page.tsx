@@ -8,7 +8,7 @@
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/page";
 import RemoveModal from "@/app/web/components/modal/remove-employee/page";
-import { UpsertCustomer } from "@/app/web/components/modal/upsert-customer/page";
+import { UpsertCustomer } from "@/upsert-customer/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {

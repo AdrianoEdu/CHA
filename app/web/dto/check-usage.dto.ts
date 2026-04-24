@@ -35,6 +35,8 @@ export type UpdateCheckUsageDTO = {
   usageType?: CheckUsageType;
 };
 
+export type UpsertCheckUsageDTO = CreateCheckUsageDTO & UpdateCheckUsageDTO;
+
 export type CheckUsageWhere = Partial<CheckUsageDTO>;
 
 export type CheckUsageParams = PaginationDto<CheckUsageWhere, any, any, any>;

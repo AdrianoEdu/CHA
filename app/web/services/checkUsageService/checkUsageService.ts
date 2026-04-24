@@ -23,7 +23,7 @@ class CheckUsageService {
   }
 
   update(data: UpdateCheckUsageDTO) {
-    return requestService.update(this.url, data);
+    return requestService.update<UpdateCheckUsageDTO, void>(this.url, data);
   }
 
   findAll(data: CheckUsageParams) {

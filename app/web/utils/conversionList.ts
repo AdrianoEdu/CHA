@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ReceivedCheckStatus } from "../constants/enum";
+import { CheckUsageType, ReceivedCheckStatus } from "../constants/enum";
 
 type SelectOption = { id: string; name: string };
 
@@ -40,6 +40,26 @@ export function getListStatusReceiveCheck(): SelectOption[] {
         return {
           id: ReceivedCheckStatus.IN_USE,
           name: "Em Uso",
+        };
+    }
+  });
+}
+
+export function getListStatusCheckUsage(): SelectOption[] {
+  const enums = Object.values(CheckUsageType);
+
+  return enums.map((status) => {
+    switch (status) {
+      case CheckUsageType.DEPOSIT:
+        return {
+          id: CheckUsageType.DEPOSIT,
+          name: "Cancelado",
+        };
+
+      default:
+        return {
+          id: CheckUsageType.PAYABLE,
+          name: "Contas a pagar",
         };
     }
   });

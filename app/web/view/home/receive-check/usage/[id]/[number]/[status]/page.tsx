@@ -6,13 +6,17 @@
 "use client";
 
 import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
+import { UpsertCheckUsageModal } from "@/app/web/components/modal/upsert-check-usage/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
 import {
   ActionEnum,
   CheckUsageType,
   ReceivedCheckStatus,
 } from "@/app/web/constants/enum";
-import { CheckUsageDTO } from "@/app/web/dto/check-usage.dto";
+import {
+  CheckUsageDTO,
+  UpsertCheckUsageDTO,
+} from "@/app/web/dto/check-usage.dto";
 import { ReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
@@ -29,6 +33,11 @@ export type GetColumnProps = {
   handleEdit: (row: CheckUsageDTO) => void;
 };
 
+const statusCheckUsageMap: Record<CheckUsageType, string> = {
+  DEPOSIT: "Depósito",
+  PAYABLE: "Contas a pagar",
+};
+
 const statusMap: Record<ReceivedCheckStatus, string> = {
   RECEIVED: "Recebido",
   IN_USE: "Em uso",
@@ -40,7 +49,11 @@ const getColumns = ({
   handleEdit,
 }: GetColumnProps): TableColumn<CheckUsageDTO>[] => [
   { label: "Criado em", accessor: "usedAt" },
-  { label: "Tipo de pagamento", accessor: "usageType" },
+  {
+    label: "Tipo de pagamento",
+    accessor: "usageType",
+    render: (row) => statusCheckUsageMap[row.usageType],
+  },
   { label: "Anotações", accessor: "notes" },
   {
     label: "Valor",
@@ -81,7 +94,9 @@ export default function ReceiveCheck() {
     handleGetListCheckUsage();
   }, []);
 
-  useEffect(() => {}, [filter]);
+  useEffect(() => {
+    handleFilterCheckUsage;
+  }, [filter]);
 
   const handleGetCheckUsageById = async (): Promise<void> => {
     const data = await receiveCheckService.findAll({
@@ -109,16 +124,59 @@ export default function ReceiveCheck() {
   };
 
   function handleOpenModalEditCheckUsage(row: CheckUsageDTO): void {
-    throw new Error("Function not implemented.");
+    openModal(
+      <UpsertCheckUsageModal
+        editData={row}
+        onClose={closeModal}
+        onSubmit={handleUpsertData}
+        receivedCheckId={id as string}
+      />,
+      "Atualizar uso do cheque",
+    );
   }
 
-  function handleOpenModalRegisterCheckUsage(): void {
-    throw new Error("Function not implemented.");
-  }
+  const handleOpenModalRegisterCheckUsage = (): void => {
+    openModal(
+      <UpsertCheckUsageModal
+        onClose={closeModal}
+        onSubmit={handleUpsertData}
+        receivedCheckId={id as string}
+      />,
+      "Recistrar uso do cheque",
+    );
+  };
 
-  function handleOpenModalEditReceivedCheck(row: CheckUsageDTO): void {
-    throw new Error("Function not implemented.");
-  }
+  const handleUpsertData = (
+    { id, ...data }: UpsertCheckUsageDTO,
+    isEdit?: boolean,
+  ): void => {
+    if (isEdit) {
+      checkUsageService
+        .update({
+          id,
+          receivedCheckId: data.receivedCheckId,
+          amount: data.amount,
+          notes: data.notes,
+          usageType: data.usageType,
+          usedAt: data.usedAt,
+        })
+        .then(() => {
+          toast.success("Utilização do cheque atualizada com sucesso");
+
+          handleGetListCheckUsage();
+          closeModal();
+        });
+
+      return;
+    }
+
+    checkUsageService.create({ ...data }).then(() => {
+      toast.success("Utilização do cheque  com sucesso");
+
+      handleGetListCheckUsage();
+      closeModal();
+    });
+  };
 
   const handleFilterCheckUsage = async () => {
     await handleGenericFilter({
@@ -132,6 +190,7 @@ export default function ReceiveCheck() {
           take: 20,
           all: true,
           orderBy: { created: "desc" },
+          where: { usageType: value as CheckUsageType },
         });
 
         return Array.isArray(result) ? result : [result];
@@ -139,13 +198,19 @@ export default function ReceiveCheck() {
     });
   };
 
-  const handleSetFilterCheckNumber = (checkNumber: string) => {
+  const handleSetFilterCheckUsage = (usageType: string) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
 
+    const currentStatus = CheckUsageType[usageType as CheckUsageType];
+
+    if (!currentStatus) {
+      toast.error("Erro na pesquisa");
+    }
+
     debounceRef.current = setTimeout(() => {
-      setFilter(checkNumber);
+      setFilter(currentStatus);
     }, 500);
   };
 
@@ -157,7 +222,7 @@ export default function ReceiveCheck() {
         enableFilter
         rows={checkUsageList}
         title={"Cheque utilizado"}
-        onFilterChange={handleFilterCheckUsage}
+        onFilterChange={handleSetFilterCheckUsage}
         onActionClicked={handleOpenModalRegisterCheckUsage}
         columns={getColumns({ handleEdit: handleOpenModalEditCheckUsage })}
       />

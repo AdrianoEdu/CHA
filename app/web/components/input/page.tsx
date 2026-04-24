@@ -1,8 +1,3 @@
-// Copyright (c) 2026-02-16
-// Contabilidade H. Alvarenga LTDA
-// Developed by Adriano Trentin Jr.
-// All rights reserved.
-
 "use client";
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
@@ -15,15 +10,16 @@ export enum InputType {
   Money = "money",
   Cnpj = "Cnpj",
   Date = "date",
+  Annotation = "annotation", // ✅ NOVO
 }
 
 type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
 
 interface InputProps extends BaseInputProps {
   inputType?: InputType;
-
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-
+  onChange?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   onValueChange?: (value: number | string) => void;
 
   regex?: RegExp;
@@ -43,7 +39,6 @@ export default function Input({
   ...rest
 }: Readonly<InputProps>) {
   const [displayValue, setDisplayValue] = useState<string>("");
-  const [rawMoney, setRawMoney] = useState<string>("");
 
   const formatters: Partial<
     Record<InputType, (value: string) => { raw: string; formatted: string }>
@@ -56,11 +51,8 @@ export default function Input({
     if (inputType === InputType.Money) {
       if (typeof rest.value === "number") {
         const cents = Math.round(rest.value * 100).toString();
-
-        setRawMoney(cents);
         setDisplayValue(formatMoney(cents).formatted);
       }
-
       return;
     }
 
@@ -82,12 +74,13 @@ export default function Input({
     return "text";
   }
 
-  function handleOnPress(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleOnPress(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
     const value = e.target.value;
 
     if (inputType === InputType.Money) {
       const onlyNumbers = value.replace(/\D/g, "");
-
       const numeric = Number(onlyNumbers) / 100;
       const safeValue = isNaN(numeric) ? 0 : numeric;
 
@@ -136,21 +129,32 @@ export default function Input({
   return (
     <div className="bg-transparent p-2 rounded-lg">
       <div className="relative w-72">
-        <input
-          id={rest.name}
-          placeholder=" "
-          disabled={rest.disabled}
-          onChange={handleOnPress}
-          type={resolveHtmlType(inputType)}
-          value={
-            inputType === InputType.Money
-              ? displayValue
-              : inputType === InputType.Cnpj
+        {/* ✅ AQUI MUDA TUDO */}
+        {inputType === InputType.Annotation ? (
+          <textarea
+            id={rest.name}
+            placeholder=" "
+            disabled={rest.disabled}
+            onChange={handleOnPress}
+            value={displayValue}
+            rows={4}
+            className={`peer bg-white w-full min-h-[100px] rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${rest.className}`}
+          />
+        ) : (
+          <input
+            id={rest.name}
+            placeholder=" "
+            disabled={rest.disabled}
+            onChange={handleOnPress}
+            type={resolveHtmlType(inputType)}
+            value={
+              inputType === InputType.Money || inputType === InputType.Cnpj
                 ? displayValue
                 : (rest.value ?? "")
-          }
-          className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
-        />
+            }
+            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
+          />
+        )}
 
         <label
           htmlFor={rest.name}
