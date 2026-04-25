@@ -3,8 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ActionDto } from "./auth.dto";
-
 export type PaginationDto<WHERE, SELECT, INCLUDE, ORDERBY> = {
   skip?: number;
   take?: number;
