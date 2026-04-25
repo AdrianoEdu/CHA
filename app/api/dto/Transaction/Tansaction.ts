@@ -7,7 +7,7 @@ import { TransactionType } from "@/app/generated/prisma";
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
 import { GetCustomerDto } from "../Customer/Customer";
 
-export type TrasnactionDTO = {
+export type GetTrasnactionDTO = {
   id: string;
   type: TransactionType;
   category: GetFinancialCategoryDto;

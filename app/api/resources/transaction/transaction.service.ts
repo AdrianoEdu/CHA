@@ -7,10 +7,12 @@ import { Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import {
   CreateTransactionDTO,
-  TrasnactionDTO,
+  GetTrasnactionDTO,
   UpdateTransactionDTO,
 } from "../../dto/Transaction/Tansaction";
 import { databaseService } from "../../providers/database/DatabaseService";
+import { transactionSelect, TransactionWithRelations } from "./type";
+import { NotFoundException } from "../../error/NotFoundException";
 
 class TransactionService {
   private databaseService = databaseService;
@@ -26,14 +28,14 @@ class TransactionService {
     });
   }
 
-  async findAll(
+  async findTransaction(
     params: PaginationDto<
       Prisma.TransactionWhereInput,
       Prisma.TransactionSelect,
       Prisma.TransactionInclude,
       Prisma.TransactionOrderByWithRelationInput
     >,
-  ): Promise<TrasnactionDTO[]> {
+  ): Promise<GetTrasnactionDTO | GetTrasnactionDTO[]> {
     const baseQuery: Prisma.TransactionFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -44,21 +46,37 @@ class TransactionService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
+    if (!params.all) return await this.findFirst(baseQuery);
+
+    return await this.findAll(baseQuery);
+  }
+
+  async findAll(
+    baseQuery: Prisma.TransactionFindManyArgs,
+  ): Promise<GetTrasnactionDTO[]> {
     const result = await this.databaseService.transaction.findMany({
       ...baseQuery,
-      select: {
-        id: true,
-        type: true,
-        amount: true,
-        dueDate: true,
-        customer: true,
-        category: true,
-        settledAt: true,
-        createdAt: true,
-      },
+      select: transactionSelect,
     });
 
-    return result.map((item) => ({
+    return result.map((transaction) => this.mapperTransation(transaction));
+  }
+
+  async findFirst(
+    baseQuery: Prisma.TransactionFindManyArgs,
+  ): Promise<GetTrasnactionDTO> {
+    const result = await this.databaseService.transaction.findFirst({
+      ...baseQuery,
+      select: transactionSelect,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return this.mapperTransation(result);
+  }
+
+  mapperTransation(item: TransactionWithRelations): GetTrasnactionDTO {
+    return {
       id: item.id,
       type: item.type,
       dueDate: item.dueDate,
@@ -67,7 +85,7 @@ class TransactionService {
       createdAt: item.createdAt,
       amount: item.amount.toNumber(),
       settledAt: item.settledAt ?? undefined,
-    }));
+    };
   }
 }
 

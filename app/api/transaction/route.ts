@@ -55,21 +55,7 @@ export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    const { searchParams } = new URL(req.url);
-    const type = Number(searchParams.get("type"));
-
-    let result;
-
-    switch (type) {
-      case ActionEnum.FindAll:
-        result = await transactionController.findAll(req);
-        break;
-      case ActionEnum.FindByFilters:
-        // result = await transactionController.findByName(req);
-        break;
-      default:
-        break;
-    }
+    const result = await transactionController.findAll(req);
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {

@@ -3,17 +3,17 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
   RemoveFinancialCategoryDto,
   UpdateFinancialCategoryDto,
-} from "../../dto/FinancialCategory/FinancialCategory";
-import { PaginationDto } from "../../dto/Pagination/Pagination";
-import { databaseService } from "../../providers/database/DatabaseService";
-import { HttpException } from "../../error/HttpException";
-import { NotFoundException } from "../../error/NotFoundException";
+} from "@/app/api/dto/FinancialCategory/FinancialCategory";
+import { PaginationDto } from "@/app/api/dto/Pagination/Pagination";
+import { HttpException } from "@/app/api/error/HttpException";
+import { NotFoundException } from "@/app/api/error/NotFoundException";
+import { databaseService } from "@/app/api/providers/database/DatabaseService";
+import { Prisma } from "@/app/generated/prisma";
 
 class FinancialCategoryService {
   private databaseService;
@@ -82,10 +82,10 @@ class FinancialCategoryService {
 
   async delete({ id }: RemoveFinancialCategoryDto) {
     const [countReceived, countPayable] = await Promise.all([
-      this.databaseService.accountsReceivable.count({
+      this.databaseService.transaction.count({
         where: { categoryId: id },
       }),
-      this.databaseService.accountsPayable.count({ where: { categoryId: id } }),
+      this.databaseService.transaction.count({ where: { categoryId: id } }),
     ]);
 
     if (countPayable > 0 || countReceived > 0)

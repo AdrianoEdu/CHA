@@ -3,10 +3,12 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import {
   CreateTransactionDTO,
   UpdateTransactionDTO,
 } from "../../dto/Transaction/Tansaction";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { transactionService } from "./transaction.service";
 
 class TransactionController {
@@ -20,14 +22,14 @@ class TransactionController {
 
   findAll(req: Request) {
     try {
-      const { searchParams } = new URL(req.url);
-      const skip = searchParams.get("skip");
-      const take = searchParams.get("take");
+      const params = parsePrismaQuery<
+        Prisma.TransactionWhereInput,
+        Prisma.TransactionSelect,
+        Prisma.TransactionInclude,
+        Prisma.TransactionOrderByWithRelationInput
+      >(req);
 
-      return transactionService.findAll({
-        skip: Number(skip),
-        take: Number(take),
-      });
+      return transactionService.findTransaction(params);
     } catch (error: any) {
       console.error("Erro ao buscar transações:", error);
       return Response.json({ error: error.message }, { status: 500 });

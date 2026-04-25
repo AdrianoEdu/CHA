@@ -2,14 +2,14 @@
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 
+import { financialCategoryService } from "./financial-category.service";
+import { Prisma } from "@/app/generated/prisma";
 import {
   CreateFinancialCategoryDto,
   UpdateFinancialCategoryDto,
-} from "../../dto/FinancialCategory/FinancialCategory";
-import { financialCategoryService } from "./financial-category.service";
-import { RemoveAdvanceReason } from "../../dto/AdvanceReason/AdvanceReason";
-import { parsePrismaQuery } from "../../utils/parseFindParams";
-import { Prisma } from "@/app/generated/prisma";
+} from "@/app/api/dto/FinancialCategory/FinancialCategory";
+import { parsePrismaQuery } from "@/app/api/utils/parseFindParams";
+import { RemoveAdvanceReason } from "@/app/api/dto/AdvanceReason/AdvanceReason";
 
 class FinancialCategoryController {
   private financialCategoryService;
