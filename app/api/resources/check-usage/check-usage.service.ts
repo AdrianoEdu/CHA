@@ -77,9 +77,13 @@ class CheckUsageService {
       usedAt: item.usedAt,
       createdAt: item.createdAt,
       usageType: item.usageType,
+      transaction: {
+        id: item.transaction.id,
+        amount: item.transaction.amount.toNumber(),
+      },
       notes: item.notes ?? undefined,
       amount: item.amount.toNumber(),
-      receiveCheck: {
+      receivedCheck: {
         id: item.receivedCheck.id,
         bank: item.receivedCheck.bank,
         status: item.receivedCheck.status,

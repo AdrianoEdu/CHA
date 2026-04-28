@@ -8,7 +8,6 @@ import { Prisma } from "@/app/generated/prisma";
 export type TransactionWithRelations = Prisma.TransactionGetPayload<{
   select: {
     id: true;
-    type: true;
     amount: true;
     dueDate: true;
     customer: true;
@@ -20,7 +19,6 @@ export type TransactionWithRelations = Prisma.TransactionGetPayload<{
 
 export const transactionSelect = {
   id: true,
-  type: true,
   amount: true,
   dueDate: true,
   category: true,

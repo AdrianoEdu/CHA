@@ -13,7 +13,9 @@ import {
   CheckUsageDTO,
   UpsertCheckUsageDTO,
 } from "@/app/web/dto/check-usage.dto";
-import { CheckUsageType } from "@/app/web/constants/enum";
+import { CheckUsageType, FinancialFlowType } from "@/app/web/constants/enum";
+import { transactionService } from "@/app/web/services/transactionService/transactionService";
+import { GetTrasnactionDTO } from "@/app/web/dto/transaction.dto";
 
 interface CheckUsageModalProps {
   onClose: () => void;
@@ -29,6 +31,18 @@ const statusMap: Record<CheckUsageType, string> = {
   PAYABLE: "Contas a pagar",
 };
 
+const mapperTransaction = (
+  data: GetTrasnactionDTO | GetTrasnactionDTO[],
+): SelectOption[] => {
+  if (Array.isArray(data))
+    return data.map((transaction) => ({
+      id: transaction.id,
+      name: transaction.category.name ?? "",
+    }));
+
+  return [{ id: data.id, name: data.category.name ?? "" }];
+};
+
 export function UpsertCheckUsageModal({
   onClose,
   onSubmit,
@@ -40,6 +54,7 @@ export function UpsertCheckUsageModal({
     notes: "",
     amount: 0,
     receivedCheckId,
+    transactionId: "",
     usedAt: new Date(),
     usageType: CheckUsageType.DEPOSIT,
   });
@@ -50,6 +65,12 @@ export function UpsertCheckUsageModal({
     null,
   );
 
+  const [transactionOption, settransactionOption] = useState<SelectOption[]>(
+    [],
+  );
+  const [transactionSelectOption, settransactionSelectOption] =
+    useState<SelectOption | null>(null);
+
   useEffect(() => {
     const list: SelectOption[] = Object.values(CheckUsageType).map((value) => ({
       id: String(value),
@@ -57,6 +78,8 @@ export function UpsertCheckUsageModal({
     }));
 
     setUsageTypeList(list);
+
+    handleGetTransactions();
   }, []);
 
   useEffect(() => {
@@ -65,7 +88,8 @@ export function UpsertCheckUsageModal({
     setData({
       ...editData,
       usedAt: editData.usedAt,
-      receivedCheckId: editData.receiveCheck.id,
+      transactionId: editData.transaction.id ?? "",
+      receivedCheckId: editData.receivedCheck.id ?? "",
     });
 
     const currentType = usageTypeList.find(
@@ -81,12 +105,27 @@ export function UpsertCheckUsageModal({
     }
   }, [editData, usageTypeList]);
 
+  const handleGetTransactions = async (): Promise<void> => {
+    const result = await transactionService.findAll({ all: true });
+
+    settransactionOption(mapperTransaction(result));
+  };
+
   const handleSelectUsageType = (option: SelectOption | null) => {
     setUsageTypeOption(option);
 
     setData((prev) => ({
       ...prev,
       usageType: option?.id as CheckUsageType,
+    }));
+  };
+
+  const handleSelectTransaction = (option: SelectOption | null) => {
+    settransactionSelectOption(option);
+
+    setData((prev) => ({
+      ...prev,
+      transactionId: option?.id ?? "",
     }));
   };
 
@@ -131,6 +170,15 @@ export function UpsertCheckUsageModal({
             usedAt: new Date(value),
           }));
         }}
+      />
+
+      <ComboBox
+        valueKey="id"
+        labelKey="name"
+        options={transactionOption}
+        selected={transactionSelectOption}
+        label="Tipo de uso"
+        onSelectOption={handleSelectTransaction}
       />
 
       <ComboBox

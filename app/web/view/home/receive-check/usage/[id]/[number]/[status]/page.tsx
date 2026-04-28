@@ -56,8 +56,8 @@ const getColumns = ({
   },
   { label: "Anotações", accessor: "notes" },
   {
-    label: "Valor",
-    accessor: "totalAmount",
+    label: "Valor utilizado",
+    accessor: "amount",
     render: (row) => `R$ ${row.amount.toFixed(2)}`,
   },
   {
@@ -115,6 +115,7 @@ export default function ReceiveCheck() {
       take: 20,
       all: true,
       orderBy: { createdAt: "desc" },
+      where: { receivedCheck: { id: id as string } },
     });
 
     if (Array.isArray(result)) {
@@ -150,32 +151,58 @@ export default function ReceiveCheck() {
     { id, ...data }: UpsertCheckUsageDTO,
     isEdit?: boolean,
   ): void => {
-    if (isEdit) {
-      checkUsageService
-        .update({
-          id,
-          receivedCheckId: data.receivedCheckId,
-          amount: data.amount,
-          notes: data.notes,
-          usageType: data.usageType,
-          usedAt: data.usedAt,
-        })
-        .then(() => {
-          toast.success("Utilização do cheque atualizada com sucesso");
+    const sum = (checkUsageSelected?.currentAmount ?? 0) + data.amount;
 
-          handleGetListCheckUsage();
-          closeModal();
-        });
-
+    if (sum > checkUsageSelected?.totalAmount!) {
+      toast.error(
+        "Erro na utilização, o valor ultrapassou o limite total do cheque",
+      );
       return;
     }
 
-    checkUsageService.create({ ...data }).then(() => {
-      toast.success("Utilização do cheque  com sucesso");
+    try {
+      if (isEdit) {
+        checkUsageService
+          .update({
+            id,
+            receivedCheckId: data.receivedCheckId,
+            amount: data.amount,
+            notes: data.notes,
+            usageType: data.usageType,
+            usedAt: data.usedAt,
+          })
+          .then(() => {
+            toast.success("Utilização do cheque atualizada com sucesso");
+          });
 
+        return;
+      }
+
+      checkUsageService.create({ ...data }).then(() => {
+        toast.success("Utilização do cheque  com sucesso");
+      });
+
+      const sum = (checkUsageSelected?.currentAmount ?? 0) + data.amount;
+
+      let validateStatus =
+        sum === checkUsageSelected?.totalAmount
+          ? ReceivedCheckStatus.FINALIZED
+          : checkUsageSelected?.status;
+
+      alert(validateStatus + `${sum} ${checkUsageSelected?.totalAmount}`);
+
+      receiveCheckService.update({
+        status: validateStatus,
+        id: checkUsageSelected?.id ?? id,
+        currentAmount: sum,
+      });
+
+      handleGetCheckUsageById();
       handleGetListCheckUsage();
       closeModal();
-    });
+    } catch (err) {
+      toast.error(`Erro no sistema: ${err}`);
+    }
   };
 
   const handleFilterCheckUsage = async () => {
@@ -218,6 +245,9 @@ export default function ReceiveCheck() {
     <div>
       <h1>{`Número do cheque: ${checkUsageSelected?.checkNumber}`}</h1>
       <h1>{`Status do cheque: ${statusMap[checkUsageSelected?.status!]}`}</h1>
+      <h1>{`Valor total do cheque: R$ ${checkUsageSelected?.totalAmount.toFixed(2)}`}</h1>
+      <h1>{`Valor total do cheque: R$ ${checkUsageSelected?.currentAmount.toFixed(2)}`}</h1>
+
       <Table
         enableFilter
         rows={checkUsageList}

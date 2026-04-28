@@ -78,7 +78,6 @@ class TransactionService {
   mapperTransation(item: TransactionWithRelations): GetTrasnactionDTO {
     return {
       id: item.id,
-      type: item.type,
       dueDate: item.dueDate,
       category: item.category,
       customer: item.customer,

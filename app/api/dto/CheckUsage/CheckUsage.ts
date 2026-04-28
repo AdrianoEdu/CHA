@@ -7,6 +7,7 @@ import { CheckUsageType } from "@/app/generated/prisma";
 import { ReceivedCheckDTO } from "../ReceivedCheck/ReceivedCheck";
 import { BankDto } from "../Bank/bank";
 import { GetCustomerDto } from "../Customer/Customer";
+import { GetTrasnactionDTO } from "../Transaction/Tansaction";
 
 export type CheckUsageDTO = {
   id: string;
@@ -15,13 +16,15 @@ export type CheckUsageDTO = {
   notes?: string;
   createdAt: Date;
   usageType: CheckUsageType;
-  receiveCheck: ReceivedCheckDTO;
+  receivedCheck: ReceivedCheckDTO;
+  transaction: Partial<GetTrasnactionDTO>;
 };
 
 export type CreateCheckUsageDTO = {
   usedAt: Date;
   notes?: string;
   amount: number;
+  transactionId: string;
   receivedCheckId: string;
   usageType: CheckUsageType;
 };
@@ -29,8 +32,9 @@ export type CreateCheckUsageDTO = {
 export type UpdateCheckUsageDTO = {
   id: string;
   usedAt?: Date;
-  amount?: number;
   notes?: string;
+  amount?: number;
+  transactionId?: string;
   receivedCheckId: string;
   usageType?: CheckUsageType;
 };

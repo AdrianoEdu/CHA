@@ -45,13 +45,20 @@ class ReceivedCheckService {
 
   async update(data: UpdateReceivedCheckDTO): Promise<void> {
     const { bankId, customerId, status, ...receivedUpdated } = data;
+
     await this.databaseService.receivedCheck.update({
       where: { id: data.id },
       data: {
         ...receivedUpdated,
-        status: this.parseStatus(data.status!),
-        bank: { connect: { id: data.bankId } },
-        customer: { connect: { id: data.customerId } },
+        ...(status !== undefined && {
+          status: this.parseStatus(status),
+        }),
+        ...(bankId && {
+          bank: { connect: { id: bankId } },
+        }),
+        ...(customerId && {
+          customer: { connect: { id: customerId } },
+        }),
       },
     });
   }

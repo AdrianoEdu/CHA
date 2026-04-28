@@ -175,6 +175,9 @@ model CheckUsage {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  transactionId  String
+  transaction    Transaction @relation(fields: [transactionId], references: [id])
+
   @@map("check_usages")
 }
 
@@ -192,7 +195,6 @@ model FinancialCategory {
 
 model Transaction {
   id         String   @id @default(uuid())
-  type       TransactionType
   categoryId String
   category   FinancialCategory @relation(fields: [categoryId], references: [id])
   customerId    String
@@ -202,6 +204,8 @@ model Transaction {
   settledAt  DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  checkUsage CheckUsage[]
 
   @@map("transactions")
 }

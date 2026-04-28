@@ -20,7 +20,7 @@ interface InputProps extends BaseInputProps {
   onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
-  onValueChange?: (value: number | string) => void;
+  onValueChange?: (value: number | string | Date) => void;
 
   regex?: RegExp;
   regexError?: boolean;
@@ -56,10 +56,23 @@ export default function Input({
       return;
     }
 
+    // ✅ DATE corrigido
+    if (inputType === InputType.Date) {
+      if (rest.value instanceof Date) {
+        const iso = rest.value.toISOString().split("T")[0];
+        setDisplayValue(iso);
+      } else if (typeof rest.value === "string") {
+        setDisplayValue(rest.value);
+      } else {
+        setDisplayValue("");
+      }
+      return;
+    }
+
     const rawValue = String(rest.value ?? "");
     const formatter = formatters[inputType];
 
-    if (formatter && inputType !== InputType.Date) {
+    if (formatter) {
       setDisplayValue(formatter(rawValue).formatted);
       return;
     }
@@ -115,6 +128,25 @@ export default function Input({
       return;
     }
 
+    // ✅ DATE corrigido (retorna Date)
+    if (inputType === InputType.Date) {
+      if (!value) {
+        onValueChange?.("");
+        onChange?.(e);
+        return;
+      }
+
+      const [year, month, day] = value.split("-");
+      const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+      setDisplayValue(value);
+
+      onValueChange?.(date); // 👈 AGORA retorna Date
+      onChange?.(e);
+
+      return;
+    }
+
     setDisplayValue(value);
 
     if (onRegexError) {
@@ -129,7 +161,6 @@ export default function Input({
   return (
     <div className="bg-transparent p-2 rounded-lg">
       <div className="relative w-72">
-        {/* ✅ AQUI MUDA TUDO */}
         {inputType === InputType.Annotation ? (
           <textarea
             id={rest.name}
@@ -150,7 +181,9 @@ export default function Input({
             value={
               inputType === InputType.Money || inputType === InputType.Cnpj
                 ? displayValue
-                : (rest.value ?? "")
+                : inputType === InputType.Date
+                  ? displayValue
+                  : (rest.value ?? "")
             }
             className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
           />
@@ -163,16 +196,12 @@ export default function Input({
             bg-white px-1
             text-gray-500 text-sm
             transition-all
-
             top-2
-
             peer-focus:-top-3
             peer-focus:text-sky-600
             peer-focus:text-xs
-
             peer-not-placeholder-shown:-top-3
             peer-not-placeholder-shown:text-xs
-
             pointer-events-none
           "
         >

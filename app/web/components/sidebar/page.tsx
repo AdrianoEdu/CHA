@@ -73,6 +73,13 @@ export default function SideBar() {
         </Link>
 
         <Link
+          href="/web/view/home/transaction"
+          className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
+        >
+          <span className="ml-3">Transações</span>
+        </Link>
+
+        <Link
           href="/web/view/home/settings"
           className="flex justify-center px-3 py-2 rounded hover:bg-gray-800 hover:text-white transition"
         >

@@ -7,6 +7,7 @@ import { CheckUsageType } from "../constants/enum";
 import { ActionDto } from "./auth.dto";
 import { PaginationDto } from "./pagination.dto";
 import { ReceivedCheckDTO } from "./receive-check.dto";
+import { GetTrasnactionDTO } from "./transaction.dto";
 
 export type CheckUsageDTO = {
   id: string;
@@ -15,13 +16,15 @@ export type CheckUsageDTO = {
   notes?: string;
   createdAt: Date;
   usageType: CheckUsageType;
-  receiveCheck: ReceivedCheckDTO;
+  receivedCheck: Partial<ReceivedCheckDTO>;
+  transaction: Partial<GetTrasnactionDTO>;
 };
 
 export type CreateCheckUsageDTO = {
   usedAt: Date;
   notes?: string;
   amount: number;
+  transactionId: string;
   receivedCheckId: string;
   usageType: CheckUsageType;
 };
@@ -31,7 +34,7 @@ export type UpdateCheckUsageDTO = {
   usedAt?: Date;
   amount?: number;
   notes?: string;
-  receivedCheckId: string;
+  receivedCheckId?: string;
   usageType?: CheckUsageType;
 };
 

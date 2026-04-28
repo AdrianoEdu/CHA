@@ -3,39 +3,36 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { TransactionType } from "@/app/generated/prisma";
 import { GetFinancialCategoryDto } from "./financial.dto";
 import { GetCustomerDto } from "./customer.dto";
 import { PaginationDto } from "./pagination.dto";
 
 export type GetTrasnactionDTO = {
   id: string;
-  type: TransactionType;
-  category: GetFinancialCategoryDto;
-  customer: GetCustomerDto;
   amount: number;
   dueDate?: Date;
-  settledAt?: Date;
   createdAt: Date;
+  settledAt?: Date;
+  customer: GetCustomerDto;
+  category: Partial<GetFinancialCategoryDto>;
 };
 
 export type CreateTransactionDTO = {
-  type: TransactionType;
+  dueDate: Date;
+  amount: number;
+  settledAt?: Date;
   categoryId: string;
   customerId: string;
-  amount: number;
-  dueDate: Date;
-  settLedAt?: Date;
 };
 
 export type UpdateTransactionDTO = {
   id: string;
   dueDate?: Date;
   amount?: number;
-  settLedAt?: Date;
+  settledAt?: Date;
   categoryId?: string;
   customerId?: string;
-  type?: TransactionType;
+  transactionId?: string;
 };
 
 export type UpsertTransactionDto = CreateTransactionDTO & UpdateTransactionDTO;
