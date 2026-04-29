@@ -41,3 +41,9 @@ export enum CheckUsageType {
   DEPOSIT = "DEPOSIT",
   PAYABLE = "PAYABLE",
 }
+
+export enum TransactionStatus {
+  CREATED = "CREATED",
+  IN_USE = "IN_USE",
+  FINALIZED = "FINALIZED",
+}

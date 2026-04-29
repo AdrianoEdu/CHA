@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
+import { Prisma, TransactionStatus } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import {
   CreateTransactionDTO,
@@ -24,7 +24,12 @@ class TransactionService {
   update({ id, ...data }: UpdateTransactionDTO) {
     return this.databaseService.transaction.update({
       where: { id },
-      data: { ...data },
+      data: {
+        ...data,
+        ...(data.status !== undefined && {
+          status: this.parseStatus(data.status),
+        }),
+      },
     });
   }
 
@@ -75,16 +80,28 @@ class TransactionService {
     return this.mapperTransation(result);
   }
 
-  mapperTransation(item: TransactionWithRelations): GetTrasnactionDTO {
+  private mapperTransation(item: TransactionWithRelations): GetTrasnactionDTO {
     return {
       id: item.id,
+      status: item.status,
       dueDate: item.dueDate,
       category: item.category,
       customer: item.customer,
       createdAt: item.createdAt,
       amount: item.amount.toNumber(),
       settledAt: item.settledAt ?? undefined,
+      currentAmount: item.currentAmount.toNumber(),
     };
+  }
+
+  private parseStatus(status: string): TransactionStatus {
+    const statusUpper = status.toUpperCase();
+
+    const value = TransactionStatus[statusUpper as TransactionStatus];
+
+    if (value) return value;
+
+    throw new Error(`Status inválido: ${status}`);
   }
 }
 

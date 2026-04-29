@@ -9,22 +9,25 @@ import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
 import { UpsertCheckUsageModal } from "@/app/web/components/modal/upsert-check-usage/page";
 import Table, { TableColumn } from "@/app/web/components/table/page";
 import {
-  ActionEnum,
   CheckUsageType,
   ReceivedCheckStatus,
+  TransactionStatus,
 } from "@/app/web/constants/enum";
 import {
   CheckUsageDTO,
   UpsertCheckUsageDTO,
 } from "@/app/web/dto/check-usage.dto";
 import { ReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
+import { GetTrasnactionDTO } from "@/app/web/dto/transaction.dto";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { checkUsageService } from "@/app/web/services/checkUsageService/checkUsageService";
 import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
+import { transactionService } from "@/app/web/services/transactionService/transactionService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { FaLaptopHouse } from "react-icons/fa";
 import { toast } from "react-toastify";
 
 let oldCheckUsageList: CheckUsageDTO[] = [];
@@ -90,7 +93,7 @@ export default function ReceiveCheck() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    handleGetCheckUsageById();
+    handleReceivedCheckById();
     handleGetListCheckUsage();
   }, []);
 
@@ -98,7 +101,7 @@ export default function ReceiveCheck() {
     handleFilterCheckUsage;
   }, [filter]);
 
-  const handleGetCheckUsageById = async (): Promise<void> => {
+  const handleReceivedCheckById = async (): Promise<void> => {
     const data = await receiveCheckService.findAll({
       where: {
         id: id as string,
@@ -147,11 +150,25 @@ export default function ReceiveCheck() {
     );
   };
 
-  const handleUpsertData = (
+  const handleUpsertData = async (
     { id, ...data }: UpsertCheckUsageDTO,
     isEdit?: boolean,
-  ): void => {
+  ): Promise<void> => {
     const sum = (checkUsageSelected?.currentAmount ?? 0) + data.amount;
+
+    const transaction = (await transactionService.findAll({
+      where: { id: data.transactionId },
+      all: false,
+    })) as GetTrasnactionDTO;
+
+    const sumTransaction = data.amount + transaction.currentAmount;
+
+    if (sumTransaction > transaction.amount) {
+      toast.error(
+        "Erro na utilização do cheque,  o valor não pode ultrapassar o valor total da conta a pagar",
+      );
+      return;
+    }
 
     if (sum > checkUsageSelected?.totalAmount!) {
       toast.error(
@@ -182,22 +199,33 @@ export default function ReceiveCheck() {
         toast.success("Utilização do cheque  com sucesso");
       });
 
-      const sum = (checkUsageSelected?.currentAmount ?? 0) + data.amount;
-
-      let validateStatus =
+      let validateStatusReceivedCheck =
         sum === checkUsageSelected?.totalAmount
           ? ReceivedCheckStatus.FINALIZED
           : checkUsageSelected?.status;
 
-      alert(validateStatus + `${sum} ${checkUsageSelected?.totalAmount}`);
+      let validateStatusTransaction =
+        sumTransaction === transaction.amount
+          ? TransactionStatus.FINALIZED
+          : TransactionStatus.IN_USE;
 
       receiveCheckService.update({
-        status: validateStatus,
+        status: validateStatusReceivedCheck,
         id: checkUsageSelected?.id ?? id,
         currentAmount: sum,
       });
 
-      handleGetCheckUsageById();
+      await transactionService.update({
+        id: data.transactionId,
+        currentAmount: sumTransaction,
+        status: validateStatusTransaction,
+
+        ...(validateStatusTransaction === TransactionStatus.FINALIZED && {
+          settledAt: new Date(),
+        }),
+      });
+
+      handleReceivedCheckById();
       handleGetListCheckUsage();
       closeModal();
     } catch (err) {
@@ -246,7 +274,7 @@ export default function ReceiveCheck() {
       <h1>{`Número do cheque: ${checkUsageSelected?.checkNumber}`}</h1>
       <h1>{`Status do cheque: ${statusMap[checkUsageSelected?.status!]}`}</h1>
       <h1>{`Valor total do cheque: R$ ${checkUsageSelected?.totalAmount.toFixed(2)}`}</h1>
-      <h1>{`Valor total do cheque: R$ ${checkUsageSelected?.currentAmount.toFixed(2)}`}</h1>
+      <h1>{`Valor utilizado do cheque: R$ ${checkUsageSelected?.currentAmount.toFixed(2)}`}</h1>
 
       <Table
         enableFilter

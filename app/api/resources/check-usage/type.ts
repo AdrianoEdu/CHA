@@ -17,7 +17,7 @@ export type CheckUsageWithRelations = Prisma.CheckUsageGetPayload<{
       include: { bank: true; customer: true };
     };
     transaction: {
-      select: { amount: true; id: true };
+      select: { amount: true; id: true; currentAmount: true };
     };
   };
 }>;
@@ -33,6 +33,6 @@ export const checkUsageSelect = {
     include: { bank: true, customer: true },
   },
   transaction: {
-    select: { amount: true, id: true },
+    select: { amount: true, id: true, currentAmount: true },
   },
 };

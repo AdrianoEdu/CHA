@@ -13,7 +13,7 @@ import {
   CheckUsageDTO,
   UpsertCheckUsageDTO,
 } from "@/app/web/dto/check-usage.dto";
-import { CheckUsageType, FinancialFlowType } from "@/app/web/constants/enum";
+import { CheckUsageType, TransactionStatus } from "@/app/web/constants/enum";
 import { transactionService } from "@/app/web/services/transactionService/transactionService";
 import { GetTrasnactionDTO } from "@/app/web/dto/transaction.dto";
 
@@ -106,7 +106,10 @@ export function UpsertCheckUsageModal({
   }, [editData, usageTypeList]);
 
   const handleGetTransactions = async (): Promise<void> => {
-    const result = await transactionService.findAll({ all: true });
+    const result = await transactionService.findAll({
+      all: true,
+      where: { status: { not: TransactionStatus.FINALIZED } },
+    });
 
     settransactionOption(mapperTransaction(result));
   };

@@ -59,7 +59,6 @@ const getColumns = ({
   {
     label: "Data de vencimento",
     accessor: "dueDate",
-    render: (row) => `R$ ${row.amount.toFixed(2)}`,
   },
   {
     label: "Data do pagamento",
@@ -143,7 +142,7 @@ export default function ReceiveCheck() {
       return;
     }
 
-    transactionService.create({ ...data }).then(() => {
+    transactionService.create({ ...data, currentAmount: 0 }).then(() => {
       toast.success("Transação registrada com sucesso");
 
       handleGetListCheckUsage();

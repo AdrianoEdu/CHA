@@ -21,6 +21,12 @@ enum ReceivedCheckStatus {
   CANCELLED
 }
 
+enum TransactionStatus {
+  CREATED      
+  IN_USE
+  FINALIZED   
+}
+
 enum CheckUsageType {
   DEPOSIT    
   PAYABLE    
@@ -194,16 +200,19 @@ model FinancialCategory {
 }
 
 model Transaction {
-  id         String   @id @default(uuid())
-  categoryId String
-  category   FinancialCategory @relation(fields: [categoryId], references: [id])
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
-  amount     Decimal  @db.Decimal(15,2)
-  dueDate    DateTime
-  settledAt  DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id @default(uuid())
+  categoryId     String
+  category       FinancialCategory @relation(fields: [categoryId], references: [id])
+  customerId     String
+  customer       Customer @relation(fields: [customerId], references: [id])
+  amount         Decimal  @db.Decimal(15,2)
+  currentAmount  Decimal  @db.Decimal(15,2)
+  status        TransactionStatus @default(CREATED)
+
+  dueDate        DateTime
+  settledAt      DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   checkUsage CheckUsage[]
 

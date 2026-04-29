@@ -71,7 +71,7 @@ class CheckUsageService {
     return this.findMany(baseQuery);
   }
 
-  mapperCheckUsage(item: CheckUsageWithRelations): CheckUsageDTO {
+  private mapperCheckUsage(item: CheckUsageWithRelations): CheckUsageDTO {
     return {
       id: item.id,
       usedAt: item.usedAt,
@@ -80,6 +80,7 @@ class CheckUsageService {
       transaction: {
         id: item.transaction.id,
         amount: item.transaction.amount.toNumber(),
+        currentAmount: item.transaction.currentAmount.toNumber(),
       },
       notes: item.notes ?? undefined,
       amount: item.amount.toNumber(),

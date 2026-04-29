@@ -6,6 +6,7 @@
 import { GetFinancialCategoryDto } from "./financial.dto";
 import { GetCustomerDto } from "./customer.dto";
 import { PaginationDto } from "./pagination.dto";
+import { TransactionStatus } from "../constants/enum";
 
 export type GetTrasnactionDTO = {
   id: string;
@@ -13,7 +14,9 @@ export type GetTrasnactionDTO = {
   dueDate?: Date;
   createdAt: Date;
   settledAt?: Date;
+  currentAmount: number;
   customer: GetCustomerDto;
+  status: TransactionStatus;
   category: Partial<GetFinancialCategoryDto>;
 };
 
@@ -23,6 +26,8 @@ export type CreateTransactionDTO = {
   settledAt?: Date;
   categoryId: string;
   customerId: string;
+  currentAmount: number;
+  status: TransactionStatus;
 };
 
 export type UpdateTransactionDTO = {
@@ -33,6 +38,8 @@ export type UpdateTransactionDTO = {
   categoryId?: string;
   customerId?: string;
   transactionId?: string;
+  currentAmount?: number;
+  status?: TransactionStatus;
 };
 
 export type UpsertTransactionDto = CreateTransactionDTO & UpdateTransactionDTO;

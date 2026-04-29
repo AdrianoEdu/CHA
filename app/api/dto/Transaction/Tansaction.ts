@@ -5,23 +5,28 @@
 
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
 import { GetCustomerDto } from "../Customer/Customer";
+import { TransactionStatus } from "@/app/generated/prisma";
 
 export type GetTrasnactionDTO = {
   id: string;
   category: GetFinancialCategoryDto;
-  customer: GetCustomerDto;
   amount: number;
   dueDate?: Date;
-  settledAt?: Date;
   createdAt: Date;
+  settledAt?: Date;
+  currentAmount: number;
+  customer: GetCustomerDto;
+  status: TransactionStatus;
 };
 
 export type CreateTransactionDTO = {
-  categoryId: string;
-  customerId: string;
   amount: number;
   dueDate: Date;
   settledAt?: Date;
+  categoryId: string;
+  customerId: string;
+  currentAmount: number;
+  status: TransactionStatus;
 };
 
 export type UpdateTransactionDTO = {
@@ -31,4 +36,6 @@ export type UpdateTransactionDTO = {
   settledAt?: Date;
   categoryId?: string;
   customerId?: string;
+  currentAmount?: number;
+  status?: TransactionStatus;
 };
