@@ -51,7 +51,7 @@ export function UpsertCustomer({
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [showErrorRegex, setShowErrorRegex] = useState(false);
-  const [selected, setSelected] = useState<SelectComboboxProps | null>();
+  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   useEffect(() => {
     if (!data) return;
@@ -64,7 +64,7 @@ export function UpsertCustomer({
             label: customerTypeLabels[data.customerType],
             value: data.customerType,
           }
-        : undefined,
+        : null,
     );
   }, [data]);
 
@@ -105,7 +105,7 @@ export function UpsertCustomer({
         regexMessageError={"Por favor informar caracteres válidos"}
       />
 
-      <ComboBox
+      <ComboBox<SelectComboboxProps>
         options={options}
         valueKey={"value"}
         labelKey={"label"}
