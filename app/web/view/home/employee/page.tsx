@@ -6,11 +6,11 @@
 "use client";
 
 import { UserRole } from "@/app/generated/prisma";
-import Button from "@/app/web/components/button/page";
-import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/page";
-import RemoveModal from "@/app/web/components/modal/remove-employee/page";
-import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button from "@/app/web/components/button/button";
+import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/register-employee";
+import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
+import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import { ActionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
@@ -131,11 +131,14 @@ export default function EmployeeScreen() {
     const result = await employeeService.findAll({
       skip: 0,
       take: 20,
-      type: ActionEnum.FindAll,
+      all: true,
+      orderBy: { created: "desc" },
     });
 
-    oldEmployeeList = result;
-    setEmployeeList(result);
+    if (Array.isArray(result)) {
+      oldEmployeeList = result;
+      setEmployeeList(result);
+    }
   };
 
   const handleFilterEmployeeName = async () => {
@@ -145,10 +148,15 @@ export default function EmployeeScreen() {
       setList: setEmployeeList,
       getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        return employeeService.findByName({
-          name: value,
-          type: ActionEnum.FindByFilters,
+        const result = await employeeService.findAll({
+          skip: 0,
+          take: 20,
+          all: true,
+          where: { name: value },
+          orderBy: { createdAt: "desc" },
         });
+
+        return Array.isArray(result) ? result : [result];
       },
     });
   };

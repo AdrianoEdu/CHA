@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Input, { InputType } from "../../input/page";
-import Button, { ButtonStatusEnum } from "../../button/page";
+import Input, { InputType } from "../../input/input";
+import Button, { ButtonStatusEnum } from "../../button/button";
 import { AddIcon, DeleteIcon } from "@/app/web/icons";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 

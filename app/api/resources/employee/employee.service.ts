@@ -20,14 +20,14 @@ class EmployeeService {
     await this.databaseService.employee.update({ where: { id }, data });
   }
 
-  async findAll(
+  async findEmployee(
     params: PaginationDto<
       Prisma.EmployeeWhereInput,
       Prisma.EmployeeSelect,
       Prisma.EmployeeInclude,
       Prisma.EmployeeOrderByWithRelationInput
     >,
-  ): Promise<Employee[]> {
+  ): Promise<Employee | Employee[]> {
     const baseQuery: Prisma.EmployeeFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -38,14 +38,28 @@ class EmployeeService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
+    if (!params.all) return this.findFirst(baseQuery);
+
     return await this.databaseService.employee.findMany({
       ...baseQuery,
       orderBy: { createdAt: "desc" },
     });
   }
 
-  async findByName({ name }: Partial<EmployeeDto>) {
-    return this.databaseService.employee.findFirst({ where: { name } });
+  async findFirst(baseQuery: Prisma.EmployeeFindManyArgs) {
+    const result = await this.databaseService.employee.findFirst({
+      ...baseQuery,
+    });
+
+    if (!result) throw new NotFoundException();
+
+    return result;
+  }
+
+  async findAll(baseQuery: Prisma.EmployeeFindManyArgs) {
+    return await this.databaseService.employee.findMany({
+      ...baseQuery,
+    });
   }
 
   async updateStatusUser({ isActive, id }: Partial<EmployeeDto>) {

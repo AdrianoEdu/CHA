@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { ActionDto } from "./auth.dto";
+import { PaginationDto } from "./pagination.dto";
 
 export interface EmployeeDto {
   id?: string;
@@ -13,4 +14,6 @@ export interface EmployeeDto {
   updatedAt?: Date;
 }
 
-export interface SendEmployeeDto extends ActionDto, EmployeeDto {}
+export type EmployeeWhere = Partial<EmployeeDto>;
+
+export type EmployeeParams = PaginationDto<EmployeeWhere, any, any, any>;

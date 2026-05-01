@@ -6,8 +6,8 @@
 "use client";
 
 import Image from "next/image";
-import Input, { InputType } from "../../components/input/page";
-import Button from "../../components/button/page";
+import Input, { InputType } from "../../components/input/input";
+import Button from "../../components/button/button";
 import { useState } from "react";
 import { useAuth } from "../../providers/AuthProvider";
 

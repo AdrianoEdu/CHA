@@ -6,10 +6,10 @@
 "use client";
 
 import { UserRole } from "@/app/generated/prisma";
-import Button from "@/app/web/components/button/page";
-import RemoveModal from "@/app/web/components/modal/remove-employee/page";
-import { UpsertAdvanceReason } from "@/app/web/components/modal/upsert-adavence-reason/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button from "@/app/web/components/button/button";
+import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
+import UpsertAdvanceReason from "@/app/web/components/modal/upsert-advance-reason/upsert-advance-reason";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import {
   CreateAdvanceReasonDto,
   FindAdvanceReasonDto,

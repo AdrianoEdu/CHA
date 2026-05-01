@@ -3,15 +3,17 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+"use client";
+
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateAdvanceReasonDto,
   UpdateAdavanceReasonDto,
 } from "@/app/web/dto/advance-reason.dto";
 import { useEffect, useState } from "react";
-import Input from "../../input/page";
+import Input from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
-import Button from "../../button/page";
+import Button from "../../button/button";
 
 type AdvanceReasonProps = {
   data?: UpdateAdavanceReasonDto;
@@ -22,7 +24,7 @@ type AdvanceReasonProps = {
 
 const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
-export function UpsertAdvanceReason({
+export default function UpsertAdvanceReason({
   data,
   onClose,
   onUpdated,

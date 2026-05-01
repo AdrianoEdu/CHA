@@ -6,10 +6,10 @@
 "use client";
 
 import { UserRole } from "@/app/generated/prisma";
-import Button from "@/app/web/components/button/page";
-import RemoveModal from "@/app/web/components/modal/remove-employee/page";
+import Button from "@/app/web/components/button/button";
+import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import { UpsertCustomer } from "@/upsert-customer/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateCustomerDto,

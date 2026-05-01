@@ -6,15 +6,15 @@
 "use client";
 
 import { JSX, useEffect, useState } from "react";
-import Input, { InputType } from "../../input/page";
-import Button, { ButtonStatusEnum } from "../../button/page";
+import Input, { InputType } from "../../input/input";
+import Button, { ButtonStatusEnum } from "../../button/button";
 import {
   UpdateReceivedCheckDTO,
   UpsertReceivedCheckDto,
 } from "@/app/web/dto/receive-check.dto";
 import { bankService } from "@/app/web/services/bankService/bankService";
 import { customerService } from "@/app/web/services/customerService/customerService";
-import ComboBox from "../../combobox/page";
+import ComboBox from "../../combobox/combobox";
 import { ReceivedCheckStatus } from "@/app/web/constants/enum";
 import {
   getListStatusReceiveCheck,

@@ -6,7 +6,7 @@
 "use client";
 
 import { useState } from "react";
-import CheckBox from "../checkbox/page";
+import CheckBox from "../checkbox/checkbox";
 
 type CheckBoxListProps = {
   options: string[];

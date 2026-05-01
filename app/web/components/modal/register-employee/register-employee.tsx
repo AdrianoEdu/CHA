@@ -6,8 +6,8 @@
 "use client";
 
 import { useState } from "react";
-import Button from "../../button/page";
-import Input from "../../input/page";
+import Button from "../../button/button";
+import Input from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
 import { i18n } from "@/app/web/constants/i18n";
 

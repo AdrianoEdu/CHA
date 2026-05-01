@@ -6,10 +6,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Button from "../../button/page";
-import Input, { InputType } from "../../input/page";
+import Button from "../../button/button";
+import Input, { InputType } from "../../input/input";
 import { i18n } from "@/app/web/constants/i18n";
-import ComboBox from "../../combobox/page";
+import ComboBox from "../../combobox/combobox";
 import { advanceReasonService } from "@/app/web/services/advanceReasonService/advanceReasonService";
 import {
   FindAdvanceReasonDto,

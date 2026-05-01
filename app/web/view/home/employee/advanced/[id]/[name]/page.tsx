@@ -5,8 +5,8 @@
 
 "use client";
 
-import RegisterEmployeeAdvanceModal from "@/app/web/components/modal/employee-advance/page";
-import Table from "@/app/web/components/table/page";
+import RegisterEmployeeAdvanceModal from "@/app/web/components/modal/employee-advance/employee-advance";
+import Table from "@/app/web/components/table/table";
 import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateEmployeeAdvanceDto,

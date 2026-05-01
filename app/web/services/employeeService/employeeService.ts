@@ -4,9 +4,7 @@
 // All rights reserved.
 
 import { requestService } from "../requestService/requestService";
-import { PaginationDto, SendPaginationDto } from "../../dto/pagination.dto";
-import { EmployeeDto, SendEmployeeDto } from "../../dto/employee.dto";
-import { ActionDto } from "../../dto/auth.dto";
+import { EmployeeDto, EmployeeParams } from "../../dto/employee.dto";
 
 class EmployeeService {
   private readonly url: string;
@@ -15,18 +13,18 @@ class EmployeeService {
     this.url = "/employee";
   }
 
-  create(data: SendEmployeeDto) {
+  create(data: EmployeeDto) {
     return requestService.post(this.url, data);
   }
 
-  findAll(data: SendPaginationDto) {
-    return requestService.getAll<SendPaginationDto, EmployeeDto[]>(
+  findAll(data: EmployeeParams) {
+    return requestService.getAll<EmployeeParams, EmployeeDto | EmployeeDto[]>(
       this.url,
       data,
     );
   }
 
-  patch({ isActive, id }: Partial<SendEmployeeDto>) {
+  patch({ isActive, id }: Partial<EmployeeDto>) {
     return requestService.patch<Partial<EmployeeDto>, void>(this.url, {
       isActive,
       id,
@@ -35,16 +33,6 @@ class EmployeeService {
 
   delete(id: string) {
     return requestService.delete(this.url, id);
-  }
-
-  findByName({ name, type }: Partial<SendEmployeeDto>) {
-    return requestService.getByFilters<SendEmployeeDto, EmployeeDto[]>(
-      this.url,
-      {
-        name: name!,
-        type,
-      },
-    );
   }
 }
 

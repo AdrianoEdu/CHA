@@ -6,9 +6,9 @@
 "use client";
 
 import { ChangeEvent, JSX, useEffect, useState } from "react";
-import Input, { InputType } from "../../input/page";
-import Button, { ButtonStatusEnum } from "../../button/page";
-import ComboBox from "../../combobox/page";
+import Input, { InputType } from "../../input/input";
+import Button, { ButtonStatusEnum } from "../../button/button";
+import ComboBox from "../../combobox/combobox";
 import {
   GetTrasnactionDTO,
   UpsertTransactionDto,
@@ -17,7 +17,8 @@ import { financialCategoryService } from "@/app/web/services/financialCategorySe
 import { GetFinancialCategoryDto } from "@/app/web/dto/financial.dto";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { GetCustomerDto } from "@/app/web/dto/customer.dto";
-import CheckBox from "../../checkbox/page";
+import CheckBox from "../../checkbox/checkbox";
+import { TransactionStatus } from "@/app/web/constants/enum";
 
 interface CheckUsageModalProps {
   onClose: () => void;
@@ -57,11 +58,13 @@ export function UpsertTransaction({
   editData,
 }: CheckUsageModalProps): JSX.Element {
   const [data, setData] = useState<UpsertTransactionDto>({
+    id: "",
     amount: 0,
     categoryId: "",
     customerId: "",
+    currentAmount: 0,
     dueDate: new Date(),
-    id: "",
+    status: TransactionStatus.CREATED,
   });
 
   const [flag, setFlag] = useState(false);
@@ -123,13 +126,17 @@ export function UpsertTransaction({
     onSubmit({ ...data, settledAt: flag ? new Date() : undefined });
   };
 
-  const handleSelectFinancialCategory = (option: SelectOption): void => {
+  const handleSelectFinancialCategory = (option: SelectOption | null): void => {
+    if (!option) return;
+
     setFinancialCategoryOption(option);
 
     handleUpsertData({ categoryId: option.id });
   };
 
-  const handleSelectCustomerOption = (option: SelectOption): void => {
+  const handleSelectCustomerOption = (option: SelectOption | null): void => {
+    if (!option) return;
+
     setCustomerOption(option);
 
     handleUpsertData({ customerId: option.id });

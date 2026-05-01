@@ -3,13 +3,15 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+"use client";
+
 import { useEffect, useState } from "react";
-import Input, { InputType } from "../../input/page";
+import Input, { InputType } from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
-import ComboBox from "../../combobox/page";
+import ComboBox from "../../combobox/combobox";
 import { FinancialFlowType } from "@/app/web/constants/enum";
-import Button, { ButtonStatusEnum } from "../../button/page";
+import Button, { ButtonStatusEnum } from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateFinancialCategoryDto,
@@ -42,7 +44,7 @@ type FinancialCategoryProps = {
 
 const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
-export function UpsertFinancialCategory({
+export default function UpsertFinancialCategory({
   data,
   onClose,
   onUpdated,
@@ -50,7 +52,7 @@ export function UpsertFinancialCategory({
 }: Readonly<FinancialCategoryProps>) {
   const [name, setName] = useState("");
   const [showErrorRegex, setShowErrorRegex] = useState(false);
-  const [selected, setSelected] = useState<SelectComboboxProps | undefined>();
+  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   useEffect(() => {
     if (!data) return;
@@ -62,7 +64,7 @@ export function UpsertFinancialCategory({
             label: financialCategoryTypeLabels[data.financialFlowType],
             value: data.financialFlowType,
           }
-        : undefined,
+        : null,
     );
   }, [data]);
 
@@ -90,7 +92,7 @@ export function UpsertFinancialCategory({
         }
       />
 
-      <ComboBox
+      <ComboBox<SelectComboboxProps>
         options={options}
         valueKey={"value"}
         labelKey={"label"}

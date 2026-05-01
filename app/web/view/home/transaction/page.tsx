@@ -5,9 +5,9 @@
 
 "use client";
 
-import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
-import { UpsertTransaction } from "@/app/web/components/modal/upsert-transaction/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button, { ButtonStatusEnum } from "@/app/web/components/button/button";
+import { UpsertTransaction } from "@/app/web/components/modal/upsert-transaction/upsert-transaction";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import {
   GetTrasnactionDTO,

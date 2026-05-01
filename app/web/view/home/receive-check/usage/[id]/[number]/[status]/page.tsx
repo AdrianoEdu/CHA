@@ -5,9 +5,9 @@
 
 "use client";
 
-import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
-import { UpsertCheckUsageModal } from "@/app/web/components/modal/upsert-check-usage/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button, { ButtonStatusEnum } from "@/app/web/components/button/button";
+import { UpsertCheckUsageModal } from "@/app/web/components/modal/upsert-check-usage/upsert-check-usage";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import {
   CheckUsageType,
   ReceivedCheckStatus,

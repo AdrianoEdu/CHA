@@ -5,9 +5,9 @@
 
 "use client";
 
-import Button, { ButtonStatusEnum } from "@/app/web/components/button/page";
-import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button, { ButtonStatusEnum } from "@/app/web/components/button/button";
+import UpsertReceivedCheckModal from "@/app/web/components/modal/upsert-received-check/upsert-received-check";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import { ActionEnum, ReceivedCheckStatus } from "@/app/web/constants/enum";
 import {
   ReceivedCheckDTO,

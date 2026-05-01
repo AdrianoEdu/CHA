@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { AuthDto } from "../dto/auth.dto";
 import { ActionEnum } from "../constants/enum";
-import LoadingModal from "../components/modal/loaded/page";
+import LoadingModal from "../components/modal/loaded/loaded";
 import { useModal } from "./ModalProvider";
 
 interface User {

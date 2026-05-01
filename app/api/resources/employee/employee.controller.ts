@@ -3,7 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import { EmployeeDto } from "../../dto/Employee/Employee";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { employeeService } from "./employee.service";
 
 export class EmployeeController {
@@ -38,27 +40,18 @@ export class EmployeeController {
 
   async findAll(req: Request) {
     try {
-      const { searchParams } = new URL(req.url);
-      const skip = searchParams.get("skip");
-      const take = searchParams.get("take");
+      const params = parsePrismaQuery<
+        Prisma.EmployeeWhereInput,
+        Prisma.EmployeeSelect,
+        Prisma.EmployeeInclude,
+        Prisma.EmployeeOrderByWithRelationInput
+      >(req);
 
-      return this.employeeService.findAll({
-        skip: Number(skip),
-        take: Number(take),
-      });
+      return this.employeeService.findEmployee(params);
     } catch (error: any) {
       console.error("Erro ao buscar Employees:", error);
       return Response.json({ error: error.message }, { status: 500 });
     }
-  }
-
-  async findByName(req: Request) {
-    try {
-      const { searchParams } = new URL(req.url);
-      const name = searchParams.get("name") ?? "";
-
-      return await this.employeeService.findByName({ name });
-    } catch (error) {}
   }
 
   async patch({ isActive, id }: Partial<EmployeeDto>) {

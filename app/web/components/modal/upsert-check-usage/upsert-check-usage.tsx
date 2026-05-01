@@ -6,9 +6,9 @@
 "use client";
 
 import { JSX, useEffect, useState } from "react";
-import Input, { InputType } from "../../input/page";
-import Button, { ButtonStatusEnum } from "../../button/page";
-import ComboBox from "../../combobox/page";
+import Input, { InputType } from "../../input/input";
+import Button, { ButtonStatusEnum } from "../../button/button";
+import ComboBox from "../../combobox/combobox";
 import {
   CheckUsageDTO,
   UpsertCheckUsageDTO,
@@ -108,7 +108,7 @@ export function UpsertCheckUsageModal({
   const handleGetTransactions = async (): Promise<void> => {
     const result = await transactionService.findAll({
       all: true,
-      where: { status: { not: TransactionStatus.FINALIZED } },
+      where: { status: { not: TransactionStatus.FINALIZED } } as any,
     });
 
     settransactionOption(mapperTransaction(result));

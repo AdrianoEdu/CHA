@@ -6,10 +6,10 @@
 "use client";
 
 import { UserRole } from "@/app/generated/prisma";
-import Button from "@/app/web/components/button/page";
-import RemoveModal from "@/app/web/components/modal/remove-employee/page";
-import BankModal from "@/app/web/components/modal/upsert-bank/page";
-import Table, { TableColumn } from "@/app/web/components/table/page";
+import Button from "@/app/web/components/button/button";
+import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
+import BankModal from "@/app/web/components/modal/upsert-bank/upsert-bank";
+import Table, { TableColumn } from "@/app/web/components/table/table";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { DeleteIcon } from "@/app/web/icons";
 import { useAuth } from "@/app/web/providers/AuthProvider";

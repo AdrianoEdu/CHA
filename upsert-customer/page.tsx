@@ -4,12 +4,12 @@
 // All rights reserved.
 
 import { useEffect, useState } from "react";
-import Input, { InputType } from "../app/web/components/input/page";
+import Input, { InputType } from "../app/web/components/input/input";
 import { Regex } from "@/app/web/constants/regex";
 import { FormatterResult } from "@/app/web/utils/inputFormatter";
-import ComboBox from "../app/web/components/combobox/page";
+import ComboBox from "../app/web/components/combobox/combobox";
 import { CustomerType } from "@/app/web/constants/enum";
-import Button, { ButtonStatusEnum } from "../app/web/components/button/page";
+import Button, { ButtonStatusEnum } from "../app/web/components/button/button";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateCustomerDto,

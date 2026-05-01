@@ -5,7 +5,7 @@
 
 "use client";
 
-import Button from "../../button/page";
+import Button from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 
 const { cancelButton, registerButton, UpdateStatusEmployee } =

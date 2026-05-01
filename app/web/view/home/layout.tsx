@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "react-toastify";
-import SideBar from "../../components/sidebar/page";
+import SideBar from "../../components/sidebar/sidebar";
 import { authService } from "../../services/authService/authService";
 import { useRouter } from "next/navigation";
 export default function Home({ children }: { children: React.ReactNode }) {
