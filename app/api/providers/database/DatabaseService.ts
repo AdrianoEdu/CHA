@@ -6,28 +6,16 @@
 
 import { PrismaClient } from "@/app/generated/prisma";
 
-class DatabaseService extends PrismaClient {
-  private static instance: DatabaseService;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
 
-  static getInstance(): DatabaseService {
-    if (!DatabaseService.instance) {
-      DatabaseService.instance = new DatabaseService();
-      DatabaseService.instance.init().catch(err => {
-        console.error('Erro ao conectar no DB:', err);
-      });
-    }
-    return DatabaseService.instance;
-  }
+export const databaseService =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: ["error", "warn"],
+  });
 
-   async init() {
-    await this.$connect();
-    console.log('Connected to database');
-  }
-
-  async disconnect() {
-    await this.$disconnect();
-    console.log('Disconnected from database');
-  }
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = databaseService;
 }
-
-export const databaseService = DatabaseService.getInstance();

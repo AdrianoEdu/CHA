@@ -121,7 +121,6 @@ export default function ReceiveCheck() {
     }: UpsertReceivedCheckDto,
     isEdit?: boolean,
   ): Promise<void> => {
-    console.log(goodForAt);
     if (isEdit) {
       receiveCheckService
         .update({
