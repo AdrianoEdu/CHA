@@ -48,6 +48,7 @@ next-env.d.ts
 
 # node_modules
 node_modules/
+postgres/
 
 # vscode
 .vscode/*
