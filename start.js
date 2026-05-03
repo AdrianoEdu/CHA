@@ -1,12 +1,17 @@
-// start.js
-// Orquestrador: Postgres local + Next.js + Prisma resiliente
-
 const { spawn, execSync } = require("child_process");
 const net = require("net");
 const fs = require("fs");
+const path = require("path");
 
-const PG_BIN = "./db/postgres/bin";
-const PG_DATA = "./db/postgres/data";
+// 🔒 EVITA DUPLICAÇÃO
+if (global.__START_RUNNING__) {
+  console.log("⚠️ start.js já está rodando");
+  process.exit(0);
+}
+global.__START_RUNNING__ = true;
+
+const PG_BIN = path.join(__dirname, "db/postgres/bin");
+const PG_DATA = path.join(__dirname, "db/postgres/data");
 
 const PRIMARY_PORT = 5432;
 const FALLBACK_PORT = 15250;
@@ -14,6 +19,8 @@ const FALLBACK_PORT = 15250;
 const PG_USER = "postgres";
 const PG_PASSWORD = "";
 const PG_DB = "contabilidade";
+
+let nextProcess = null;
 
 // ---------------- utils ----------------
 
@@ -60,7 +67,7 @@ function buildDatabaseUrl(port) {
 }
 
 function updateEnv(databaseUrl) {
-  const envPath = ".env";
+  const envPath = path.join(__dirname, ".env");
 
   let env = "";
 
@@ -80,10 +87,17 @@ function updateEnv(databaseUrl) {
 // ---------------- postgres ----------------
 
 function startPostgres(port) {
+  const pgCtl = path.join(PG_BIN, "pg_ctl.exe");
+
   return new Promise((resolve, reject) => {
     console.log(`🚀 Iniciando PostgreSQL na porta ${port}...`);
 
-    const pg = spawn(`${PG_BIN}/pg_ctl.exe`, [
+    if (!fs.existsSync(pgCtl)) {
+      console.error("❌ PostgreSQL NÃO encontrado:", pgCtl);
+      return resolve(); // sai sem quebrar app
+    }
+
+    const pg = spawn(pgCtl, [
       "-D",
       PG_DATA,
       "-o",
@@ -96,9 +110,18 @@ function startPostgres(port) {
     pg.stdout.on("data", (d) => console.log(d.toString()));
     pg.stderr.on("data", (d) => console.log(d.toString()));
 
+    pg.on("error", (err) => {
+      console.error("❌ erro ao iniciar postgres:", err);
+      reject(err);
+    });
+
     pg.on("exit", (code) => {
-      if (code === 0) resolve();
-      else reject(new Error("Postgres falhou ao iniciar"));
+      if (code === 0) {
+        console.log("✅ Postgres iniciado com sucesso");
+        resolve();
+      } else {
+        reject(new Error("Postgres falhou ao iniciar"));
+      }
     });
   });
 }
@@ -112,7 +135,7 @@ async function waitDatabase(port) {
     const ok = await checkPort(port);
 
     if (ok) {
-      console.log("✅ DB respondendo");
+      console.log("DB respondendo");
       return;
     }
 
@@ -122,32 +145,21 @@ async function waitDatabase(port) {
   throw new Error("Falha ao conectar no banco");
 }
 
-// ---------------- PRISMA (ROBUSTO) ----------------
+// ---------------- PRISMA ----------------
 
 function runPrisma() {
   console.log("🧬 Inicializando banco...");
 
   try {
-    console.log("➡️ tentando migrate deploy...");
-
     execSync("npx prisma migrate deploy", {
       stdio: "inherit",
+      shell: true,
     });
-
-    console.log("✅ migrations OK");
-  } catch (err) {
-    console.log("⚠️ migrate falhou, tentando db push...");
-
-    try {
-      execSync("npx prisma db push", {
-        stdio: "inherit",
-      });
-
-      console.log("✅ db push OK (banco criado)");
-    } catch (err2) {
-      console.log("❌ falha crítica no Prisma");
-      throw err2;
-    }
+  } catch {
+    execSync("npx prisma db push", {
+      stdio: "inherit",
+      shell: true,
+    });
   }
 }
 
@@ -157,26 +169,41 @@ function runSeed() {
   try {
     execSync("npx prisma db seed", {
       stdio: "inherit",
+      shell: true,
     });
-
-    console.log("✅ seed OK");
   } catch {
-    console.log("⚠️ seed ignorado");
+    console.log("seed ignorado");
   }
 }
 
-// ---------------- next ----------------
+// ---------------- NEXT (🔥 CORREÇÃO REAL) ----------------
 
 function startNext() {
-  console.log("🚀 Iniciando Next.js...");
+  console.log("🚀 Iniciando Next.js (PROD)...");
 
-  const next = spawn("npm", ["run", "start"], {
+  const nextPath = path.join(
+    __dirname,
+    "node_modules",
+    "next",
+    "dist",
+    "bin",
+    "next",
+  );
+
+  nextProcess = spawn(process.execPath, [nextPath, "start", "-p", "3000"], {
     stdio: "inherit",
-    shell: true,
     env: process.env,
   });
 
-  return next;
+  nextProcess.on("error", (err) => {
+    console.error("❌ Erro ao iniciar Next:", err);
+  });
+
+  nextProcess.on("exit", (code) => {
+    console.error("💥 Next morreu com código:", code);
+  });
+
+  return nextProcess;
 }
 
 // ---------------- main ----------------
@@ -187,7 +214,7 @@ async function main() {
 
     const databaseUrl = buildDatabaseUrl(port);
 
-    console.log("🔌 DATABASE_URL gerada:", databaseUrl);
+    console.log("🔌 DATABASE_URL:", databaseUrl);
 
     process.env.DATABASE_URL = databaseUrl;
     updateEnv(databaseUrl);
@@ -198,12 +225,12 @@ async function main() {
       await startPostgres(port);
       await wait(2000);
     } else {
-      console.log("✅ PostgreSQL já está rodando");
+      console.log("PostgreSQL já rodando");
     }
 
     await waitDatabase(port);
 
-    console.log("🔌 Banco pronto...");
+    console.log("🔌 Banco pronto");
 
     runPrisma();
     runSeed();
@@ -211,8 +238,11 @@ async function main() {
     console.log("🚀 Subindo aplicação...");
 
     startNext();
+
+    // 🔥 SEGURA PROCESSO VIVO (ESSENCIAL)
+    setInterval(() => {}, 1000);
   } catch (err) {
-    console.error("❌ erro start:", err);
+    console.error("erro start:", err);
   }
 }
 

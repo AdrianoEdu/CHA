@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import { databaseService } from "../../providers/database/DatabaseService";
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { AuthDto, AuthLoggedDto, LoginDto } from "@/app/api/dto/Auth/Auth";
 import jwt from "jsonwebtoken";
 import { JwtProps } from "./types";
@@ -13,16 +13,19 @@ import { ForbiddenException } from "../../error/ForbiddenExecption";
 
 class AuthService {
   private databaseService = databaseService;
-  private readonly JWT_SECRET = process.env.JWT_SECRET ?? "";
+  private readonly JWT_SECRET = process.env.JWT_SECRET || "dev_secret";
 
   async login({ login, password }: LoginDto): Promise<AuthDto> {
-    const user = await databaseService.user.findUnique({ where: { login } });
+    const user = await this.databaseService.user.findUnique({
+      where: { login },
+    });
 
-    if (!user) throw new Error("Autenticação inválida");
+    if (!user) throw new UnauthorizedException("Autenticação inválida");
 
-    const passwordValid = await this.comparePassword(user.password, password);
+    const passwordValid = await this.comparePassword(password, user.password);
 
-    if (!passwordValid) throw new Error("Autenticação inválida");
+    if (!passwordValid)
+      throw new UnauthorizedException("Autenticação inválida");
 
     const token = this.generateJwt({
       sub: user.id,
@@ -30,27 +33,38 @@ class AuthService {
       key: this.JWT_SECRET,
     });
 
-    return { lastName: user.lastName, name: user.name, token, role: user.role };
+    return {
+      lastName: user.lastName,
+      name: user.name,
+      token,
+      role: user.role,
+    };
   }
 
-  private comparePassword(hash: string, passwd: string) {
-    return argon2.verify(hash, passwd);
+  private async comparePassword(passwd: string, hash: string) {
+    return bcrypt.compare(passwd, hash);
   }
 
   async isLogged(token: string): Promise<AuthLoggedDto> {
     if (!token) return { name: "", lastName: "", role: undefined };
 
-    const userId = this.decodeJwt(token) ?? "";
+    let userId: string;
 
-    const user = await databaseService.user.findFirst({
+    try {
+      userId = this.decodeJwt(token);
+    } catch {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.databaseService.user.findUnique({
       where: { id: userId },
     });
 
     if (!user) throw new UnauthorizedException();
 
     return {
-      name: user?.name ?? "",
-      lastName: user?.lastName ?? "",
+      name: user.name ?? "",
+      lastName: user.lastName ?? "",
       role: user.role,
     };
   }
@@ -58,13 +72,13 @@ class AuthService {
   async logout(token: string): Promise<void> {
     if (!token) throw new ForbiddenException();
 
-    const userId = this.decodeJwt(token) ?? "";
+    try {
+      this.decodeJwt(token);
+    } catch {
+      throw new ForbiddenException();
+    }
 
-    const user = await databaseService.user.findFirst({
-      where: { id: userId },
-    });
-
-    if (!user) throw new ForbiddenException("Falha ao executar o logout");
+    // opcional: implementar blacklist de token futuramente
   }
 
   private generateJwt({ key, login, sub }: JwtProps) {
@@ -73,7 +87,7 @@ class AuthService {
     });
   }
 
-  private decodeJwt(token: string) {
+  private decodeJwt(token: string): string {
     const decoded = jwt.verify(token, this.JWT_SECRET) as JwtProps;
     return decoded.sub;
   }

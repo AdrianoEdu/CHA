@@ -1,0 +1,25 @@
+# dependências
+node_modules
+
+# build local (MAS NÃO ignorar standalone!)
+.next/cache
+
+out
+dist
+build
+
+# git
+.git
+.gitignore
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# env
+.env.*
+
+# docker
+docker-compose.yml

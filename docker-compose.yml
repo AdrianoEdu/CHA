@@ -1,18 +1,44 @@
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
     image: postgres:15
-    container_name: postgres_contabil
+    container_name: contabilidade_postgres
     restart: always
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: contabilidade_front
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://admin:admin@contabilidade_postgres:5432/app
+
+    command: sh -c "
+      npx prisma@5.22.0 migrate deploy &&
+      npx prisma@5.22.0 db seed &&
+      node server.js
+      "
 
 volumes:
   pgdata:

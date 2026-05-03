@@ -5,14 +5,16 @@
 
 import { UserRole } from "@/app/generated/prisma";
 import { PrismaClient } from "@prisma/client";
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 
 export async function seedUsers(prisma: PrismaClient) {
-  const passwordHash = await argon2.hash("admin123");
+  const passwordHash = await bcrypt.hash("admin123", 10);
 
   await prisma.user.upsert({
     where: { login: "admin" },
-    update: {},
+    update: {
+      password: passwordHash, // atualiza se já existir
+    },
     create: {
       login: "admin",
       password: passwordHash,
@@ -23,5 +25,5 @@ export async function seedUsers(prisma: PrismaClient) {
     },
   });
 
-  console.log("👤 Usuários seedados");
+  console.log("👤 Usuário admin pronto (bcryptjs)");
 }
