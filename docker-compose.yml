@@ -8,13 +8,13 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d app"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -31,8 +31,12 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://admin:admin@contabilidade_postgres:5432/app
+      NODE_ENV: ${NODE_ENV}
+      PRETTY_LOG: ${PRETTY_LOG}
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      AES_SECRET: ${AES_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
 
     command: sh -c "
       npx prisma@5.22.0 migrate deploy &&
