@@ -25,11 +25,21 @@ Write-Host "[INFO] Preparando POSTGRES..."
 docker pull postgres:15
 
 # =========================
-# EXPORTANDO IMAGEM (SÓ FRONT)
+# EXPORTANDO IMAGEM (SO FRONT)
 # =========================
 
 Write-Host "[INFO] Exportando imagens..."
 docker save -o "$OUTPUT_DIR\contabilidade-front.tar" contabilidade-front
+
+# =========================
+# COPIANDO ARQUIVOS AUXILIARES
+# =========================
+
+Write-Host "[INFO] Copiando .env..."
+Copy-Item ".env" "$OUTPUT_DIR\" -Force
+
+Write-Host "[INFO] Copiando icone..."
+Copy-Item "cha.ico" "$OUTPUT_DIR\" -Force
 
 # =========================
 # GERANDO DOCKER COMPOSE (PROD)
@@ -82,13 +92,6 @@ $composePath = Join-Path $OUTPUT_DIR "docker-compose.yml"
 $composeProd | Out-File -FilePath $composePath -Encoding utf8
 
 # =========================
-# COPIANDO .ENV
-# =========================
-
-Write-Host "[INFO] Copiando .env..."
-Copy-Item ".env" "$OUTPUT_DIR\" -Force
-
-# =========================
 # SCRIPT DO CLIENTE
 # =========================
 
@@ -103,7 +106,21 @@ Write-Host "[INFO] Subindo containers..."
 
 docker compose up -d --no-build
 
+Write-Host "[INFO] Criando atalho na area de trabalho..."
+
+$desktop = [Environment]::GetFolderPath("Desktop")
+$shortcutPath = Join-Path $desktop "Contabilidade Web.lnk"
+
+$WScriptShell = New-Object -ComObject WScript.Shell
+$shortcut = $WScriptShell.CreateShortcut($shortcutPath)
+
+$shortcut.TargetPath = "http://localhost:3000"
+$shortcut.IconLocation = (Join-Path (Get-Location) "cha.ico")
+
+$shortcut.Save()
+
 Write-Host "[OK] Aplicacao rodando em http://localhost:3000"
+Write-Host "[OK] Atalho criado na area de trabalho"
 '@
 
 $clientPath = Join-Path $OUTPUT_DIR "run-build.ps1"
