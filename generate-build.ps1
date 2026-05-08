@@ -15,41 +15,68 @@ New-Item -ItemType Directory -Path $OUTPUT_DIR | Out-Null
 docker system prune -a -f
 
 # =========================
-# BUILD DAS IMAGENS
+# PEGAR IP + GERAR API URL (ANTES DO BUILD)
+# =========================
+
+$ip = Get-NetIPAddress -AddressFamily IPv4 |
+Where-Object {
+    $_.IPAddress -match "^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" -and
+    $_.IPAddress -notlike "127.*" -and
+    $_.IPAddress -notlike "169.254.*" -and
+    $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox" -and
+    $_.PrefixOrigin -ne "WellKnown"
+} |
+Select-Object -First 1 -ExpandProperty IPAddress
+
+Write-Host "[DEBUG] IP LAN final: $ip"
+
+# fallback seguro
+if ([string]::IsNullOrWhiteSpace($ip)) {
+    $apiUrl = "http://localhost:3000/api"
+} else {
+    $apiUrl = "http://$($ip):3000/api"
+}
+
+Write-Host "[INFO] API URL gerada: $apiUrl"
+
+# =========================
+# BUILD FRONT (COM API EMBUTIDA)
 # =========================
 
 Write-Host "[INFO] Buildando FRONT..."
-docker build -t contabilidade-front .
+
+docker build `
+  --build-arg NEXT_PUBLIC_API_URL=$apiUrl `
+  -t contabilidade-front .
+
+# =========================
+# POSTGRES
+# =========================
 
 Write-Host "[INFO] Preparando POSTGRES..."
 docker pull postgres:15
 
 # =========================
-# EXPORTANDO IMAGEM (SO FRONT)
+# EXPORT IMAGEM
 # =========================
 
 Write-Host "[INFO] Exportando imagens..."
 docker save -o "$OUTPUT_DIR\contabilidade-front.tar" contabilidade-front
 
 # =========================
-# COPIANDO ARQUIVOS AUXILIARES
+# COPIAR ARQUIVOS
 # =========================
-
-Write-Host "[INFO] Copiando .env..."
-Copy-Item ".env" "$OUTPUT_DIR\" -Force
 
 Write-Host "[INFO] Copiando icone..."
 Copy-Item "cha.ico" "$OUTPUT_DIR\" -Force
 
 # =========================
-# GERANDO DOCKER COMPOSE (PROD)
+# DOCKER COMPOSE PROD
 # =========================
 
 Write-Host "[INFO] Gerando docker-compose de producao..."
 
 $composeProd = @'
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15
@@ -62,7 +89,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d contabilidade"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -92,7 +119,25 @@ $composePath = Join-Path $OUTPUT_DIR "docker-compose.yml"
 $composeProd | Out-File -FilePath $composePath -Encoding utf8
 
 # =========================
-# SCRIPT DO CLIENTE
+# ENV FINAL (APENAS BACKEND + DB + FALLBACK)
+# =========================
+
+Write-Host "[INFO] Gerando .env..."
+
+$envSource = ".env"
+$envDest = Join-Path $OUTPUT_DIR ".env"
+
+$envContent = Get-Content $envSource -Raw
+
+# mantém sua lógica, mas evita duplicar API errada
+$envContent = $envContent -replace "NEXT_PUBLIC_API_URL=.*", ""
+
+$envContent += "`nNEXT_PUBLIC_API_URL=$apiUrl`n"
+
+$envContent | Out-File -FilePath $envDest -Encoding utf8
+
+# =========================
+# SCRIPT CLIENTE
 # =========================
 
 Write-Host "[INFO] Criando script do cliente..."
@@ -106,7 +151,33 @@ Write-Host "[INFO] Subindo containers..."
 
 docker compose up -d --no-build
 
-Write-Host "[INFO] Criando atalho na area de trabalho..."
+# =========================
+# PEGAR IP LOCAL
+# =========================
+
+$ip = Get-NetIPAddress -AddressFamily IPv4 |
+Where-Object {
+    $_.IPAddress -match "^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)" -and
+    $_.IPAddress -notlike "127.*" -and
+    $_.IPAddress -notlike "169.254.*" -and
+    $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox" -and
+    $_.PrefixOrigin -ne "WellKnown"
+} |
+Select-Object -First 1 -ExpandProperty IPAddress
+
+Write-Host "[DEBUG] IP LAN final: $ip"
+
+if ([string]::IsNullOrWhiteSpace($ip)) {
+    $baseUrl = "http://localhost:3000"
+} else {
+    $baseUrl = "http://$($ip):3000"
+}
+
+Write-Host "[INFO] URL gerada: $baseUrl"
+
+# =========================
+# ATALHO
+# =========================
 
 $desktop = [Environment]::GetFolderPath("Desktop")
 $shortcutPath = Join-Path $desktop "Contabilidade Web.lnk"
@@ -114,13 +185,15 @@ $shortcutPath = Join-Path $desktop "Contabilidade Web.lnk"
 $WScriptShell = New-Object -ComObject WScript.Shell
 $shortcut = $WScriptShell.CreateShortcut($shortcutPath)
 
-$shortcut.TargetPath = "http://localhost:3000"
+$shortcut.TargetPath = $baseUrl
 $shortcut.IconLocation = (Join-Path (Get-Location) "cha.ico")
 
 $shortcut.Save()
 
-Write-Host "[OK] Aplicacao rodando em http://localhost:3000"
-Write-Host "[OK] Atalho criado na area de trabalho"
+Copy-Item $shortcutPath (Join-Path (Get-Location) "Contabilidade Web.lnk") -Force
+
+Write-Host "[OK] Aplicacao rodando em $baseUrl"
+Write-Host "[OK] Atalho criado"
 '@
 
 $clientPath = Join-Path $OUTPUT_DIR "run-build.ps1"
