@@ -12,6 +12,8 @@ Write-Host "[INFO] Limpando pasta antiga..."
 Remove-Item -Recurse -Force $OUTPUT_DIR -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Path $OUTPUT_DIR | Out-Null
 
+docker system prune -a -f
+
 # =========================
 # BUILD DAS IMAGENS
 # =========================
@@ -21,15 +23,13 @@ docker build -t contabilidade-front .
 
 Write-Host "[INFO] Preparando POSTGRES..."
 docker pull postgres:15
-docker tag postgres:15 contabilidade-postgres
 
 # =========================
-# EXPORTANDO IMAGENS
+# EXPORTANDO IMAGEM (SÓ FRONT)
 # =========================
 
 Write-Host "[INFO] Exportando imagens..."
 docker save -o "$OUTPUT_DIR\contabilidade-front.tar" contabilidade-front
-docker save -o "$OUTPUT_DIR\contabilidade-postgres.tar" contabilidade-postgres
 
 # =========================
 # GERANDO DOCKER COMPOSE (PROD)
@@ -42,7 +42,7 @@ version: "3.8"
 
 services:
   postgres:
-    image: contabilidade-postgres
+    image: postgres:15
     container_name: contabilidade_postgres
     restart: always
     ports:
@@ -98,7 +98,6 @@ $clientScript = @'
 Write-Host "[INFO] Carregando imagens..."
 
 docker load -i contabilidade-front.tar
-docker load -i contabilidade-postgres.tar
 
 Write-Host "[INFO] Subindo containers..."
 
