@@ -23,22 +23,21 @@ interface InputProps extends BaseInputProps {
   onValueChange?: (value: number | string | Date) => void;
 
   regex?: RegExp;
-  regexError?: boolean;
   regexMessageError?: string;
   onRegexError?: (status: boolean) => void;
 }
 
 export default function Input({
-  inputType = InputType.Text,
   regex,
-  regexError,
   regexMessageError,
-  onRegexError,
+  inputType = InputType.Text,
   onChange,
   onValueChange,
   ...rest
 }: Readonly<InputProps>) {
+  const [showErrorRegex, setShowErrorRegex] = useState(false);
   const [displayValue, setDisplayValue] = useState<string>("");
+  const [messageErrorRegex, setMessageErrorRegex] = useState(regexMessageError);
 
   const formatters: Partial<
     Record<InputType, (value: string) => { raw: string; formatted: string }>
@@ -56,7 +55,6 @@ export default function Input({
       return;
     }
 
-    // ✅ DATE corrigido
     if (inputType === InputType.Date) {
       if (rest.value instanceof Date) {
         const iso = rest.value.toISOString().split("T")[0];
@@ -128,7 +126,6 @@ export default function Input({
       return;
     }
 
-    // ✅ DATE corrigido (retorna Date)
     if (inputType === InputType.Date) {
       if (!value) {
         onValueChange?.("");
@@ -149,9 +146,14 @@ export default function Input({
 
     setDisplayValue(value);
 
-    if (onRegexError) {
-      if (regex && !regex.test(value)) onRegexError(true);
-      else onRegexError(false);
+    if (regex) {
+      const currentMessageErrorRegex =
+        value.trim() === "" ? "" : messageErrorRegex;
+
+      setMessageErrorRegex(currentMessageErrorRegex);
+
+      const showError = !regex.test(value);
+      setShowErrorRegex(showError);
     }
 
     onValueChange?.(value);
@@ -208,9 +210,9 @@ export default function Input({
           {rest.name}
         </label>
 
-        {regexError && (
+        {showErrorRegex && (
           <span className="text-red-500 text-xs mt-1 block">
-            {regexMessageError}
+            {messageErrorRegex}
           </span>
         )}
       </div>

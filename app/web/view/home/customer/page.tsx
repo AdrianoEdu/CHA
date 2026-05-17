@@ -60,6 +60,7 @@ export default function Customer() {
       skip: 0,
       take: 20,
       all: true,
+      where: { isActive: true },
       orderBy: { createdAt: "desc" },
     });
 
@@ -151,6 +152,7 @@ export default function Customer() {
 
   const getColumns = (): TableColumn<GetCustomerDto>[] => {
     const columns: TableColumn<GetCustomerDto>[] = [
+      { label: "Identificação", accessor: "numberId" },
       { label: "Criado em", accessor: "createdAt" },
       { label: "Nome do cliente", accessor: "name" },
       { label: "CNPJ", accessor: "code" },
@@ -159,6 +161,11 @@ export default function Customer() {
         accessor: "customerType",
         render: (row) =>
           row.customerType === "CLIENT" ? "Cliente" : "Fornecedor",
+      },
+      {
+        label: "Ativo?",
+        accessor: "isActive",
+        render: (row) => (row.isActive ? "Sim" : "Não"),
       },
     ];
 

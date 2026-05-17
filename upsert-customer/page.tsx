@@ -6,7 +6,6 @@
 import { useEffect, useState } from "react";
 import Input, { InputType } from "../app/web/components/input/input";
 import { Regex } from "@/app/web/constants/regex";
-import { FormatterResult } from "@/app/web/utils/inputFormatter";
 import ComboBox from "../app/web/components/combobox/combobox";
 import { CustomerType } from "@/app/web/constants/enum";
 import Button, { ButtonStatusEnum } from "../app/web/components/button/button";
@@ -50,14 +49,18 @@ export function UpsertCustomer({
 }: Readonly<RegisterCustomerProps>) {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
-  const [showErrorRegex, setShowErrorRegex] = useState(false);
+  const [disable, setDisable] = useState(false);
+  const [identification, setIdentification] = useState("");
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
+  const isRegister = !data;
+
   useEffect(() => {
-    if (!data) return;
+    if (isRegister) return;
 
     setName(data.name!);
     setCode(data.code!);
+    setIdentification(data.numberId?.toString()!);
     setSelected(
       data.customerType
         ? {
@@ -69,27 +72,50 @@ export function UpsertCustomer({
   }, [data]);
 
   const handleUpsertCustomer = (): void => {
+    const numberId = Number(identification);
+
     if (onUpdated) {
-      onUpdated({ id: data?.id!, code, name, customerType: selected?.value });
+      onUpdated({
+        id: data?.id!,
+        code,
+        name,
+        numberId,
+        customerType: selected?.value,
+      });
       return;
     }
 
-    if (onRegister) onRegister({ code, name, customerType: selected?.value! });
+    if (onRegister)
+      onRegister({
+        code,
+        name,
+        numberId,
+        customerType: selected?.value!,
+      });
   };
+
+  const handleIsRegexError = (status: boolean) => setDisable(status);
 
   return (
     <div className="flex flex-col w-full gap-2">
       <Input
+        className="flex-1"
+        disabled={!isRegister}
+        value={identification}
+        regex={Regex.onlyNumbers}
+        onRegexError={handleIsRegexError}
+        name={"Informe a identificação do cliente"}
+        onChange={(e) => setIdentification(e.target.value)}
+        regexMessageError={
+          "Por favor informar caracteres válidos (apenas números)"
+        }
+      />
+
+      <Input
         value={name}
         className="flex-1"
-        regex={Regex.onlyText}
-        regexError={showErrorRegex}
-        onRegexError={setShowErrorRegex}
         name={"Informe o nome do cliente"}
         onChange={(e) => setName(e.target.value)}
-        regexMessageError={
-          "Por favor informar caracteres válidos (apenas texto)"
-        }
       />
 
       <Input
@@ -99,8 +125,7 @@ export function UpsertCustomer({
         regex={Regex.onlyCNPJ}
         name={"Informe o CNPJ"}
         inputType={InputType.Cnpj}
-        regexError={showErrorRegex}
-        onRegexError={setShowErrorRegex}
+        onRegexError={handleIsRegexError}
         onChange={(e) => setCode(e.target.value)}
         regexMessageError={"Por favor informar caracteres válidos"}
       />
@@ -119,10 +144,12 @@ export function UpsertCustomer({
           status={ButtonStatusEnum.CANCEL}
         />
         <Button
-          disabled={showErrorRegex}
+          disabled={disable}
           onPress={handleUpsertCustomer}
-          text={!data ? registerButton : updateButton}
-          status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
+          text={isRegister ? registerButton : updateButton}
+          status={
+            isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE
+          }
         />
       </div>
     </div>

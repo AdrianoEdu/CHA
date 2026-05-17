@@ -22,26 +22,24 @@ interface TableProps<T> {
   onFilterChange?: (value: string) => void;
 }
 
-function formatValue(value: unknown) {
+function formatValue(value: unknown): string {
+  if (value == null) return "";
+
   if (typeof value === "string") {
-    const isDateLike = /^\d{4}-\d{2}-\d{2}/.test(value); // yyyy-mm-dd
+    const date = new Date(value);
 
-    if (isDateLike) {
-      const date = new Date(value);
-
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-      }
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
-
-    return value;
   }
+
+  return String(value);
 }
 
 function getValue(obj: any, path: string) {

@@ -31,7 +31,6 @@ export default function UpsertAdvanceReason({
   onRegister,
 }: Readonly<AdvanceReasonProps>) {
   const [name, setName] = useState("");
-  const [showErrorRegex, setShowErrorRegex] = useState(false);
 
   useEffect(() => {
     if (!data) return;
@@ -53,20 +52,14 @@ export default function UpsertAdvanceReason({
       <Input
         value={name}
         className="flex-1"
-        regex={Regex.onlyText}
-        regexError={showErrorRegex}
-        onRegexError={setShowErrorRegex}
         name={"Infome o motivo o adiantamento"}
         onChange={(e) => setName(e.target.value)}
-        regexMessageError={
-          "Por favor informar caracteres válidos (apenas texto)"
-        }
       />
 
       <div className="mt-6 flex justify-end gap-4">
         <Button text={cancelButton} onPress={onClose} />
         <Button
-          disabled={showErrorRegex}
+          disabled={name === ""}
           onPress={handleUpsertAdvanceReason}
           text={!data ? registerButton : updateButton}
         />

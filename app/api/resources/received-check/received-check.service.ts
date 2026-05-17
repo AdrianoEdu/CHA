@@ -168,6 +168,8 @@ class ReceivedCheckService {
         id: item.customer?.id ?? "",
         name: item.customer?.name ?? "",
         code: item.customer?.code ?? "",
+        isActive: item.customer?.isActive,
+        numberId: item.customer?.numberId,
         createdAt: item.customer?.createdAt ?? new Date(),
         customerType: item.customer?.customerType ?? "CLIENT",
       },

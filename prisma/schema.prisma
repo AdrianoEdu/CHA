@@ -39,7 +39,7 @@ enum FinancialFlowType {
 }
 
 enum FinancialStatus {
-  OPEN        
+  OPEN
   PAID        
   CANCELLED
 }
@@ -126,6 +126,8 @@ model Customer {
   id                 String @id @default(uuid())
   name               String
   code               String
+  numberId           Int @unique
+  isActive  Boolean   @default(true)
 
   transaction        Transaction[]
   receivedChecks     ReceivedCheck[]
@@ -138,9 +140,8 @@ model Customer {
 }
 
 model Bank {
-  id                String @id @default(uuid())
-  name              String
-
+  id                 String @id @default(uuid())
+  name               String
   agencies           String[]
 
   receivedChecks     ReceivedCheck[]

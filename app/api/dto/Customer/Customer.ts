@@ -8,6 +8,7 @@ import { Customer, CustomerType } from "@/app/generated/prisma";
 export type CreateCustomerDto = {
   name: string;
   code: string;
+  numberId: number;
   customerType: CustomerType;
 };
 
@@ -19,8 +20,10 @@ export type GetCustomerDto = {
   id: string;
   name: string;
   code: string;
-  customerType: CustomerType;
   createdAt: Date;
+  numberId: number;
+  isActive: boolean;
+  customerType: CustomerType;
 };
 
 export type RemoverCustomerDto = {

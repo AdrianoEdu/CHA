@@ -20,9 +20,11 @@ export type ReceivedCheckWithRelations = Prisma.ReceivedCheckGetPayload<{
         id: true;
         name: true;
         code: true;
-        customerType: true;
+        isActive: true;
+        numberId: true;
         createdAt: true;
         updatedAt: true;
+        customerType: true;
       };
     };
     bank: {
@@ -51,9 +53,11 @@ export const receivedCheckSelect = {
       id: true,
       name: true,
       code: true,
-      customerType: true,
+      isActive: true,
+      numberId: true,
       createdAt: true,
       updatedAt: true,
+      customerType: true,
     },
   },
   bank: {

@@ -26,38 +26,24 @@ export default function RegisterEmployeeModal({
   onClose,
 }: Readonly<RegisterEmployeeProps>) {
   const [name, setName] = useState("");
-  const [showErrorRegex, setShowErrorRegex] = useState(false);
+  const [disable, setDisable] = useState(false);
 
-  const errorRegexMessage =
-    name.trim() === "" ? errorEmptyName : errorInvalidName;
-
-  const handleRegisterEmployee = async (): Promise<void> => {
-    if (name.trim() === "") {
-      setShowErrorRegex(true);
-      return;
-    }
-
-    onRegister(name);
-  };
+  const handleRegisterEmployee = async (): Promise<void> => onRegister(name);
 
   return (
     <div className="flex flex-col w-full">
       <Input
         value={name}
         className="flex-1"
-        regex={Regex.onlyText}
-        regexError={showErrorRegex}
         name={inputNamePlaceholder}
-        onRegexError={setShowErrorRegex}
-        regexMessageError={errorRegexMessage}
         onChange={(e) => setName(e.target.value)}
       />
       <div className="mt-6 flex justify-end gap-4">
         <Button text={cancelButton} onPress={onClose} />
         <Button
           text={registerButton}
-          disabled={showErrorRegex}
           onPress={handleRegisterEmployee}
+          disabled={name === "" || disable}
         />
       </div>
     </div>

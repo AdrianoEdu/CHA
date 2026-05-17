@@ -73,24 +73,15 @@ class CustomerService {
   }
 
   async remove({ id }: RemoverCustomerDto) {
-    const count = await this.databaseService.transaction.count({
-      where: { customerId: id },
-    });
-
-    if (count > 0)
-      throw new HttpException(
-        "Já existem registros de adiantamento associados a este motivo.",
-        400,
-      );
-
     const removeCustomer = await this.databaseService.customer.findFirst({
       where: { id },
     });
 
     if (!removeCustomer) throw new HttpException("Cliente não encontrado", 404);
 
-    await this.databaseService.customer.delete({
+    await this.databaseService.customer.update({
       where: { id: removeCustomer.id },
+      data: { isActive: false },
     });
   }
 }

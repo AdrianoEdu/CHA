@@ -51,7 +51,6 @@ export default function UpsertFinancialCategory({
   onRegister,
 }: Readonly<FinancialCategoryProps>) {
   const [name, setName] = useState("");
-  const [showErrorRegex, setShowErrorRegex] = useState(false);
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   useEffect(() => {
@@ -82,14 +81,8 @@ export default function UpsertFinancialCategory({
       <Input
         value={name}
         className="flex-1"
-        regex={Regex.onlyText}
-        regexError={showErrorRegex}
-        onRegexError={setShowErrorRegex}
         name={"Infome a categoria financeira"}
         onChange={(e) => setName(e.target.value)}
-        regexMessageError={
-          "Por favor informar caracteres válidos (apenas texto)"
-        }
       />
 
       <ComboBox<SelectComboboxProps>
@@ -107,7 +100,7 @@ export default function UpsertFinancialCategory({
           status={ButtonStatusEnum.CANCEL}
         />
         <Button
-          disabled={showErrorRegex}
+          disabled={name === ""}
           onPress={handleUpsertFinancialCategory}
           text={!data ? registerButton : updateButton}
           status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
