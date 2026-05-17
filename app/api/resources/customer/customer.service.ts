@@ -73,14 +73,14 @@ class CustomerService {
   }
 
   async remove({ id }: RemoverCustomerDto) {
-    const removeCustomer = await this.databaseService.customer.findFirst({
+    const customer = await this.databaseService.customer.findFirst({
       where: { id },
     });
 
-    if (!removeCustomer) throw new HttpException("Cliente não encontrado", 404);
+    if (!customer) throw new HttpException("Cliente não encontrado", 404);
 
     await this.databaseService.customer.update({
-      where: { id: removeCustomer.id },
+      where: { id: customer.id },
       data: { isActive: false },
     });
   }
