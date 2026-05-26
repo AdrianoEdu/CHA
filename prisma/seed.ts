@@ -6,6 +6,7 @@
 import { PrismaClient } from "@/app/generated/prisma";
 import { seedUsers } from "./seeds/user-seed";
 import { seedSystemConfig } from "./seeds/config-system-seeds";
+import { seedCustomers } from "./seeds/customer-seed";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,7 @@ async function main() {
 
   await seedUsers(prisma);
   await seedSystemConfig(prisma);
+  await seedCustomers(prisma);
 
   console.log("✅ Seeds finalizadas");
 }

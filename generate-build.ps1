@@ -53,6 +53,14 @@ Write-Host "[INFO] Copiando icone..."
 Copy-Item "cha.ico" "$OUTPUT_DIR\" -Force
 
 # =========================
+# COPIAR CLIENTES
+# =========================
+
+Write-Host "[INFO] Copiando clientes.xls..."
+
+Copy-Item "clientes.xls" "$OUTPUT_DIR\" -Force
+
+# =========================
 # DOCKER COMPOSE PROD
 # =========================
 
@@ -87,6 +95,8 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    volumes:
+      - ./clientes.xls:/app/clientes.xls
     command: sh -c "
       npx prisma@5.22.0 migrate deploy &&
       npx prisma@5.22.0 db seed &&
