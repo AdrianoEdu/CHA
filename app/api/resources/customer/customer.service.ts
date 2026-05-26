@@ -6,7 +6,7 @@
 import { Prisma } from "@/app/generated/prisma";
 import {
   CreateCustomerDto,
-  GetCustomerDto,
+  GetCustomerDtoParams,
   RemoverCustomerDto,
   UpdateCustomerDto,
 } from "../../dto/Customer/Customer";
@@ -40,7 +40,7 @@ class CustomerService {
       Prisma.CustomerInclude,
       Prisma.CustomerOrderByWithRelationInput
     >,
-  ): Promise<GetCustomerDto | GetCustomerDto[]> {
+  ): Promise<GetCustomerDtoParams> {
     const baseQuery: Prisma.CustomerFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -51,9 +51,12 @@ class CustomerService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return this.findFirst(baseQuery);
+    const count = await this.databaseService.customer.count();
 
-    return this.findMany(baseQuery);
+    if (!params.all)
+      return { count, customers: await this.findFirst(baseQuery) };
+
+    return { count, customers: await this.findMany(baseQuery) };
   }
 
   async findMany(baseQuery: Prisma.CustomerFindManyArgs) {
@@ -69,7 +72,7 @@ class CustomerService {
 
     if (!result) throw new NotFoundException();
 
-    return result;
+    return [result];
   }
 
   async remove({ id }: RemoverCustomerDto) {

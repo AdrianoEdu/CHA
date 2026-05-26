@@ -27,6 +27,11 @@ export type GetCustomerDto = {
   customerType: CustomerType;
 };
 
+export type GetCustomerDtoParams = {
+  count: number;
+  customers: GetCustomerDto[];
+};
+
 export type CustomerWhere = Partial<GetCustomerDto>;
 
 export type CustomerParams = PaginationDto<CustomerWhere, any, any, any>;

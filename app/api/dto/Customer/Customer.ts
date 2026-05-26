@@ -26,6 +26,11 @@ export type GetCustomerDto = {
   customerType: CustomerType;
 };
 
+export type GetCustomerDtoParams = {
+  count: number;
+  customers: GetCustomerDto[];
+};
+
 export type RemoverCustomerDto = {
   id: string;
 };

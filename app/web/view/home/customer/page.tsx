@@ -10,7 +10,6 @@ import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import { UpsertCustomer } from "@/upsert-customer/page";
 import Table, { TableColumn } from "@/app/web/components/table/table";
-import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateCustomerDto,
   GetCustomerDto,
@@ -24,10 +23,14 @@ import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
+let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
+
+const takeCustomers = 20;
 
 export default function Customer() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [customerList, setCustomerList] = useState<GetCustomerDto[]>([]);
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -38,8 +41,8 @@ export default function Customer() {
   const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
-    handleGetAllCustomers();
-  }, []);
+    handleGetAllCustomers(currentPage);
+  }, [currentPage]);
 
   useEffect(() => {
     handleFilterCustomerName();
@@ -55,19 +58,19 @@ export default function Customer() {
     );
   };
 
-  const handleGetAllCustomers = async (): Promise<void> => {
-    const result = await customerService.findAll({
-      skip: 0,
-      take: 20,
+  const handleGetAllCustomers = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeCustomers;
+
+    const { count, customers } = await customerService.findAll({
+      skip: currentSkip,
       all: true,
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
+      take: takeCustomers,
+      orderBy: { name: "asc" },
     });
 
-    if (Array.isArray(result)) {
-      oldCustomerList = result;
-      setCustomerList(result);
-    }
+    countCustomers = count;
+    setCustomerList(customers);
+    oldCustomerList = customers;
   };
 
   const handleRegisterCustomer = async (
@@ -75,7 +78,7 @@ export default function Customer() {
   ): Promise<void> => {
     await customerService.create(data).then(() => {
       toast.success("Cliente registrado com sucesso");
-      handleGetAllCustomers();
+      handleGetAllCustomers(currentPage);
       closeModal();
     });
   };
@@ -85,7 +88,7 @@ export default function Customer() {
   ): Promise<void> => {
     await customerService.update(data).then(() => {
       toast.success("Cliente Atualizado com sucesso");
-      handleGetAllCustomers();
+      handleGetAllCustomers(currentPage);
       closeModal();
     });
   };
@@ -97,14 +100,20 @@ export default function Customer() {
       setList: setCustomerList,
       getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        const result = await customerService.findAll({
+        const filteredFields: Partial<GetCustomerDto> = Number.isNaN(value)
+          ? { name: value }
+          : { numberId: Number(value) };
+
+        const { count, customers } = await customerService.findAll({
           skip: 0,
-          take: 20,
           all: true,
-          where: { name: value },
+          take: takeCustomers,
+          where: filteredFields,
         });
 
-        return Array.isArray(result) ? result : [result];
+        countCustomers = count;
+
+        return customers;
       },
     });
   };
@@ -135,7 +144,7 @@ export default function Customer() {
     customerService.delete(customerId).then(() => {
       closeModal();
       toast.success("Cliente removido com sucesso");
-      handleGetAllCustomers();
+      handleGetAllCustomers(currentPage);
     });
   };
 
@@ -196,9 +205,13 @@ export default function Customer() {
         enableFilter
         title={"Clientes"}
         rows={customerList}
+        take={takeCustomers}
         columns={getColumns()}
+        currentPage={currentPage}
+        countRows={countCustomers}
         onRowClick={handleOpenModalEditCustomer}
         onFilterChange={handleSetFilterCustomerName}
+        onPageChange={(page) => setCurrentPage(page)}
         onActionClicked={hanleOpenModalRegisterCustomer}
       />
     </div>

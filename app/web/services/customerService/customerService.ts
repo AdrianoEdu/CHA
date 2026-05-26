@@ -6,7 +6,7 @@
 import {
   CreateCustomerDto,
   CustomerParams,
-  GetCustomerDto,
+  GetCustomerDtoParams,
   UpdateCustomerDto,
 } from "../../dto/customer.dto";
 import { requestService } from "../requestService/requestService";
@@ -26,11 +26,11 @@ class CustomerService {
     return requestService.post<CreateCustomerDto, void>(this.url, data);
   }
 
-  findAll(data?: CustomerParams): Promise<GetCustomerDto | GetCustomerDto[]> {
-    return requestService.getAll<
-      CustomerParams,
-      GetCustomerDto | GetCustomerDto[]
-    >(this.url, data);
+  findAll(data?: CustomerParams): Promise<GetCustomerDtoParams> {
+    return requestService.getAll<CustomerParams, GetCustomerDtoParams>(
+      this.url,
+      data,
+    );
   }
 
   delete(id: string) {

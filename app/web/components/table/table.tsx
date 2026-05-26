@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import React from "react";
+import TablePagination from "../tablepagination/page";
 
 export interface TableColumn<T> {
   label: string;
@@ -13,12 +14,16 @@ export interface TableColumn<T> {
 }
 
 interface TableProps<T> {
+  take: number;
   title?: string;
+  countRows: number;
   rows?: T[] | null;
+  currentPage: number;
+  enableFilter?: boolean;
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
   onRowClick?: (row: T) => void;
-  enableFilter?: boolean;
+  onPageChange: (page: number) => void;
   onFilterChange?: (value: string) => void;
 }
 
@@ -47,13 +52,17 @@ function getValue(obj: any, path: string) {
 }
 
 export default function Table<T>({
-  title = "Tabela",
-  columns,
   rows,
-  onActionClicked,
-  onRowClick,
+  take,
+  columns,
+  countRows,
+  currentPage,
+  title = "Tabela",
   enableFilter = false,
+  onRowClick,
+  onPageChange,
   onFilterChange,
+  onActionClicked,
 }: TableProps<T>) {
   const safeRows: T[] = Array.isArray(rows) ? rows : [];
 
@@ -158,6 +167,12 @@ export default function Table<T>({
               </div>
             </div>
           </div>
+          <TablePagination
+            take={take}
+            totalRows={countRows}
+            currentPage={currentPage}
+            onPageChange={onPageChange}
+          />
         </div>
       </main>
 
