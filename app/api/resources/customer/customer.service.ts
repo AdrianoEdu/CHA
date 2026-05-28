@@ -51,7 +51,9 @@ class CustomerService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    const count = await this.databaseService.customer.count();
+    const count = await this.databaseService.customer.count({
+      where: baseQuery.where,
+    });
 
     if (!params.all)
       return { count, customers: await this.findFirst(baseQuery) };

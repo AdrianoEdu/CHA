@@ -3,55 +3,76 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-export type FetchFn<T> = (value: string) => Promise<T[]>;
+export type FetchResult<T> = {
+  data: T[];
+  count: number;
+};
+
+export type FetchFn<T> = (value: string) => Promise<FetchResult<T>>;
 
 export interface FilterOptions<T> {
   originalList: T[];
+
   filter: string;
-  getSearchField: (item: T) => string;
+
   setList: (data: T[]) => void;
+
+  /**
+   * Atualiza o total retornado pela API
+   */
+  setCount?: (count: number) => void;
+
+  /**
+   * Busca diretamente da fonte
+   */
   fetchFromApi?: FetchFn<T>;
 }
 
 export async function handleGenericFilter<T>({
   originalList,
   filter,
-  getSearchField,
   setList,
+  setCount,
   fetchFromApi,
 }: FilterOptions<T>): Promise<void> {
+  // Sem filtro → mantém lista original
   if (!filter || filter.trim() === "") {
     setList(originalList);
+
+    if (setCount) {
+      setCount(originalList.length);
+    }
+
     return;
   }
 
-  const normalizedFilter = filter.toLowerCase();
-
-  const local = originalList.filter((item) =>
-    getSearchField(item).toLowerCase().includes(normalizedFilter),
-  );
-
-  if (local.length > 0) {
-    setList(local);
-    return;
-  }
-
+  // Sem API → não faz filtro local
   if (!fetchFromApi) {
     setList([]);
+
+    if (setCount) {
+      setCount(0);
+    }
+
     return;
   }
 
   try {
-    const apiResult = await fetchFromApi(filter);
+    // Busca DIRETAMENTE da fonte
+    const result = await fetchFromApi(filter);
 
-    if (!apiResult || apiResult.length === 0) {
-      setList([]);
-      return;
+    setList(result.data ?? []);
+
+    if (setCount) {
+      setCount(result.count ?? 0);
     }
-
-    setList(apiResult);
   } catch (error) {
     console.error("Erro no filtro genérico:", error);
-    setList(originalList);
+
+    setList([]);
+
+    if (setCount) {
+      setCount(0);
+    }
   }
 }

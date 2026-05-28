@@ -15,13 +15,14 @@ import {
   GetCustomerDto,
   UpdateCustomerDto,
 } from "@/app/web/dto/customer.dto";
-import { DeleteIcon } from "@/app/web/icons";
+import { DisabledIcon, EnableIcon } from "@/app/web/icons";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import EditIcon from "@/app/web/icons/edit-icon";
 
 let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
@@ -47,6 +48,10 @@ export default function Customer() {
   useEffect(() => {
     handleFilterCustomerName();
   }, [filter]);
+
+  const currentCountCustomers = useMemo(() => {
+    return countCustomers;
+  }, [countCustomers]); // Só recalcula quando count mudar
 
   const hanleOpenModalRegisterCustomer = (): void => {
     openModal(
@@ -98,10 +103,12 @@ export default function Customer() {
       originalList: oldCustomerList,
       filter,
       setList: setCustomerList,
-      getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        const filteredFields: Partial<GetCustomerDto> = Number.isNaN(value)
-          ? { name: value }
+        const parsed = Number(value);
+
+        // @ts-ignore
+        const filteredFields: Partial<GetCustomerDto> = Number.isNaN(parsed)
+          ? { name: { contains: value, mode: "insensitive" } }
           : { numberId: Number(value) };
 
         const { count, customers } = await customerService.findAll({
@@ -113,7 +120,7 @@ export default function Customer() {
 
         countCustomers = count;
 
-        return customers;
+        return { count, data: customers };
       },
     });
   };
@@ -128,7 +135,12 @@ export default function Customer() {
     }, 500);
   };
 
-  const handleOpenModalEditCustomer = (row: UpdateCustomerDto): void => {
+  const handleOpenModalEditCustomer = (
+    e: React.MouseEvent,
+    row: UpdateCustomerDto,
+  ): void => {
+    e.stopPropagation();
+
     openModal(
       <UpsertCustomer
         data={row}
@@ -184,11 +196,17 @@ export default function Customer() {
         render: (row) => {
           return (
             <div className="flex gap-2 justify-center">
-              {isAdmin && (
+              <Button
+                onClick={(e) => handleOpenModalRemove(e, row.id)}
+                icon={row.isActive ? <DisabledIcon /> : <EnableIcon />}
+                className={row.isActive ? "bg-red-500" : "bg-green-500"}
+              />
+
+              {row.isActive && (
                 <Button
-                  icon={<DeleteIcon />}
-                  className="bg-red-500"
-                  onClick={(e) => handleOpenModalRemove(e, row.id)}
+                  icon={<EditIcon />}
+                  className={"bg-green-500"}
+                  onClick={(e) => handleOpenModalEditCustomer(e, row)}
                 />
               )}
             </div>
@@ -208,8 +226,7 @@ export default function Customer() {
         take={takeCustomers}
         columns={getColumns()}
         currentPage={currentPage}
-        countRows={countCustomers}
-        onRowClick={handleOpenModalEditCustomer}
+        countRows={currentCountCustomers}
         onFilterChange={handleSetFilterCustomerName}
         onPageChange={(page) => setCurrentPage(page)}
         onActionClicked={hanleOpenModalRegisterCustomer}
