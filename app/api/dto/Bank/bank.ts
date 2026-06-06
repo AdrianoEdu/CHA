@@ -3,15 +3,23 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-export interface BankDto {
-  id?: string;
+export interface CreateBankDto {
   name: string;
   createdAt?: Date;
   agencies: string[];
 }
 
-export type UpdateBankDto = Partial<BankDto>;
+export interface GetBankDto extends CreateBankDto {
+  id?: string;
+}
+
+export type UpdateBankDto = Partial<GetBankDto>;
 
 export type RemoveBankDto = {
   id: string;
+};
+
+export type GetBankDtoParams = {
+  count: number;
+  banks: GetBankDto[];
 };

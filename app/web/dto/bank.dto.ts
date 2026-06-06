@@ -12,7 +12,7 @@ export type GetBankDto = {
   agencies: string[];
 };
 
-export type CreateBankDtp = {
+export type CreateBankDto = {
   name: string;
   createdAt: Date;
   agencies: string[];
@@ -28,3 +28,8 @@ export type UpdateBankDto = {
 export type BankWhere = Partial<GetBankDto>;
 
 export type BankParams = PaginationDto<BankWhere, any, any, any>;
+
+export type GetBankDtoParams = {
+  count: number;
+  banks: GetBankDto[];
+};

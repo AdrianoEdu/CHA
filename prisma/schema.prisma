@@ -145,11 +145,21 @@ model Bank {
   agencies           String[]
 
   receivedChecks     ReceivedCheck[]
+  currentAccount     CurrentAccount[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("banks")
+}
+
+model CurrentAccount {
+  id                String @id @default(uuid())
+  accountNumber     String
+  bankBalance       Decimal @db.Decimal(15,2)
+
+  bankId            String
+  bank              Bank @relation(fields: [bankId], references: [id])
 }
 
 model ReceivedCheck {

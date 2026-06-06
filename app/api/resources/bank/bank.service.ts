@@ -4,16 +4,22 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
-import { BankDto, RemoveBankDto, UpdateBankDto } from "../../dto/Bank/bank";
+import {
+  GetBankDto,
+  GetBankDtoParams,
+  RemoveBankDto,
+  UpdateBankDto,
+} from "../../dto/Bank/bank";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
 import { NotFoundException } from "../../error/NotFoundException";
+import { CreateBankDto } from "@/app/web/dto/bank.dto";
 
 class BankService {
   private databaseService = databaseService;
 
-  async create({ agencies, name }: BankDto): Promise<BankDto> {
+  async create({ agencies, name }: CreateBankDto): Promise<GetBankDto> {
     return this.databaseService.bank.create({ data: { name, agencies } });
   }
 
@@ -31,7 +37,7 @@ class BankService {
       Prisma.BankInclude,
       Prisma.BankOrderByWithRelationInput
     >,
-  ): Promise<BankDto | BankDto[]> {
+  ): Promise<GetBankDtoParams> {
     const baseQuery: Prisma.BankFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -42,23 +48,28 @@ class BankService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return this.findFirst(baseQuery);
+    const count = await this.databaseService.bank.count({
+      where: baseQuery.where,
+    });
 
-    return this.findMany(baseQuery);
+    if (params.where)
+      return { count, banks: await this.findManyByFilters(baseQuery) };
+
+    return { count, banks: await this.findMany(baseQuery) };
   }
 
-  async findMany(baseQuery: Prisma.BankFindManyArgs): Promise<BankDto[]> {
+  async findMany(baseQuery: Prisma.BankFindManyArgs): Promise<GetBankDto[]> {
     return await this.databaseService.bank.findMany({
       ...baseQuery,
     });
   }
 
-  async findFirst(baseQuery: Prisma.BankFindManyArgs): Promise<BankDto> {
-    const result = await this.databaseService.bank.findFirst({
+  async findManyByFilters(
+    baseQuery: Prisma.BankFindManyArgs,
+  ): Promise<GetBankDto[]> {
+    const result = await this.databaseService.bank.findMany({
       ...baseQuery,
     });
-
-    if (!result) throw new NotFoundException();
 
     return result;
   }

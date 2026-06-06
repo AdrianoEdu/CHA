@@ -3,9 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { BankDto } from "@/app/api/dto/Bank/bank";
 import { ReceivedCheckStatus } from "../constants/enum";
-import { ActionDto } from "./auth.dto";
 import { GetBankDto } from "./bank.dto";
 import { GetCustomerDto } from "./customer.dto";
 import { PaginationDto } from "./pagination.dto";
@@ -35,7 +33,7 @@ export type CreateReceivedCheckDTO = {
 
 export type UpdateReceivedCheckDTO = {
   id: string;
-  bank?: BankDto;
+  bank?: GetBankDto;
   bankId?: string;
   agency?: string;
   status?: string;

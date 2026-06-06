@@ -9,7 +9,7 @@ export default function Home({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-off-white">
-      <div className="w-64 bg-gray-800 text-white">
+      <div className="w-80 bg-gray-800 text-white">
         <SideBar />
       </div>
 

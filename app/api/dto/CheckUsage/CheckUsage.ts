@@ -5,8 +5,6 @@
 
 import { CheckUsageType } from "@/app/generated/prisma";
 import { ReceivedCheckDTO } from "../ReceivedCheck/ReceivedCheck";
-import { BankDto } from "../Bank/bank";
-import { GetCustomerDto } from "../Customer/Customer";
 import { GetTrasnactionDTO } from "../Transaction/Tansaction";
 
 export type CheckUsageDTO = {

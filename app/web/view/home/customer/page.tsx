@@ -42,16 +42,16 @@ export default function Customer() {
   const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
+    if (filter) {
+      handleFilterCustomerName(currentPage);
+      return;
+    }
     handleGetAllCustomers(currentPage);
-  }, [currentPage]);
-
-  useEffect(() => {
-    handleFilterCustomerName();
-  }, [filter]);
+  }, [currentPage, filter]);
 
   const currentCountCustomers = useMemo(() => {
     return countCustomers;
-  }, [countCustomers]); // Só recalcula quando count mudar
+  }, [countCustomers]);
 
   const hanleOpenModalRegisterCustomer = (): void => {
     openModal(
@@ -98,7 +98,9 @@ export default function Customer() {
     });
   };
 
-  const handleFilterCustomerName = async () => {
+  const handleFilterCustomerName = async (page: number) => {
+    const currentSkip = (page - 1) * takeCustomers;
+
     await handleGenericFilter({
       originalList: oldCustomerList,
       filter,
@@ -112,7 +114,7 @@ export default function Customer() {
           : { numberId: Number(value) };
 
         const { count, customers } = await customerService.findAll({
-          skip: 0,
+          skip: currentSkip,
           all: true,
           take: takeCustomers,
           where: filteredFields,
@@ -131,6 +133,8 @@ export default function Customer() {
     }
 
     debounceRef.current = setTimeout(() => {
+      if (name === "") setCurrentPage(1);
+
       setFilter(name);
     }, 500);
   };

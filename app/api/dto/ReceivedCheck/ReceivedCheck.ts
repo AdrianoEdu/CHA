@@ -4,12 +4,12 @@
 // All rights reserved.
 
 import { ReceivedCheckStatus } from "@/app/generated/prisma";
-import { BankDto } from "../Bank/bank";
+import { GetBankDto } from "../Bank/bank";
 import { GetCustomerDto } from "../Customer/Customer";
 
 export type ReceivedCheckDTO = {
   id: string;
-  bank: BankDto;
+  bank: GetBankDto;
   agency: string;
   createdAt: Date;
   goodForAt?: Date;

@@ -55,8 +55,8 @@ class CustomerService {
       where: baseQuery.where,
     });
 
-    if (!params.all)
-      return { count, customers: await this.findFirst(baseQuery) };
+    if (params.where)
+      return { count, customers: await this.findAllByFilters(baseQuery) };
 
     return { count, customers: await this.findMany(baseQuery) };
   }
@@ -67,14 +67,12 @@ class CustomerService {
     });
   }
 
-  async findFirst(baseQuery: Prisma.CustomerFindManyArgs) {
-    const result = await this.databaseService.customer.findFirst({
+  async findAllByFilters(baseQuery: Prisma.CustomerFindManyArgs) {
+    const result = await this.databaseService.customer.findMany({
       ...baseQuery,
     });
 
-    if (!result) throw new NotFoundException();
-
-    return [result];
+    return result;
   }
 
   async remove({ id }: RemoverCustomerDto) {
