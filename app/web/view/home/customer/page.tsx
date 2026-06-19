@@ -46,6 +46,7 @@ export default function Customer() {
       handleFilterCustomerName(currentPage);
       return;
     }
+
     handleGetAllCustomers(currentPage);
   }, [currentPage, filter]);
 
@@ -67,8 +68,8 @@ export default function Customer() {
     const currentSkip = (page - 1) * takeCustomers;
 
     const { count, customers } = await customerService.findAll({
-      skip: currentSkip,
       all: true,
+      skip: currentSkip,
       take: takeCustomers,
       orderBy: { name: "asc" },
     });
@@ -102,8 +103,8 @@ export default function Customer() {
     const currentSkip = (page - 1) * takeCustomers;
 
     await handleGenericFilter({
-      originalList: oldCustomerList,
       filter,
+      originalList: oldCustomerList,
       setList: setCustomerList,
       fetchFromApi: async (value) => {
         const parsed = Number(value);
@@ -111,7 +112,7 @@ export default function Customer() {
         // @ts-ignore
         const filteredFields: Partial<GetCustomerDto> = Number.isNaN(parsed)
           ? { name: { contains: value, mode: "insensitive" } }
-          : { numberId: Number(value) };
+          : { numberId: parsed };
 
         const { count, customers } = await customerService.findAll({
           skip: currentSkip,
@@ -230,9 +231,9 @@ export default function Customer() {
         take={takeCustomers}
         columns={getColumns()}
         currentPage={currentPage}
+        onPageChange={setCurrentPage}
         countRows={currentCountCustomers}
         onFilterChange={handleSetFilterCustomerName}
-        onPageChange={(page) => setCurrentPage(page)}
         onActionClicked={hanleOpenModalRegisterCustomer}
       />
     </div>

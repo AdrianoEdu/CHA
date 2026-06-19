@@ -5,6 +5,7 @@
 
 import {
   CreateTransactionDTO,
+  GetTransactionsParamsDto,
   GetTrasnactionDTO,
   TransactionParams,
   UpdateTransactionDTO,
@@ -27,10 +28,10 @@ class TransactionService {
   }
 
   findAll(data: TransactionParams) {
-    return requestService.getAll<
-      TransactionParams,
-      GetTrasnactionDTO | GetTrasnactionDTO[]
-    >(this.url, data);
+    return requestService.getAll<TransactionParams, GetTransactionsParamsDto>(
+      this.url,
+      data,
+    );
   }
 }
 

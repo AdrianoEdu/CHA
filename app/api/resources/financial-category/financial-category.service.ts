@@ -6,6 +6,7 @@
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
+  GetFinancialCategoryParamsDto,
   RemoveFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "@/app/api/dto/FinancialCategory/FinancialCategory";
@@ -40,7 +41,7 @@ class FinancialCategoryService {
       Prisma.FinancialCategoryInclude,
       Prisma.FinancialCategoryOrderByWithRelationInput
     >,
-  ): Promise<GetFinancialCategoryDto | GetFinancialCategoryDto[]> {
+  ): Promise<GetFinancialCategoryParamsDto> {
     const baseQuery: Prisma.FinancialCategoryFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -51,19 +52,25 @@ class FinancialCategoryService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return this.findFirst(baseQuery);
-
-    return this.findMany(baseQuery);
-  }
-
-  async findFirst(
-    baseQuery: Prisma.FinancialCategoryFindManyArgs,
-  ): Promise<GetFinancialCategoryDto> {
-    const result = await this.databaseService.financialCategory.findFirst({
-      ...baseQuery,
+    const count = await this.databaseService.financialCategory.count({
+      where: baseQuery.where,
     });
 
-    if (!result) throw new NotFoundException();
+    if (params.where)
+      return {
+        count,
+        financialCategories: await this.findManyByFilters(baseQuery),
+      };
+
+    return { count, financialCategories: await this.findMany(baseQuery) };
+  }
+
+  async findManyByFilters(
+    baseQuery: Prisma.FinancialCategoryFindManyArgs,
+  ): Promise<GetFinancialCategoryDto[]> {
+    const result = await this.databaseService.financialCategory.findMany({
+      ...baseQuery,
+    });
 
     return result;
   }

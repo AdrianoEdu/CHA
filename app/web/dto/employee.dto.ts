@@ -3,7 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ActionDto } from "./auth.dto";
 import { PaginationDto } from "./pagination.dto";
 
 export interface EmployeeDto {
@@ -17,3 +16,8 @@ export interface EmployeeDto {
 export type EmployeeWhere = Partial<EmployeeDto>;
 
 export type EmployeeParams = PaginationDto<EmployeeWhere, any, any, any>;
+
+export type GetEmployeeDtoParams = {
+  count: number;
+  employee: EmployeeDto[];
+};

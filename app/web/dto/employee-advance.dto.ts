@@ -38,3 +38,8 @@ export type EmployeeAdvanceParams = PaginationDto<
   any,
   any
 >;
+
+export type EmployeeAdvanceDtoParams = {
+  count: number;
+  employeeAdvanced: GetAllEmployeeAdvanceDto[];
+};

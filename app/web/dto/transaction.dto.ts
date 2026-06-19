@@ -47,3 +47,8 @@ export type UpsertTransactionDto = CreateTransactionDTO & UpdateTransactionDTO;
 export type TransacitonWhere = Partial<GetTrasnactionDTO>;
 
 export type TransactionParams = PaginationDto<TransacitonWhere, any, any, any>;
+
+export type GetTransactionsParamsDto = {
+  count: number;
+  transactions: GetTrasnactionDTO[];
+};

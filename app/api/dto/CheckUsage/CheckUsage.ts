@@ -36,3 +36,8 @@ export type UpdateCheckUsageDTO = {
   receivedCheckId: string;
   usageType?: CheckUsageType;
 };
+
+export type GetUsageDTOParams = {
+  count: number;
+  checkUsages: CheckUsageDTO[];
+};

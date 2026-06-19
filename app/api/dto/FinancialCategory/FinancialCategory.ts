@@ -24,3 +24,8 @@ export type GetFinancialCategoryDto = {
 export type RemoveFinancialCategoryDto = {
   id: string;
 };
+
+export type GetFinancialCategoryParamsDto = {
+  count: number;
+  financialCategories: GetFinancialCategoryDto[];
+};

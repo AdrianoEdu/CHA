@@ -19,3 +19,8 @@ export interface CreateEmployeeAdvanceDto extends GetEmployeeAdvanceDto {
   employeeId: string;
   reasonId: string;
 }
+
+export interface GetEmployeeAdvanceDtoParams {
+  count: number;
+  employeeAdvanced: EmployeeAdvanceDto[];
+}

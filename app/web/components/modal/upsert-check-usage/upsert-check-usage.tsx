@@ -106,12 +106,12 @@ export function UpsertCheckUsageModal({
   }, [editData, usageTypeList]);
 
   const handleGetTransactions = async (): Promise<void> => {
-    const result = await transactionService.findAll({
+    const { transactions } = await transactionService.findAll({
       all: true,
       where: { status: { not: TransactionStatus.FINALIZED } } as any,
     });
 
-    settransactionOption(mapperTransaction(result));
+    settransactionOption(mapperTransaction(transactions));
   };
 
   const handleSelectUsageType = (option: SelectOption | null) => {

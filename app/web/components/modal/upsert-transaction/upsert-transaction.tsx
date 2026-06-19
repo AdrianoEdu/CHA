@@ -97,29 +97,34 @@ export function UpsertTransaction({
   }, []);
 
   const getAllFinancialCategory = async (): Promise<void> => {
-    const result = await financialCategoryService.findAll({ all: true });
+    const { financial } = await financialCategoryService.findAll({ all: true });
 
-    if (editData && Array.isArray(result)) {
-      const filter = result.filter((item) => item.id === editData.category.id);
+    if (editData && Array.isArray(financial)) {
+      const filter = financial.filter(
+        (item) => item.id === editData.category.id,
+      );
+
       const [firstItem] = mapperFinancialCategory(filter);
 
       setFinancialCategoryOption(firstItem);
     }
 
-    setFinancialCategoryList(mapperFinancialCategory(result));
+    setFinancialCategoryList(mapperFinancialCategory(financial));
   };
 
   const getAllCustomer = async (): Promise<void> => {
-    const result = await customerService.findAll({ all: true });
+    const { customers } = await customerService.findAll({ all: true });
 
-    if (editData && Array.isArray(result)) {
-      const filter = result.filter((item) => item.id === editData.customer.id);
+    if (editData && Array.isArray(customers)) {
+      const filter = customers.filter(
+        (item) => item.id === editData.customer.id,
+      );
       const [firstItem] = mapperCustomer(filter);
 
       setCustomerOption(firstItem);
     }
 
-    setCustomerList(mapperCustomer(result));
+    setCustomerList(mapperCustomer(customers));
   };
 
   const handleSubmit = () => {

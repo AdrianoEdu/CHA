@@ -45,3 +45,8 @@ export type UpdateReceivedCheckDTO = {
 export type RemoveReceivedCheckDto = {
   id: string;
 };
+
+export type GetReceivedCheckDTOParams = {
+  count: number;
+  receivedChecks: ReceivedCheckDTO[];
+};

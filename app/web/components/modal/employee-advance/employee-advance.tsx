@@ -73,14 +73,14 @@ export default function RegisterEmployeeAdvanceModal({
   }, [employeeName]);
 
   const handleGetAllAdvanceReason = async (): Promise<void> => {
-    const result = await advanceReasonService.findAll({
+    const { advanceReason } = await advanceReasonService.findAll({
       skip: 0,
-      take: 20,
+      take: 0,
       all: true,
       orderBy: { createdAt: "desc" },
     });
 
-    setAdvanceReasonList(result);
+    setAdvanceReasonList(advanceReason);
   };
 
   const handleRegisterAdvanceEmployee = async (): Promise<void> => {

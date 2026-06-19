@@ -21,15 +21,19 @@ import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
+let countFinancial = 0;
 let oldFinancialList: GetFinancialCategoryDto[] = [];
+
+const takeFinancial = 0;
 
 export default function FinancialCategory() {
   const [financialList, setFinancialList] =
     useState<GetFinancialCategoryDto[]>();
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { user } = useAuth();
   const { closeModal, openModal } = useModal();
@@ -39,12 +43,14 @@ export default function FinancialCategory() {
   const isAdmin = user.role === UserRole.ADMIN;
 
   useEffect(() => {
-    handleGetAllFinancialCategory();
-  }, []);
+    if (filter) handleFilterFinancialCategoryName(currentPage);
 
-  useEffect(() => {
-    handleFilterFinancialCategoryName();
-  }, [filter]);
+    handleGetAllFinancialCategory(currentPage);
+  }, [currentPage, filter]);
+
+  const currentCountFinancial = useMemo(() => {
+    return countFinancial;
+  }, [countFinancial]);
 
   function handleSetFilterChange(value: string) {
     if (debounceRef.current) {
@@ -69,18 +75,19 @@ export default function FinancialCategory() {
     );
   };
 
-  const handleGetAllFinancialCategory = async (): Promise<void> => {
-    const result = await financialCategoryService.findAll({
-      skip: 0,
-      take: 20,
+  const handleGetAllFinancialCategory = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeFinancial;
+
+    const { count, financial } = await financialCategoryService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeFinancial,
       orderBy: { createdAt: "desc" },
     });
 
-    if (Array.isArray(result)) {
-      setFinancialList(result);
-      oldFinancialList = result;
-    }
+    countFinancial = count;
+    setFinancialList(financial);
+    oldFinancialList = financial;
   };
 
   const handleOpenModalRegisterFinancialCategory = () => {
@@ -98,7 +105,7 @@ export default function FinancialCategory() {
   ): void => {
     financialCategoryService.create(data).then(() => {
       toast.success("Categoria financeira registrada com sucesso");
-      handleGetAllFinancialCategory();
+      handleGetAllFinancialCategory(currentPage);
       closeModal();
     });
   };
@@ -108,22 +115,34 @@ export default function FinancialCategory() {
   ): void => {
     financialCategoryService.update(data).then(() => {
       toast.success("Categoria financeira atualizada com sucesso");
-      handleGetAllFinancialCategory();
+      handleGetAllFinancialCategory(currentPage);
       closeModal();
     });
   };
 
-  const handleFilterFinancialCategoryName = async () => {
+  const handleFilterFinancialCategoryName = async (page: number) => {
+    const currentSkip = (page - 1) * takeFinancial;
+
     await handleGenericFilter({
-      originalList: oldFinancialList,
       filter,
       setList: setFinancialList,
-      getSearchField: (emp) => emp.name,
+      originalList: oldFinancialList,
       fetchFromApi: async (value) => {
-        return financialCategoryService.findByName({
-          name: value,
-          type: ActionEnum.FindByFilters,
+        // @ts-ignore
+        const filteredFields = {
+          name: { contains: value, mode: "insensitive" },
+        } as Partial<GetFinancialCategoryDto>;
+
+        const { count, financial } = await financialCategoryService.findAll({
+          all: true,
+          skip: currentSkip,
+          take: takeFinancial,
+          where: filteredFields,
         });
+
+        countFinancial = count;
+
+        return { count, data: financial };
       },
     });
   };
@@ -132,7 +151,7 @@ export default function FinancialCategory() {
     financialCategoryService.delete(categoryId).then(() => {
       closeModal();
       toast.success("Categoria financeira removida com sucesso");
-      handleGetAllFinancialCategory();
+      handleGetAllFinancialCategory(currentPage);
     });
   };
 
@@ -186,9 +205,13 @@ export default function FinancialCategory() {
     <div>
       <Table
         enableFilter
+        take={takeFinancial}
         rows={financialList}
         columns={getColumns()}
+        currentPage={currentPage}
         title={"Entradas e saídas"}
+        onPageChange={setCurrentPage}
+        countRows={currentCountFinancial}
         onFilterChange={handleSetFilterChange}
         onRowClick={handleOpenModalEditFinancialCategory}
         onActionClicked={handleOpenModalRegisterFinancialCategory}

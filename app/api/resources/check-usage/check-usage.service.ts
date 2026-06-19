@@ -7,6 +7,7 @@ import { Prisma } from "@/app/generated/prisma";
 import {
   CheckUsageDTO,
   CreateCheckUsageDTO,
+  GetUsageDTOParams,
   UpdateCheckUsageDTO,
 } from "../../dto/CheckUsage/CheckUsage";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
@@ -31,21 +32,20 @@ class CheckUsageService {
   async findMany(baseQuery: Prisma.CheckUsageFindManyArgs) {
     const result = await this.databaseService.checkUsage.findMany({
       ...baseQuery,
+      where: undefined,
       select: checkUsageSelect,
     });
 
     return result.map((checkUsage) => this.mapperCheckUsage(checkUsage));
   }
 
-  async findFirst(baseQuery: Prisma.CheckUsageFindManyArgs) {
-    const result = await this.databaseService.checkUsage.findFirst({
+  async findManyByFilters(baseQuery: Prisma.CheckUsageFindManyArgs) {
+    const result = await this.databaseService.checkUsage.findMany({
       ...baseQuery,
       select: checkUsageSelect,
     });
 
-    if (!result) throw new NotFoundException();
-
-    return this.mapperCheckUsage(result);
+    return result.map((checkUsage) => this.mapperCheckUsage(checkUsage));
   }
 
   async findCheckUsage(
@@ -55,7 +55,7 @@ class CheckUsageService {
       Prisma.CheckUsageInclude,
       Prisma.CheckUsageOrderByWithRelationInput
     >,
-  ): Promise<CheckUsageDTO | CheckUsageDTO[]> {
+  ): Promise<GetUsageDTOParams> {
     const baseQuery: Prisma.CheckUsageFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -63,12 +63,17 @@ class CheckUsageService {
       orderBy: params.orderBy,
     };
 
+    const count = await this.databaseService.checkUsage.count({
+      where: baseQuery.where,
+    });
+
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) this.findFirst(baseQuery);
+    if (params.where)
+      return { count, checkUsages: await this.findManyByFilters(baseQuery) };
 
-    return this.findMany(baseQuery);
+    return { count, checkUsages: await this.findMany(baseQuery) };
   }
 
   private mapperCheckUsage(item: CheckUsageWithRelations): CheckUsageDTO {

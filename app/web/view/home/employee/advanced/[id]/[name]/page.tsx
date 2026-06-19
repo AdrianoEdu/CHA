@@ -7,7 +7,6 @@
 
 import RegisterEmployeeAdvanceModal from "@/app/web/components/modal/employee-advance/employee-advance";
 import Table from "@/app/web/components/table/table";
-import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateEmployeeAdvanceDto,
   GetAllEmployeeAdvanceDto,
@@ -16,15 +15,21 @@ import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeAdvanceService } from "@/app/web/services/employeeAdvanceService/employeeAdvanceService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+let countEmployees = 0;
 let oldEmployeeAdvanceList: GetAllEmployeeAdvanceDto[] = [];
+
+const takeEmployees = 20;
 
 export default function EmployeeAdvanced() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [employeeAdvanceList, setEmployeeAdvancedList] = useState<
     GetAllEmployeeAdvanceDto[]
   >([]);
+
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const { id, name } = useParams();
   const { openModal, closeModal } = useModal();
@@ -32,45 +37,66 @@ export default function EmployeeAdvanced() {
   const employeeName = decodeURIComponent(name as string);
 
   useEffect(() => {
-    onHandleGetAllEmployeeAdvanced();
-  }, []);
+    if (filter) {
+      handleFilterAdvanceReason(currentPage);
+      return;
+    }
 
-  useEffect(() => {
-    handleFilterAdvanceReason();
-  }, [filter]);
+    onHandleGetAllEmployeeAdvanced(currentPage);
+  }, [currentPage, filter]);
 
-  const handleFilterAdvanceReason = async () => {
+  const currentCountEmployees = useMemo(() => {
+    return countEmployees;
+  }, [countEmployees]);
+
+  const handleFilterAdvanceReason = async (page: number) => {
+    const currentSkip = (page - 1) * takeEmployees;
+
     await handleGenericFilter({
       filter,
       originalList: oldEmployeeAdvanceList,
       setList: setEmployeeAdvancedList,
-      getSearchField: (emp) => emp.reasonName,
       fetchFromApi: async (value) => {
-        const result = await employeeAdvanceService.findAll({
-          skip: 0,
-          take: 20,
-          all: true,
-          where: { reasonName: value },
-        });
+        const parsed = Number(value);
 
-        return Array.isArray(result) ? result : [result];
+        // @ts-ignore
+        const filteredFields: Partial<GetAllEmployeeAdvanceDto> = Number.isNaN(
+          parsed,
+        )
+          ? { reasonName: { value, mode: "insensitive" } }
+          : { amount: parsed };
+
+        const { count, employeeAdvanced } =
+          await employeeAdvanceService.findAll({
+            all: true,
+            skip: currentSkip,
+            take: takeEmployees,
+            where: filteredFields,
+          });
+
+        countEmployees = count;
+
+        return { count, data: employeeAdvanced };
       },
     });
   };
 
-  const onHandleGetAllEmployeeAdvanced = async (): Promise<void> => {
-    const result = await employeeAdvanceService.findAll({
-      skip: 0,
-      take: 20,
+  const onHandleGetAllEmployeeAdvanced = async (
+    page: number,
+  ): Promise<void> => {
+    const currentSkip = (page - 1) * takeEmployees;
+
+    const { count, employeeAdvanced } = await employeeAdvanceService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeEmployees,
       orderBy: { createdAt: "desc" },
       include: { reason: { select: { name: true } } },
     });
 
-    if (Array.isArray(result)) {
-      oldEmployeeAdvanceList = result;
-      setEmployeeAdvancedList(result);
-    }
+    countEmployees = count;
+    oldEmployeeAdvanceList = employeeAdvanced;
+    setEmployeeAdvancedList(employeeAdvanced);
   };
 
   const onHandleRegisterEmployeeAdvanceModal = async ({
@@ -85,7 +111,7 @@ export default function EmployeeAdvanced() {
         employeeId: id as string,
       })
       .then(() => {
-        onHandleGetAllEmployeeAdvanced();
+        onHandleGetAllEmployeeAdvanced(currentPage);
         closeModal();
       });
   };
@@ -110,10 +136,14 @@ export default function EmployeeAdvanced() {
       </div>
       <Table
         enableFilter
+        take={takeEmployees}
+        currentPage={currentPage}
         rows={employeeAdvanceList}
         onFilterChange={setFilter}
-        title="Informações adicionais"
+        title={"Informações adicionais"}
+        countRows={currentCountEmployees}
         onActionClicked={onHandleActionClick}
+        onPageChange={(page) => setCurrentPage(page)}
         columns={[
           { label: "Efetuado em", accessor: "createdAt" },
           { label: "Motivo", accessor: "reasonName" },

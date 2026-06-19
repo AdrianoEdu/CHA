@@ -17,11 +17,15 @@ import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
+import { parse } from "next/dist/build/swc/generated-native";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 let oldReceiveChecks: ReceivedCheckDTO[] = [];
+
+let countReceivedCheck = 0;
+const takeReceivedCheck = 20;
 
 type GetColumnsProps = {
   handleEdit: (row: ReceivedCheckDTO) => void;
@@ -91,6 +95,7 @@ const getColumns = ({
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [receivedChecks, setReceivedChecks] = useState<ReceivedCheckDTO[]>();
 
   const router = useRouter();
@@ -98,12 +103,14 @@ export default function ReceiveCheck() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    handleFindReceiveChecks();
-  }, []);
+    if (filter) handleFilterReceiveCheck(currentPage);
 
-  useEffect(() => {
-    handleFilterReceiveCheck();
-  }, [filter]);
+    handleFindReceiveChecks(currentPage);
+  }, [currentPage, filter]);
+
+  const currentCountReceivedCheck = useMemo(() => {
+    return countReceivedCheck;
+  }, [countReceivedCheck]);
 
   const handleUpserData = async (
     {
@@ -136,7 +143,7 @@ export default function ReceiveCheck() {
         })
         .then(() => {
           toast.success("Recebimento de cheque atualizado com sucesso");
-          handleFindReceiveChecks();
+          handleFindReceiveChecks(currentPage);
         })
         .catch((err) => toast.error("Erro ao Atualizar cheque recebido", err));
       closeModal();
@@ -155,7 +162,7 @@ export default function ReceiveCheck() {
       })
       .then(() => {
         toast.success("Recebimento de cheque registrado com sucesso");
-        handleFindReceiveChecks();
+        handleFindReceiveChecks(currentPage);
       })
       .catch((err) => toast.error("Erro ao cadastrar cheque recebido", err));
 
@@ -182,36 +189,48 @@ export default function ReceiveCheck() {
     );
   };
 
-  const handleFindReceiveChecks = async (): Promise<void> => {
-    const result = await receiveCheckService.findAll({
-      skip: 0,
-      take: 20,
+  const handleFindReceiveChecks = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeReceivedCheck;
+
+    const { count, receivedChecks } = await receiveCheckService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeReceivedCheck,
       orderBy: { createdAt: "desc" },
     });
 
-    if (Array.isArray(result)) {
-      oldReceiveChecks = result;
-      setReceivedChecks(result);
-    }
+    oldReceiveChecks = receivedChecks;
+    setReceivedChecks(receivedChecks);
+
+    countReceivedCheck = count;
   };
 
-  const handleFilterReceiveCheck = async () => {
+  const handleFilterReceiveCheck = async (page: number) => {
+    const currentSkip = (page - 1) * takeReceivedCheck;
+
     await handleGenericFilter({
       originalList: oldReceiveChecks,
       filter,
       setList: setReceivedChecks,
-      getSearchField: (emp) => emp.checkNumber,
       fetchFromApi: async (value) => {
-        const result = await receiveCheckService.findAll({
-          skip: 0,
-          take: 20,
+        const parsed = Number(value);
+
+        //@ts-ignore
+        const filteredFields: Partial<ReceivedCheckDTO> = Number.isNaN(parsed)
+          ? { customer: { code: { contains: value, mode: "insensitive" } } }
+          : { checkNumber: value };
+
+        const { count, receivedChecks } = await receiveCheckService.findAll({
           all: true,
-          where: { code: value },
+          skip: currentSkip,
+          where: filteredFields,
+          take: takeReceivedCheck,
           orderBy: { createdAt: "desc" },
         });
 
-        return Array.isArray(result) ? result : [result];
+        countReceivedCheck = count;
+
+        return { count, data: receivedChecks };
       },
     });
   };
@@ -237,7 +256,11 @@ export default function ReceiveCheck() {
       <Table
         enableFilter
         rows={receivedChecks}
+        take={takeReceivedCheck}
+        currentPage={currentPage}
         title={"Cheques recebidos"}
+        onPageChange={setCurrentPage}
+        countRows={currentCountReceivedCheck}
         onFilterChange={handleSetFilterCheckNumber}
         onRowClick={handleNavigateCheckUsageScreen}
         onActionClicked={hanleOpenModalRegisterReceivedCheck}

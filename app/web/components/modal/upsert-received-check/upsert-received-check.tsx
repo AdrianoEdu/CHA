@@ -83,8 +83,8 @@ export default function UpsertReceivedCheckModal({
       const [banks, customers] = await Promise.all([
         bankService
           .findAll({ all: true, orderBy: { createdAt: "desc" } })
-          .then((list) =>
-            list.map((bank) => ({
+          .then(({ banks }) =>
+            banks.map((bank) => ({
               id: String(bank.id),
               name: bank.name,
               list: sortStringNumbers(bank.agencies),

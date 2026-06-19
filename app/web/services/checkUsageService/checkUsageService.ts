@@ -7,6 +7,7 @@ import {
   CheckUsageDTO,
   CheckUsageParams,
   CreateCheckUsageDTO,
+  GetCheckUsageDTOParams,
   UpdateCheckUsageDTO,
 } from "../../dto/check-usage.dto";
 import { requestService } from "../requestService/requestService";
@@ -27,10 +28,10 @@ class CheckUsageService {
   }
 
   findAll(data: CheckUsageParams) {
-    return requestService.getAll<
-      CheckUsageParams,
-      CheckUsageDTO | CheckUsageDTO[]
-    >(this.url, data);
+    return requestService.getAll<CheckUsageParams, GetCheckUsageDTOParams>(
+      this.url,
+      data,
+    );
   }
 }
 

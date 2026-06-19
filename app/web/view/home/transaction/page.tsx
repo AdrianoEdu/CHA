@@ -17,9 +17,12 @@ import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { transactionService } from "@/app/web/services/transactionService/transactionService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
+const takeTransaction = 20;
+
+let countTransaction = 0;
 let oldTrancationList: GetTrasnactionDTO[] = [];
 
 export type GetColumnProps = {
@@ -85,31 +88,35 @@ const getColumns = ({
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [transactionList, setTansactionList] = useState<GetTrasnactionDTO[]>();
 
   const { closeModal, openModal } = useModal();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    handleGetListCheckUsage();
-  }, []);
+    if (filter) handleFilterTransaction(currentPage);
 
-  useEffect(() => {
-    handleFilterTransaction;
-  }, [filter]);
+    handleGetListCheckUsage(currentPage);
+  }, [filter, currentPage]);
 
-  const handleGetListCheckUsage = async (): Promise<void> => {
-    const result = await transactionService.findAll({
-      skip: 0,
-      take: 20,
+  const currentTransaction = useMemo(() => {
+    return countTransaction;
+  }, [countTransaction]);
+
+  const handleGetListCheckUsage = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeTransaction;
+
+    const { count, transactions } = await transactionService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeTransaction,
       orderBy: { createdAt: "desc" },
     });
 
-    if (Array.isArray(result)) {
-      setTansactionList(result);
-      oldTrancationList = result;
-    }
+    countTransaction = count;
+    setTansactionList(transactions);
+    oldTrancationList = transactions;
   };
 
   function handleOpenModalEditTransaction(row: GetTrasnactionDTO): void {
@@ -135,7 +142,7 @@ export default function ReceiveCheck() {
       transactionService.update({ id, ...data }).then(() => {
         toast.success("Transação atualizada com sucesso");
 
-        handleGetListCheckUsage();
+        handleGetListCheckUsage(currentPage);
         closeModal();
       });
 
@@ -145,27 +152,30 @@ export default function ReceiveCheck() {
     transactionService.create({ ...data, currentAmount: 0 }).then(() => {
       toast.success("Transação registrada com sucesso");
 
-      handleGetListCheckUsage();
+      handleGetListCheckUsage(currentPage);
       closeModal();
     });
   };
 
-  const handleFilterTransaction = async () => {
+  const handleFilterTransaction = async (page: number) => {
+    const currentSkip = (page - 1) * takeTransaction;
+
     await handleGenericFilter({
       originalList: oldTrancationList,
       filter,
       setList: setTansactionList,
-      getSearchField: (emp) => emp.id,
       fetchFromApi: async (value) => {
-        const result = await transactionService.findAll({
-          skip: 0,
-          take: 20,
+        const { count, transactions } = await transactionService.findAll({
           all: true,
+          skip: currentSkip,
+          take: takeTransaction,
           orderBy: { created: "desc" },
           where: { category: { id: value } },
         });
 
-        return Array.isArray(result) ? result : [result];
+        countTransaction = count;
+
+        return { count, data: transactions };
       },
     });
   };
@@ -185,7 +195,11 @@ export default function ReceiveCheck() {
       <Table
         enableFilter
         title={"Transações"}
+        take={takeTransaction}
         rows={transactionList}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        countRows={currentTransaction}
         onFilterChange={handleSetFilterTransaction}
         onActionClicked={handleOpenModalRegisterTransaction}
         columns={getColumns({ handleEdit: handleOpenModalEditTransaction })}

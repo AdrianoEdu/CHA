@@ -9,6 +9,7 @@ import { databaseService } from "../../providers/database/DatabaseService";
 import {
   CreateEmployeeAdvanceDto,
   GetEmployeeAdvanceDto,
+  GetEmployeeAdvanceDtoParams,
 } from "../../dto/EmployeeAdvance/employeeAdvance";
 import { NotFoundException } from "../../error/NotFoundException";
 import { connect } from "http2";
@@ -53,16 +54,16 @@ class EmployeeAdvanceService {
     return result.map((data) => this.mapEmployeeAdvance(data));
   }
 
-  async findFirst(
+  async findManyByFilters(
     baseQuery: Prisma.EmployeeAdvanceFindManyArgs,
-  ): Promise<GetEmployeeAdvanceDto> {
-    const result = await this.databaseService.employeeAdvance.findFirst({
+  ): Promise<GetEmployeeAdvanceDto[]> {
+    const result = await this.databaseService.employeeAdvance.findMany({
       ...baseQuery,
     });
 
-    if (!result) throw new NotFoundException();
-
-    return this.mapEmployeeAdvance(result);
+    return result.map((employeeAdvanced) =>
+      this.mapEmployeeAdvance(employeeAdvanced),
+    );
   }
 
   async findCheckUsage(
@@ -72,7 +73,7 @@ class EmployeeAdvanceService {
       Prisma.EmployeeAdvanceInclude,
       Prisma.EmployeeAdvanceOrderByWithRelationInput
     >,
-  ): Promise<GetEmployeeAdvanceDto[] | GetEmployeeAdvanceDto> {
+  ): Promise<GetEmployeeAdvanceDtoParams> {
     const baseQuery: Prisma.EmployeeAdvanceFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -83,9 +84,17 @@ class EmployeeAdvanceService {
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return this.findFirst(baseQuery);
+    const count = await this.databaseService.employeeAdvance.count({
+      where: baseQuery.where,
+    });
 
-    return this.findMany(baseQuery);
+    if (params.where)
+      return {
+        count,
+        employeeAdvanced: await this.findManyByFilters(baseQuery),
+      };
+
+    return { count, employeeAdvanced: await this.findMany(baseQuery) };
   }
 
   private mapEmployeeAdvance(

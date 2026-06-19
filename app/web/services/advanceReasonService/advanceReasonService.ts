@@ -8,6 +8,7 @@ import {
   AdvanceReasonParams,
   CreateAdvanceReasonDto,
   FindAdvanceReasonDto,
+  GetAdvanceReasionParamsDto,
   UpdateAdavanceReasonDto,
 } from "../../dto/advance-reason.dto";
 
@@ -27,10 +28,10 @@ class AdvanceReasonService {
   }
 
   findAll(params: AdvanceReasonParams) {
-    return requestService.getAll<AdvanceReasonParams, FindAdvanceReasonDto[]>(
-      this.url,
-      params,
-    );
+    return requestService.getAll<
+      AdvanceReasonParams,
+      GetAdvanceReasionParamsDto
+    >(this.url, params);
   }
 
   delete(id: string) {

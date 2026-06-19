@@ -26,10 +26,12 @@ import { receiveCheckService } from "@/app/web/services/receiveCheckService/rece
 import { transactionService } from "@/app/web/services/transactionService/transactionService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FaLaptopHouse } from "react-icons/fa";
 import { toast } from "react-toastify";
 
+let countCheckUsage = 0;
+const takeCheckUsage = 0;
 let oldCheckUsageList: CheckUsageDTO[] = [];
 
 export type GetColumnProps = {
@@ -84,6 +86,7 @@ const getColumns = ({
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [checkUsageSelected, setCheckUsageSelected] =
     useState<ReceivedCheckDTO>();
   const [checkUsageList, setCheckUsageList] = useState<CheckUsageDTO[]>();
@@ -94,37 +97,44 @@ export default function ReceiveCheck() {
 
   useEffect(() => {
     handleReceivedCheckById();
-    handleGetListCheckUsage();
   }, []);
 
   useEffect(() => {
-    handleFilterCheckUsage;
-  }, [filter]);
+    if (filter) handleFilterCheckUsage(currentPage);
+
+    handleGetListCheckUsage(currentPage);
+  }, [currentPage, filter]);
+
+  const currentCountCheckUsage = useMemo(
+    () => countCheckUsage,
+    [countCheckUsage],
+  );
 
   const handleReceivedCheckById = async (): Promise<void> => {
-    const data = await receiveCheckService.findAll({
+    const { receivedChecks } = await receiveCheckService.findAll({
       where: {
         id: id as string,
       },
       all: false,
     });
 
-    if (!Array.isArray(data)) setCheckUsageSelected(data);
+    setCheckUsageSelected(receivedChecks[0]);
   };
 
-  const handleGetListCheckUsage = async (): Promise<void> => {
-    const result = await checkUsageService.findAll({
-      skip: 0,
-      take: 20,
+  const handleGetListCheckUsage = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeCheckUsage;
+
+    const { checkUsages, count } = await checkUsageService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeCheckUsage,
       orderBy: { createdAt: "desc" },
       where: { receivedCheck: { id: id as string } },
     });
 
-    if (Array.isArray(result)) {
-      setCheckUsageList(result);
-      oldCheckUsageList = result;
-    }
+    countCheckUsage = count;
+    setCheckUsageList(checkUsages);
+    oldCheckUsageList = checkUsages;
   };
 
   function handleOpenModalEditCheckUsage(row: CheckUsageDTO): void {
@@ -156,14 +166,14 @@ export default function ReceiveCheck() {
   ): Promise<void> => {
     const sum = (checkUsageSelected?.currentAmount ?? 0) + data.amount;
 
-    const transaction = (await transactionService.findAll({
+    const { transactions } = await transactionService.findAll({
       where: { id: data.transactionId },
       all: false,
-    })) as GetTrasnactionDTO;
+    });
 
-    const sumTransaction = data.amount + transaction.currentAmount;
+    const sumTransaction = data.amount + transactions[0].currentAmount;
 
-    if (sumTransaction > transaction.amount) {
+    if (sumTransaction > transactions[0].amount) {
       toast.error(
         "Erro na utilização do cheque,  o valor não pode ultrapassar o valor total da conta a pagar",
       );
@@ -205,7 +215,7 @@ export default function ReceiveCheck() {
           : checkUsageSelected?.status;
 
       let validateStatusTransaction =
-        sumTransaction === transaction.amount
+        sumTransaction === transactions[0].amount
           ? TransactionStatus.FINALIZED
           : TransactionStatus.IN_USE;
 
@@ -226,29 +236,37 @@ export default function ReceiveCheck() {
       });
 
       handleReceivedCheckById();
-      handleGetListCheckUsage();
+      handleGetListCheckUsage(currentPage);
       closeModal();
     } catch (err) {
       toast.error(`Erro no sistema: ${err}`);
     }
   };
 
-  const handleFilterCheckUsage = async () => {
+  const handleFilterCheckUsage = async (page: number) => {
+    const currentSkip = (page - 1) * takeCheckUsage;
+
     await handleGenericFilter({
-      originalList: oldCheckUsageList,
       filter,
+      originalList: oldCheckUsageList,
       setList: setCheckUsageList,
-      getSearchField: (emp) => emp.usageType,
       fetchFromApi: async (value) => {
-        const result = await checkUsageService.findAll({
-          skip: 0,
-          take: 20,
+        const parsed = Number(value);
+
+        //@ts-ignore
+        const filteredFields: Partial<CheckUsageDTO> = { usageType: value };
+
+        const { count, checkUsages } = await checkUsageService.findAll({
           all: true,
+          skip: currentSkip,
+          take: takeCheckUsage,
+          where: filteredFields,
           orderBy: { created: "desc" },
-          where: { usageType: value as CheckUsageType },
         });
 
-        return Array.isArray(result) ? result : [result];
+        countCheckUsage = count;
+
+        return { count, data: checkUsages };
       },
     });
   };
@@ -279,7 +297,22 @@ export default function ReceiveCheck() {
       <Table
         enableFilter
         rows={checkUsageList}
+        take={takeCheckUsage}
+        filterType={"select"}
+        filterOptions={[
+          {
+            label: "Depósito",
+            value: CheckUsageType.DEPOSIT,
+          },
+          {
+            label: "Contas a pagar",
+            value: CheckUsageType.PAYABLE,
+          },
+        ]}
+        currentPage={currentPage}
         title={"Cheque utilizado"}
+        onPageChange={setCurrentPage}
+        countRows={currentCountCheckUsage}
         onFilterChange={handleSetFilterCheckUsage}
         onActionClicked={handleOpenModalRegisterCheckUsage}
         columns={getColumns({ handleEdit: handleOpenModalEditCheckUsage })}

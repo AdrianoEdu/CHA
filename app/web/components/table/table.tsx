@@ -20,6 +20,13 @@ interface TableProps<T> {
   rows?: T[] | null;
   currentPage: number;
   enableFilter?: boolean;
+
+  filterType?: "text" | "select";
+  filterOptions?: {
+    label: string;
+    value: string;
+  }[];
+
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
   onRowClick?: (row: T) => void;
@@ -59,6 +66,10 @@ export default function Table<T>({
   currentPage,
   title = "Tabela",
   enableFilter = false,
+
+  filterType = "text",
+  filterOptions = [],
+
   onRowClick,
   onPageChange,
   onFilterChange,
@@ -67,6 +78,7 @@ export default function Table<T>({
   const safeRows: T[] = Array.isArray(rows) ? rows : [];
 
   const [filter, setFilter] = React.useState("");
+
   const debounceRef = React.useRef<NodeJS.Timeout | null>(null);
 
   function handleFilterChange(value: string) {
@@ -87,14 +99,13 @@ export default function Table<T>({
         <div className="w-full px-3 md:px-6 pt-12 pb-24">
           <div className="flex justify-start">
             <div className="w-full bg-white shadow-xl rounded-2xl">
-              {/* HEADER */}
               <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                 <h2 className="font-semibold text-slate-900 text-lg">
                   {title}
                 </h2>
 
                 <div className="flex items-center gap-2">
-                  {enableFilter && (
+                  {enableFilter && filterType === "text" && (
                     <input
                       type="text"
                       placeholder="Pesquisar..."
@@ -102,6 +113,20 @@ export default function Table<T>({
                       onChange={(e) => handleFilterChange(e.target.value)}
                       className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
                     />
+                  )}
+
+                  {enableFilter && filterType === "select" && (
+                    <select
+                      value={filter}
+                      onChange={(e) => handleFilterChange(e.target.value)}
+                      className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                      {filterOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   )}
 
                   {onActionClicked && (
@@ -167,6 +192,7 @@ export default function Table<T>({
               </div>
             </div>
           </div>
+
           <TablePagination
             take={take}
             totalRows={countRows}

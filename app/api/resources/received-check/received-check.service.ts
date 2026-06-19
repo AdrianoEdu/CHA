@@ -19,6 +19,7 @@ import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
 import {
   CreateReceivedCheckDTO,
+  GetReceivedCheckDTOParams,
   ReceivedCheckDTO,
   RemoveReceivedCheckDto,
   UpdateReceivedCheckDTO,
@@ -70,7 +71,7 @@ class ReceivedCheckService {
       Prisma.ReceivedCheckInclude,
       Prisma.ReceivedCheckOrderByWithRelationInput
     >,
-  ): Promise<ReceivedCheckDTO | ReceivedCheckDTO[]> {
+  ): Promise<GetReceivedCheckDTOParams> {
     const baseQuery: Prisma.ReceivedCheckFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -78,27 +79,29 @@ class ReceivedCheckService {
       orderBy: params.orderBy,
     };
 
+    const count = await this.databaseService.receivedCheck.count({
+      where: baseQuery.where,
+    });
+
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return this.findFirst(baseQuery);
+    if (params.where)
+      return { count, receivedChecks: await this.findManyByFilters(baseQuery) };
 
-    return this.findMany(baseQuery);
+    return { count, receivedChecks: await this.findMany(baseQuery) };
   }
 
-  async findFirst(
+  async findManyByFilters(
     baseQuery: Prisma.ReceivedCheckFindManyArgs,
-  ): Promise<ReceivedCheckDTO> {
-    const result: ReceivedCheckWithRelations | null =
-      await this.databaseService.receivedCheck.findFirst({
-        ...baseQuery,
-        select: receivedCheckSelect,
-        orderBy: { createdAt: "desc" },
-      });
+  ): Promise<ReceivedCheckDTO[]> {
+    const result = await this.databaseService.receivedCheck.findMany({
+      ...baseQuery,
+      select: receivedCheckSelect,
+      orderBy: { createdAt: "desc" },
+    });
 
-    if (!result) throw new NotFoundException();
-
-    return this.mapperCheckUsage(result);
+    return result.map((receivedCheck) => this.mapperCheckUsage(receivedCheck));
   }
 
   async findMany(
@@ -107,6 +110,7 @@ class ReceivedCheckService {
     const result: ReceivedCheckWithRelations[] =
       await this.databaseService.receivedCheck.findMany({
         ...baseQuery,
+        where: undefined,
         select: receivedCheckSelect,
         orderBy: { createdAt: "desc" },
       });

@@ -20,13 +20,17 @@ import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { advanceReasonService } from "@/app/web/services/advanceReasonService/advanceReasonService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
+let countAdvanceReason = 0;
 let oldAdvanceReasonList: FindAdvanceReasonDto[] = [];
+
+const takeAdvanceReason = 20;
 
 export default function General() {
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [advanceReasonList, setAdvanceReasonList] = useState<
     FindAdvanceReasonDto[]
   >([]);
@@ -38,12 +42,14 @@ export default function General() {
   const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
-    handleGetAllAdvanceReason();
-  }, []);
+    if (filter) handleFilterAdvanceReasonName(currentPage);
 
-  useEffect(() => {
-    handleFilterAdvanceReasonName();
-  }, [filter]);
+    handleGetAllAdvanceReason(currentPage);
+  }, [currentPage, filter]);
+
+  const currentCountAdvanceReason = useMemo(() => {
+    return countAdvanceReason;
+  }, [countAdvanceReason]);
 
   const hanleOpenModalRegisterAdvanceReason = (): void => {
     openModal(
@@ -55,18 +61,18 @@ export default function General() {
     );
   };
 
-  const handleGetAllAdvanceReason = async (): Promise<void> => {
-    const result = await advanceReasonService.findAll({
-      skip: 0,
-      take: 20,
+  const handleGetAllAdvanceReason = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeAdvanceReason;
+
+    const { count, advanceReason } = await advanceReasonService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeAdvanceReason,
       orderBy: { createdAt: "desc" },
     });
-
-    if (Array.isArray(result)) {
-      oldAdvanceReasonList = result;
-      setAdvanceReasonList(result);
-    }
+    countAdvanceReason = count;
+    oldAdvanceReasonList = advanceReason;
+    setAdvanceReasonList(advanceReason);
   };
 
   const handleRegisterAdvanceReason = async (
@@ -74,7 +80,7 @@ export default function General() {
   ): Promise<void> => {
     await advanceReasonService.create(data).then(() => {
       toast.success("Motivo registrado com sucesso");
-      handleGetAllAdvanceReason();
+      handleGetAllAdvanceReason(currentPage);
       closeModal();
     });
   };
@@ -84,26 +90,34 @@ export default function General() {
   ): Promise<void> => {
     await advanceReasonService.update(data).then(() => {
       toast.success("Motivo atualizado com sucesso");
-      handleGetAllAdvanceReason();
+      handleGetAllAdvanceReason(currentPage);
       closeModal();
     });
   };
 
-  const handleFilterAdvanceReasonName = async () => {
+  const handleFilterAdvanceReasonName = async (page: number) => {
+    const currentSkip = (page - 1) * takeAdvanceReason;
+
     await handleGenericFilter({
-      originalList: oldAdvanceReasonList,
       filter,
+      originalList: oldAdvanceReasonList,
       setList: setAdvanceReasonList,
-      getSearchField: (emp) => emp.name,
       fetchFromApi: async (value) => {
-        const result = await advanceReasonService.findAll({
-          skip: 0,
-          take: 20,
+        //@ts-ignore
+        const filteredFields = {
+          name: { contains: value, mode: "insensitive" },
+        } as Partial<FindAdvanceReasonDto>;
+
+        const { advanceReason, count } = await advanceReasonService.findAll({
           all: true,
-          where: { name: value },
+          skip: currentSkip,
+          where: filteredFields,
+          take: takeAdvanceReason,
         });
 
-        return Array.isArray(result) ? result : [result];
+        countAdvanceReason = count;
+
+        return { count, data: advanceReason };
       },
     });
   };
@@ -112,7 +126,7 @@ export default function General() {
     advanceReasonService.delete(id).then(() => {
       closeModal();
       toast.success("Motivo removido com sucesso");
-      handleGetAllAdvanceReason();
+      handleGetAllAdvanceReason(currentPage);
     });
   };
 
@@ -181,7 +195,11 @@ export default function General() {
         enableFilter
         title={"Motivos"}
         columns={getColumns()}
+        take={takeAdvanceReason}
         rows={advanceReasonList}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        countRows={currentCountAdvanceReason}
         onRowClick={handleOpenModalEditAdvanceReason}
         onFilterChange={handleSetFilterAdvanceReasonName}
         onActionClicked={hanleOpenModalRegisterAdvanceReason}

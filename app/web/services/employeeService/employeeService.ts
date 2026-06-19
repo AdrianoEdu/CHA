@@ -4,7 +4,11 @@
 // All rights reserved.
 
 import { requestService } from "../requestService/requestService";
-import { EmployeeDto, EmployeeParams } from "../../dto/employee.dto";
+import {
+  EmployeeDto,
+  EmployeeParams,
+  GetEmployeeDtoParams,
+} from "../../dto/employee.dto";
 
 class EmployeeService {
   private readonly url: string;
@@ -18,7 +22,7 @@ class EmployeeService {
   }
 
   findAll(data: EmployeeParams) {
-    return requestService.getAll<EmployeeParams, EmployeeDto | EmployeeDto[]>(
+    return requestService.getAll<EmployeeParams, GetEmployeeDtoParams>(
       this.url,
       data,
     );

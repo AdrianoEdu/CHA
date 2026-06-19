@@ -11,7 +11,6 @@ import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
 import Table, { TableColumn } from "@/app/web/components/table/table";
-import { ActionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { EmployeeDto } from "@/app/web/dto/employee.dto";
 import { DeleteIcon, EnableIcon } from "@/app/web/icons";
@@ -20,33 +19,44 @@ import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
+import { parse } from "next/dist/build/swc/generated-native";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
 const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
   i18n["Pt-Br"].Modal;
 
+let countEmployee = 0;
 let oldEmployeeList: EmployeeDto[] = [];
 
+const takeEmployee = 20;
+
 export default function EmployeeScreen() {
-  const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [employeeList, setEmployeeList] = useState<EmployeeDto[]>([]);
+
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { openModal, closeModal } = useModal();
   const { user } = useAuth();
   const router = useRouter();
+  const { openModal, closeModal } = useModal();
 
   const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
-    handleFindEmployees();
-  }, []);
+    if (filter) {
+      handleFilterEmployeeName(currentPage);
+      return;
+    }
 
-  useEffect(() => {
-    handleFilterEmployeeName();
-  }, [filter]);
+    handleFindEmployees(currentPage);
+  }, [currentPage, filter]);
+
+  const currentCountEmployee = useMemo(() => {
+    return countEmployee;
+  }, [countEmployee]);
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
     router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
@@ -55,7 +65,7 @@ export default function EmployeeScreen() {
   const handleRegisterEmployee = async (name: string): Promise<void> => {
     employeeService.create({ name }).then(() => {
       toast.success(RegisterEmployee.successRegisterEmployee);
-      handleFindEmployees();
+      handleFindEmployees(currentPage);
       closeModal();
     });
   };
@@ -70,7 +80,7 @@ export default function EmployeeScreen() {
           ? UpdateStatusEmployee.successDeactiveEmployee
           : UpdateStatusEmployee.successActiveEmployee,
       );
-      handleFindEmployees();
+      handleFindEmployees(currentPage);
       closeModal();
     });
   };
@@ -78,7 +88,7 @@ export default function EmployeeScreen() {
   const handleRemoverEmployee = async (id?: string): Promise<void> => {
     employeeService.delete(id ?? "").then(() => {
       toast.success(RemoveEmployee.successRemoveEmployee);
-      handleFindEmployees();
+      handleFindEmployees(currentPage);
       closeModal();
     });
   };
@@ -127,36 +137,40 @@ export default function EmployeeScreen() {
     );
   };
 
-  const handleFindEmployees = async (): Promise<void> => {
-    const result = await employeeService.findAll({
-      skip: 0,
-      take: 20,
+  const handleFindEmployees = async (page: number): Promise<void> => {
+    const currentSkip = (page - 1) * takeEmployee;
+
+    const { count, employee } = await employeeService.findAll({
       all: true,
+      skip: currentSkip,
+      take: takeEmployee,
       orderBy: { created: "desc" },
     });
 
-    if (Array.isArray(result)) {
-      oldEmployeeList = result;
-      setEmployeeList(result);
-    }
+    countEmployee = count;
+    setEmployeeList(employee);
+    oldEmployeeList = employee;
   };
 
-  const handleFilterEmployeeName = async () => {
+  const handleFilterEmployeeName = async (page: number) => {
+    const currentSkip = (page - 1) * takeEmployee;
+
     await handleGenericFilter({
-      originalList: oldEmployeeList,
       filter,
       setList: setEmployeeList,
-      getSearchField: (emp) => emp.name,
+      originalList: oldEmployeeList,
       fetchFromApi: async (value) => {
-        const result = await employeeService.findAll({
-          skip: 0,
-          take: 20,
+        const { count, employee } = await employeeService.findAll({
           all: true,
+          skip: currentSkip,
+          take: takeEmployee,
           where: { name: value },
           orderBy: { createdAt: "desc" },
         });
 
-        return Array.isArray(result) ? result : [result];
+        countEmployee = count;
+
+        return { count, data: employee };
       },
     });
   };
@@ -224,9 +238,13 @@ export default function EmployeeScreen() {
       <Table
         enableFilter
         rows={employeeList}
+        take={takeEmployee}
         title={"Funcionários"}
         columns={getColumns()}
+        currentPage={currentPage}
+        countRows={currentCountEmployee}
         onFilterChange={handleSetFilterEmployeeName}
+        onPageChange={(page) => setCurrentPage(page)}
         onRowClick={handleNavigateEmployeeAdvancedScreen}
         onActionClicked={handleOpenRegisterEmployeeModal}
       />

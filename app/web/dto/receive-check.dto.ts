@@ -52,7 +52,7 @@ export type RemoveReceivedCheckDto = {
 export type UpsertReceivedCheckDto = CreateReceivedCheckDTO &
   UpdateReceivedCheckDTO;
 
-export type ReceivedCheckWhere = Partial<GetCustomerDto>;
+export type ReceivedCheckWhere = Partial<ReceivedCheckDTO>;
 
 export type ReceivedCheckParams = PaginationDto<
   ReceivedCheckWhere,
@@ -60,3 +60,8 @@ export type ReceivedCheckParams = PaginationDto<
   any,
   any
 >;
+
+export type GetReceivedCheckParamsDto = {
+  count: number;
+  receivedChecks: ReceivedCheckDTO[];
+};

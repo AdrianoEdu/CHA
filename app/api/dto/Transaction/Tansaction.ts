@@ -39,3 +39,8 @@ export type UpdateTransactionDTO = {
   currentAmount?: number;
   status?: TransactionStatus;
 };
+
+export type GetTransactionDTOParams = {
+  count: number;
+  transaction: GetTrasnactionDTO[];
+};

@@ -5,6 +5,7 @@
 
 import {
   CreateReceivedCheckDTO,
+  GetReceivedCheckParamsDto,
   ReceivedCheckDTO,
   ReceivedCheckParams,
   UpdateReceivedCheckDTO,
@@ -29,7 +30,7 @@ class ReceiveCheckService {
   findAll(data: ReceivedCheckParams) {
     return requestService.getAll<
       ReceivedCheckParams,
-      ReceivedCheckDTO | ReceivedCheckDTO[]
+      GetReceivedCheckParamsDto
     >(this.url, data);
   }
 }

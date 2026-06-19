@@ -20,3 +20,8 @@ export type UpdateAdvanceReasonDto = Partial<CreateAdvanceReasonDto> & {
 export type FindAdvanceReasonByFilters = Partial<CreateAdvanceReasonDto> & {};
 
 export type RemoveAdvanceReason = { id: string };
+
+export type GetAdvanceReasonDTOParams = {
+  count: number;
+  findAdvamceReason: FindAdvanceReasonDto[];
+};

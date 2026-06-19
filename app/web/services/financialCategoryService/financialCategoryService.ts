@@ -7,6 +7,7 @@ import {
   CreateFinancialCategoryDto,
   FinancialCategoryParams,
   GetFinancialCategoryDto,
+  GetFinancialCategoryParamsDto,
   SendFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "../../dto/financial.dto";
@@ -35,10 +36,10 @@ class FinancialCategoryService {
 
   findAll(
     data: FinancialCategoryParams,
-  ): Promise<GetFinancialCategoryDto | GetFinancialCategoryDto[]> {
+  ): Promise<GetFinancialCategoryParamsDto> {
     return requestService.getAll<
       FinancialCategoryParams,
-      GetFinancialCategoryDto | GetFinancialCategoryDto[]
+      GetFinancialCategoryParamsDto
     >(this.url, data);
   }
 

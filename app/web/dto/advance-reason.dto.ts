@@ -31,3 +31,8 @@ export type AdvanceReasonParams = PaginationDto<
   any,
   any
 >;
+
+export type GetAdvanceReasionParamsDto = {
+  count: number;
+  advanceReason: FindAdvanceReasonDto[];
+};

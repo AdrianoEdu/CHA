@@ -7,6 +7,7 @@ import { Prisma, TransactionStatus } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import {
   CreateTransactionDTO,
+  GetTransactionDTOParams,
   GetTrasnactionDTO,
   UpdateTransactionDTO,
 } from "../../dto/Transaction/Tansaction";
@@ -40,7 +41,7 @@ class TransactionService {
       Prisma.TransactionInclude,
       Prisma.TransactionOrderByWithRelationInput
     >,
-  ): Promise<GetTrasnactionDTO | GetTrasnactionDTO[]> {
+  ): Promise<GetTransactionDTOParams> {
     const baseQuery: Prisma.TransactionFindManyArgs = {
       skip: params.skip,
       where: params.where,
@@ -48,15 +49,32 @@ class TransactionService {
       orderBy: params.orderBy,
     };
 
+    const count = await this.databaseService.transaction.count({
+      where: baseQuery.where,
+    });
+
     if (params.select) baseQuery.select = params.select;
     if (params.include) baseQuery.include = params.include;
 
-    if (!params.all) return await this.findFirst(baseQuery);
+    if (params.where)
+      return { count, transaction: await this.findManyByFilters(baseQuery) };
 
-    return await this.findAll(baseQuery);
+    return { count, transaction: await this.findAll(baseQuery) };
   }
 
   async findAll(
+    baseQuery: Prisma.TransactionFindManyArgs,
+  ): Promise<GetTrasnactionDTO[]> {
+    const result = await this.databaseService.transaction.findMany({
+      ...baseQuery,
+      where: undefined,
+      select: transactionSelect,
+    });
+
+    return result.map((transaction) => this.mapperTransation(transaction));
+  }
+
+  async findManyByFilters(
     baseQuery: Prisma.TransactionFindManyArgs,
   ): Promise<GetTrasnactionDTO[]> {
     const result = await this.databaseService.transaction.findMany({
@@ -65,19 +83,6 @@ class TransactionService {
     });
 
     return result.map((transaction) => this.mapperTransation(transaction));
-  }
-
-  async findFirst(
-    baseQuery: Prisma.TransactionFindManyArgs,
-  ): Promise<GetTrasnactionDTO> {
-    const result = await this.databaseService.transaction.findFirst({
-      ...baseQuery,
-      select: transactionSelect,
-    });
-
-    if (!result) throw new NotFoundException();
-
-    return this.mapperTransation(result);
   }
 
   private mapperTransation(item: TransactionWithRelations): GetTrasnactionDTO {

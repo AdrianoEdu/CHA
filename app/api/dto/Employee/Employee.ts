@@ -8,7 +8,12 @@ export interface EmployeeDto {
   name: string;
   isActive?: boolean;
   createdAt?: Date;
-  updatedAt?: Date;
-};
+  updatedAt?: Date | null;
+}
 
 export type UpdateEmployeeDto = Partial<EmployeeDto>;
+
+export type GetEmployeeDtoParams = {
+  count: number;
+  employee: EmployeeDto[];
+};

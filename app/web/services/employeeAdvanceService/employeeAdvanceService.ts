@@ -5,6 +5,7 @@
 
 import {
   CreateEmployeeAdvanceDto,
+  EmployeeAdvanceDtoParams,
   EmployeeAdvanceParams,
   GetAllEmployeeAdvanceDto,
   UpdateEmployeeAdvanveDto,
@@ -29,7 +30,7 @@ class EmployeeAdvanceService {
   findAll(params: EmployeeAdvanceParams) {
     return requestService.getAll<
       EmployeeAdvanceParams,
-      GetAllEmployeeAdvanceDto | GetAllEmployeeAdvanceDto[]
+      EmployeeAdvanceDtoParams
     >(this.url, params);
   }
 }
