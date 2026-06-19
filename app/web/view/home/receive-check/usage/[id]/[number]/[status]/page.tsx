@@ -18,7 +18,6 @@ import {
   UpsertCheckUsageDTO,
 } from "@/app/web/dto/check-usage.dto";
 import { ReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
-import { GetTrasnactionDTO } from "@/app/web/dto/transaction.dto";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { checkUsageService } from "@/app/web/services/checkUsageService/checkUsageService";
