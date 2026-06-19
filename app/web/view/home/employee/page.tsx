@@ -144,7 +144,7 @@ export default function EmployeeScreen() {
       all: true,
       skip: currentSkip,
       take: takeEmployee,
-      orderBy: { created: "desc" },
+      orderBy: { createdAt: "desc" },
     });
 
     countEmployee = count;

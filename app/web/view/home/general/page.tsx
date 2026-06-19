@@ -42,7 +42,10 @@ export default function General() {
   const isAdmin = user?.role === UserRole.ADMIN;
 
   useEffect(() => {
-    if (filter) handleFilterAdvanceReasonName(currentPage);
+    if (filter) {
+      handleFilterAdvanceReasonName(currentPage);
+      return;
+    }
 
     handleGetAllAdvanceReason(currentPage);
   }, [currentPage, filter]);

@@ -43,7 +43,10 @@ export default function FinancialCategory() {
   const isAdmin = user.role === UserRole.ADMIN;
 
   useEffect(() => {
-    if (filter) handleFilterFinancialCategoryName(currentPage);
+    if (filter) {
+      handleFilterFinancialCategoryName(currentPage);
+      return;
+    }
 
     handleGetAllFinancialCategory(currentPage);
   }, [currentPage, filter]);

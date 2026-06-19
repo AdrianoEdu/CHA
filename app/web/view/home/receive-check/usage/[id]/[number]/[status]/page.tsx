@@ -99,7 +99,10 @@ export default function ReceiveCheck() {
   }, []);
 
   useEffect(() => {
-    if (filter) handleFilterCheckUsage(currentPage);
+    if (filter) {
+      handleFilterCheckUsage(currentPage);
+      return;
+    }
 
     handleGetListCheckUsage(currentPage);
   }, [currentPage, filter]);
@@ -260,7 +263,7 @@ export default function ReceiveCheck() {
           skip: currentSkip,
           take: takeCheckUsage,
           where: filteredFields,
-          orderBy: { created: "desc" },
+          orderBy: { createdAt: "desc" },
         });
 
         countCheckUsage = count;

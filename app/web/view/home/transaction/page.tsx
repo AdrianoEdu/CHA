@@ -95,7 +95,10 @@ export default function ReceiveCheck() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (filter) handleFilterTransaction(currentPage);
+    if (filter) {
+      handleFilterTransaction(currentPage);
+      return;
+    }
 
     handleGetListCheckUsage(currentPage);
   }, [filter, currentPage]);
@@ -169,7 +172,7 @@ export default function ReceiveCheck() {
           all: true,
           skip: currentSkip,
           take: takeTransaction,
-          orderBy: { created: "desc" },
+          orderBy: { createdAt: "desc" },
           where: { category: { id: value } },
         });
 

@@ -39,6 +39,7 @@ export default function BankScreen() {
   useEffect(() => {
     if (filter) {
       handleFilterBank(currentPage);
+      return;
     }
 
     handleFindBanks(currentCountBank);
@@ -103,7 +104,7 @@ export default function BankScreen() {
         .create(data)
         .then(() => toast.success("Criado com sucesso"));
 
-    await handleFindBanks(currentPage);
+    await handleFindBanks(1);
     closeModal();
   };
 
@@ -111,7 +112,7 @@ export default function BankScreen() {
     bankService.remove(id).then(() => {
       closeModal();
       toast.success("Agência bancária com sucessp");
-      handleFindBanks(currentPage);
+      handleFindBanks(1);
     });
   };
 

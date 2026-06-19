@@ -103,7 +103,10 @@ export default function ReceiveCheck() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (filter) handleFilterReceiveCheck(currentPage);
+    if (filter) {
+      handleFilterReceiveCheck(currentPage);
+      return;
+    }
 
     handleFindReceiveChecks(currentPage);
   }, [currentPage, filter]);
