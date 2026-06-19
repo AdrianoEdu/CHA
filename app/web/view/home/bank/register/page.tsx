@@ -42,7 +42,7 @@ export default function BankScreen() {
       return;
     }
 
-    handleFindBanks(currentCountBank);
+    handleFindBanks(currentPage);
   }, [currentPage, filter]);
 
   const currentCountBank = useMemo(() => {
@@ -52,14 +52,17 @@ export default function BankScreen() {
   const handleFindBanks = async (page: number): Promise<void> => {
     const currentSkip = (page - 1) * takeBank;
 
-    const result = await bankService.findAll({
+    const { banks, count } = await bankService.findAll({
       all: true,
       take: takeBank,
       skip: currentSkip,
       orderBy: { createdAt: "desc" },
     });
 
-    if (Array.isArray(result)) setListBank(result);
+    setListBank(banks);
+    oldBankList = banks;
+
+    countBank = count;
   };
 
   const handleFilterBank = async (page: number) => {
@@ -212,7 +215,16 @@ export default function BankScreen() {
         onRowClick={handleOpenBankModal}
         onActionClicked={handleOpenBankModal}
         onFilterChange={handleSetFilterBankName}
-        onPageChange={(page) => setCurrentPage(page)}
+        onPageChange={(page) => {
+          console.log("PAGE RECEBIDA:", page);
+
+          if (page < 1) {
+            console.error("Página inválida:", page);
+            return;
+          }
+
+          setCurrentPage(page);
+        }}
       />
     </div>
   );

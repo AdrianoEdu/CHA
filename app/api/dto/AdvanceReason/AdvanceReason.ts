@@ -23,5 +23,5 @@ export type RemoveAdvanceReason = { id: string };
 
 export type GetAdvanceReasonDTOParams = {
   count: number;
-  findAdvamceReason: FindAdvanceReasonDto[];
+  advanceReason: FindAdvanceReasonDto[];
 };

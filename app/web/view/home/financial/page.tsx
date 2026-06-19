@@ -10,7 +10,6 @@ import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpsertFinancialCategory from "@/app/web/components/modal/upsert-financial-category/upsert-financial-category";
 import Table, { TableColumn } from "@/app/web/components/table/table";
-import { ActionEnum } from "@/app/web/constants/enum";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
@@ -27,7 +26,7 @@ import { toast } from "react-toastify";
 let countFinancial = 0;
 let oldFinancialList: GetFinancialCategoryDto[] = [];
 
-const takeFinancial = 0;
+const takeFinancial = 20;
 
 export default function FinancialCategory() {
   const [financialList, setFinancialList] =
@@ -81,16 +80,17 @@ export default function FinancialCategory() {
   const handleGetAllFinancialCategory = async (page: number): Promise<void> => {
     const currentSkip = (page - 1) * takeFinancial;
 
-    const { count, financial } = await financialCategoryService.findAll({
-      all: true,
-      skip: currentSkip,
-      take: takeFinancial,
-      orderBy: { createdAt: "desc" },
-    });
+    const { count, financialCategories } =
+      await financialCategoryService.findAll({
+        all: true,
+        skip: currentSkip,
+        take: takeFinancial,
+        orderBy: { createdAt: "desc" },
+      });
 
     countFinancial = count;
-    setFinancialList(financial);
-    oldFinancialList = financial;
+    setFinancialList(financialCategories);
+    oldFinancialList = financialCategories;
   };
 
   const handleOpenModalRegisterFinancialCategory = () => {

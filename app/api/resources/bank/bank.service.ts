@@ -13,7 +13,6 @@ import {
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
-import { NotFoundException } from "../../error/NotFoundException";
 import { CreateBankDto } from "@/app/web/dto/bank.dto";
 
 class BankService {

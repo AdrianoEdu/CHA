@@ -59,10 +59,10 @@ class AdvanceReasonService {
     if (params.where)
       return {
         count,
-        findAdvamceReason: await this.findManyByFilters(baseQuery),
+        advanceReason: await this.findManyByFilters(baseQuery),
       };
 
-    return { count, findAdvamceReason: await this.findMany(baseQuery) };
+    return { count, advanceReason: await this.findMany(baseQuery) };
   }
 
   async findMany(

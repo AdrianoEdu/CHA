@@ -37,5 +37,5 @@ export type FinancialCategoryParams = PaginationDto<
 
 export type GetFinancialCategoryParamsDto = {
   count: number;
-  financial: GetFinancialCategoryDto[];
+  financialCategories: GetFinancialCategoryDto[];
 };
