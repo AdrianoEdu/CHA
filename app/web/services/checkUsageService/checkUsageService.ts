@@ -4,7 +4,6 @@
 // All rights reserved.
 
 import {
-  CheckUsageDTO,
   CheckUsageParams,
   CreateCheckUsageDTO,
   GetCheckUsageDTOParams,

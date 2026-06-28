@@ -14,11 +14,12 @@ export interface TableColumn<T> {
 }
 
 interface TableProps<T> {
-  take: number;
+  take?: number;
   title?: string;
-  countRows: number;
+  countRows?: number;
   rows?: T[] | null;
-  currentPage: number;
+  currentPage?: number;
+
   enableFilter?: boolean;
 
   filterType?: "text" | "select";
@@ -30,7 +31,8 @@ interface TableProps<T> {
   columns: TableColumn<T>[];
   onActionClicked?: () => void;
   onRowClick?: (row: T) => void;
-  onPageChange: (page: number) => void;
+
+  onPageChange?: (page: number) => void;
   onFilterChange?: (value: string) => void;
 }
 
@@ -97,108 +99,109 @@ export default function Table<T>({
     <div className="relative font-inter antialiased">
       <main className="relative min-h-screen flex flex-col bg-slate-50 overflow-x-auto">
         <div className="w-full px-3 md:px-6 pt-12 pb-24">
-          <div className="flex justify-start">
-            <div className="w-full bg-white shadow-xl rounded-2xl">
-              <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-                <h2 className="font-semibold text-slate-900 text-lg">
-                  {title}
-                </h2>
+          <div className="w-full bg-white shadow-xl rounded-2xl">
+            <header className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h2 className="font-semibold text-slate-900 text-lg">{title}</h2>
 
-                <div className="flex items-center gap-2">
-                  {enableFilter && filterType === "text" && (
-                    <input
-                      type="text"
-                      placeholder="Pesquisar..."
-                      value={filter}
-                      onChange={(e) => handleFilterChange(e.target.value)}
-                      className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                    />
-                  )}
+              <div className="flex items-center gap-2">
+                {enableFilter && filterType === "text" && (
+                  <input
+                    type="text"
+                    placeholder="Pesquisar..."
+                    value={filter}
+                    onChange={(e) => handleFilterChange(e.target.value)}
+                    className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                )}
 
-                  {enableFilter && filterType === "select" && (
-                    <select
-                      value={filter}
-                      onChange={(e) => handleFilterChange(e.target.value)}
-                      className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                    >
-                      {filterOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
+                {enableFilter && filterType === "select" && (
+                  <select
+                    value={filter}
+                    onChange={(e) => handleFilterChange(e.target.value)}
+                    className="border border-slate-300 rounded-md px-2 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    {filterOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {onActionClicked && (
+                  <button
+                    className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
+                    onClick={onActionClicked}
+                  >
+                    Adicionar
+                  </button>
+                )}
+              </div>
+            </header>
+
+            <div className="p-6">
+              <div className="overflow-x-auto w-full">
+                <table className="table-auto w-full text-center">
+                  <thead className="text-[13px] text-slate-500/70">
+                    <tr>
+                      {columns.map((col, index) => (
+                        <th key={index} className="px-5 py-2 bg-slate-100">
+                          {col.label}
+                        </th>
                       ))}
-                    </select>
-                  )}
+                    </tr>
+                  </thead>
 
-                  {onActionClicked && (
-                    <button
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition"
-                      onClick={onActionClicked}
-                    >
-                      Adicionar
-                    </button>
-                  )}
-                </div>
-              </header>
-
-              <div className="p-6">
-                <div className="overflow-x-auto w-full">
-                  <table className="table-auto w-full text-center">
-                    <thead className="text-[13px] text-slate-500/70">
+                  <tbody className="text-sm font-medium">
+                    {safeRows.length === 0 ? (
                       <tr>
-                        {columns.map((col, index) => (
-                          <th key={index} className="px-5 py-2 bg-slate-100">
-                            {col.label}
-                          </th>
-                        ))}
+                        <td
+                          colSpan={columns.length}
+                          className="py-6 text-slate-400"
+                        >
+                          Nenhum registro encontrado
+                        </td>
                       </tr>
-                    </thead>
-
-                    <tbody className="text-sm font-medium">
-                      {safeRows.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={columns.length}
-                            className="py-6 text-slate-400"
-                          >
-                            Nenhum registro encontrado
-                          </td>
+                    ) : (
+                      safeRows.map((row, rowIndex) => (
+                        <tr
+                          key={rowIndex}
+                          className={`border-b border-slate-200 ${
+                            onRowClick
+                              ? "cursor-pointer hover:bg-slate-100 transition"
+                              : ""
+                          }`}
+                          onClick={() => onRowClick?.(row)}
+                        >
+                          {columns.map((col, colIndex) => (
+                            <td key={colIndex} className="px-5 py-2">
+                              {col.render
+                                ? col.render(row)
+                                : col.accessor
+                                  ? formatValue(getValue(row, col.accessor))
+                                  : "-"}
+                            </td>
+                          ))}
                         </tr>
-                      ) : (
-                        safeRows.map((row, rowIndex) => (
-                          <tr
-                            key={rowIndex}
-                            className={`border-b border-slate-200 ${
-                              onRowClick
-                                ? "cursor-pointer hover:bg-slate-100 transition"
-                                : ""
-                            }`}
-                            onClick={() => onRowClick?.(row)}
-                          >
-                            {columns.map((col, colIndex) => (
-                              <td key={colIndex} className="px-5 py-2">
-                                {col.render
-                                  ? col.render(row)
-                                  : col.accessor
-                                    ? formatValue(getValue(row, col.accessor))
-                                    : "-"}
-                              </td>
-                            ))}
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
 
-          <TablePagination
-            take={take}
-            totalRows={countRows}
-            currentPage={currentPage}
-            onPageChange={onPageChange}
-          />
+          {take &&
+            countRows !== undefined &&
+            currentPage !== undefined &&
+            onPageChange && (
+              <TablePagination
+                take={take}
+                totalRows={countRows}
+                currentPage={currentPage}
+                onPageChange={onPageChange}
+              />
+            )}
         </div>
       </main>
 
