@@ -132,12 +132,12 @@ model Customer {
   transaction        Transaction[]
   receivedChecks     ReceivedCheck[]
 
-  customerType               CustomerType
+  customerType       CustomerType
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
   @@map("customers")
-}
+} 
 
 model Bank {
   id                 String @id @default(uuid())
@@ -155,11 +155,27 @@ model Bank {
 
 model CurrentAccount {
   id                String @id @default(uuid())
+  balance           Decimal @db.Decimal(15,2)
   accountNumber     String
-  bankBalance       Decimal @db.Decimal(15,2)
+
+  bankStatement     BankStatement[]
 
   bankId            String
   bank              Bank @relation(fields: [bankId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BankStatement {
+  id                   String @id @default(uuid())
+  value                Float
+
+  currentAccountId     String
+  currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
+
+  financialCategoryId  String
+  financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
 }
 
 model ReceivedCheck {
@@ -207,6 +223,7 @@ model FinancialCategory {
   updatedAt         DateTime @updatedAt
 
   transaction       Transaction[]
+  bankStatement     BankStatement[]
 
   @@map("financial_categories")
 }

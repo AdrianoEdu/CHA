@@ -212,19 +212,10 @@ export default function BankScreen() {
         currentPage={currentPage}
         countRows={currentCountBank}
         title={"Agências bancárias"}
+        onPageChange={setCurrentPage}
         onRowClick={handleOpenBankModal}
         onActionClicked={handleOpenBankModal}
         onFilterChange={handleSetFilterBankName}
-        onPageChange={(page) => {
-          console.log("PAGE RECEBIDA:", page);
-
-          if (page < 1) {
-            console.error("Página inválida:", page);
-            return;
-          }
-
-          setCurrentPage(page);
-        }}
       />
     </div>
   );

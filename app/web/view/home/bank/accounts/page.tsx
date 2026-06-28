@@ -3,6 +3,11 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { CurrentAccountDto } from "@/app/web/dto/currentAccount.dto";
+import { useState } from "react";
+
 export default function AccountScreen() {
-  return <></>;
+  const [list, setList] = useState<CurrentAccountDto>();
+
+  return <div></div>;
 }
