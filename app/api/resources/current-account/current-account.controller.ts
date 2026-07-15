@@ -34,7 +34,7 @@ class CurrentAccountController {
         Prisma.CurrentAccountInclude,
         Prisma.CurrentAccountOrderByWithRelationInput
       >(req);
-      return await this.currentAccountService.findMany(params);
+      return await this.currentAccountService.findCurrentAccount(params);
     } catch (error: any) {
       return Response.json({ error: error.message }, { status: 500 });
     }

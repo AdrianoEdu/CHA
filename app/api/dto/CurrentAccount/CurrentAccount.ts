@@ -4,7 +4,6 @@
 // All rights reserved.
 
 import { GetBankDto } from "@/app/web/dto/bank.dto";
-import { PaginationDto } from "../Pagination/Pagination";
 
 export type CreateCurrentAccountDto = {
   createdAt: Date;
@@ -21,7 +20,7 @@ export type GetCurrentAccountDto = {
   id: string;
   createdAt: Date;
   balance: number;
-  bank: GetBankDto;
+  bank?: GetBankDto;
   accountNumber: string;
 };
 

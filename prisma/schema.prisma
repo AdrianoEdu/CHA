@@ -176,6 +176,9 @@ model BankStatement {
 
   financialCategoryId  String
   financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ReceivedCheck {

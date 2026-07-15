@@ -17,8 +17,8 @@ import { CurrentAccountWithRelations } from "./type";
 class CurrentAccountService {
   private databaseService = databaseService;
 
-  async create(data: CreateCurrentAccountDto): Promise<void> {
-    this.databaseService.currentAccount.create({ data });
+  async create(data: CreateCurrentAccountDto) {
+    return this.databaseService.currentAccount.create({ data });
   }
 
   async update(data: UpdateCurrentAccountDto): Promise<void> {
@@ -32,6 +32,7 @@ class CurrentAccountService {
     skip,
     where,
     take,
+    include,
     orderBy,
   }: PaginationDto<
     Prisma.CurrentAccountWhereInput,
@@ -42,6 +43,7 @@ class CurrentAccountService {
     const baseQuery: Prisma.CurrentAccountFindManyArgs = {
       skip,
       where,
+      include,
       take,
       orderBy,
     };
@@ -55,9 +57,9 @@ class CurrentAccountService {
 
   async findMany(baseQuery: Prisma.CurrentAccountFindManyArgs) {
     return this.mapCurrentAccount(
+      // @ts-ignore
       await this.databaseService.currentAccount.findMany({
         ...baseQuery,
-        include: { bank: true },
       }),
     );
   }
