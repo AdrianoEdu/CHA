@@ -32,6 +32,7 @@ class CurrentAccountService {
     skip,
     where,
     take,
+    select,
     include,
     orderBy,
   }: PaginationDto<
@@ -43,6 +44,7 @@ class CurrentAccountService {
     const baseQuery: Prisma.CurrentAccountFindManyArgs = {
       skip,
       where,
+      select,
       include,
       take,
       orderBy,
