@@ -117,11 +117,13 @@ export default function AccountScreen() {
       {
         label: "Ações",
         render(row) {
-          <Button
-            icon={<EditIcon />}
-            className={"bg-green-500"}
-            onClick={(e) => handleOpenModalUpsertCurrentAccount(e, row)}
-          />;
+          return (
+            <Button
+              icon={<EditIcon />}
+              className="bg-green-500"
+              onClick={(e) => handleOpenModalUpsertCurrentAccount(e, row)}
+            />
+          );
         },
       },
     ];
