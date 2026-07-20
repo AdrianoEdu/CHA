@@ -136,7 +136,7 @@ export default function FinancialCategory() {
           name: { contains: value, mode: "insensitive" },
         } as Partial<GetFinancialCategoryDto>;
 
-        const { count, financial } = await financialCategoryService.findAll({
+        const { count, financialCategories } = await financialCategoryService.findAll({
           all: true,
           skip: currentSkip,
           take: takeFinancial,
@@ -145,7 +145,7 @@ export default function FinancialCategory() {
 
         countFinancial = count;
 
-        return { count, data: financial };
+        return { count, data: financialCategories };
       },
     });
   };

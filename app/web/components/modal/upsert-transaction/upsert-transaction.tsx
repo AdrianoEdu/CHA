@@ -97,10 +97,10 @@ export function UpsertTransaction({
   }, []);
 
   const getAllFinancialCategory = async (): Promise<void> => {
-    const { financial } = await financialCategoryService.findAll({ all: true });
+    const { financialCategories } = await financialCategoryService.findAll({ all: true });
 
-    if (editData && Array.isArray(financial)) {
-      const filter = financial.filter(
+    if (editData && Array.isArray(financialCategories)) {
+      const filter = financialCategories.filter(
         (item) => item.id === editData.category.id,
       );
 
@@ -109,7 +109,7 @@ export function UpsertTransaction({
       setFinancialCategoryOption(firstItem);
     }
 
-    setFinancialCategoryList(mapperFinancialCategory(financial));
+    setFinancialCategoryList(mapperFinancialCategory(financialCategories));
   };
 
   const getAllCustomer = async (): Promise<void> => {
