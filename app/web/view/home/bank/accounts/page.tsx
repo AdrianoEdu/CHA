@@ -96,7 +96,7 @@ export default function AccountScreen() {
     mouseEvent?: React.MouseEvent<HTMLButtonElement>,
     data?: UpdateCurrentAccountDto,
   ): void => {
-    if (mouseEvent) mouseEvent.stopPropagation;
+    if (mouseEvent) mouseEvent.stopPropagation();
 
     openModal(
       <UpserCurrentAccountModal
