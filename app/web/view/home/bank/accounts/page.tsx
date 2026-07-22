@@ -17,7 +17,7 @@ import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
 import { useRouter } from "next/navigation";
-import { MouseEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 let countCurrentAccounts = 0;

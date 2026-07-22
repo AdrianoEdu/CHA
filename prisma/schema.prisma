@@ -170,6 +170,8 @@ model CurrentAccount {
 model BankStatement {
   id                   String @id @default(uuid())
   value                Float
+  title                String
+  description          String
 
   currentAccountId     String
   currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  

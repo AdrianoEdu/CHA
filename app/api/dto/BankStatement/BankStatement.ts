@@ -20,7 +20,9 @@ export type UpdateBankStatementDto = Partial<CreateBankStatementDto> & {
 export type GetBankStatementDto = {
   id: string;
   value: number;
+  title: string;
   createdAt: Date;
+  description: string;
   currentAccount: GetCurrentAccountDto;
   financalCategory: GetFinancialCategoryDto;
 };

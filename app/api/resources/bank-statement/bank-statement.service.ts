@@ -72,7 +72,9 @@ class BankStatementService {
     return data.map((bankStatement) => ({
       id: bankStatement.id,
       value: bankStatement.value,
+      title: bankStatement.title,
       createdAt: bankStatement.createdAt,
+      description: bankStatement.description,
       currentAccount: {
         ...bankStatement.currentAccount,
         balance: Number(bankStatement.currentAccount.balance),
