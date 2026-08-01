@@ -19,7 +19,6 @@ import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { handleGenericFilter } from "@/app/web/utils/filters";
-import { parse } from "next/dist/build/swc/generated-native";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";

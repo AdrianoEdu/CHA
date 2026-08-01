@@ -5,103 +5,102 @@
 
 "use client";
 
-import { FloatingButton } from "@/app/web/components/floatingButton/page";
 import { BankStatementList } from "@/app/web/components/statement/bank/page";
 import Header from "@/app/web/components/statement/header/page";
 import { SearchComponent } from "@/app/web/components/statement/search/page";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
+import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
 import { bankStatementService } from "@/app/web/services/bankStatementService/bankStatementService";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-let currentSkip = 0;
 const takeBankStatement = 20;
-let totalCount = 0;
+
+function FloatingButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Adicionar movimentação"
+      className="
+        fixed
+        bottom-6
+        right-10
+        z-50
+        h-12 w-12
+        rounded-full
+        bg-blue-600 text-white
+        flex items-center justify-center
+        text-2xl font-light
+        shadow-lg
+        transition-all duration-200
+        hover:bg-blue-700 hover:scale-110
+        active:scale-95
+      "
+    >
+      +
+    </button>
+  );
+}
 
 export default function StatementPage() {
+  const params = useParams();
   const [search, setSearch] = useState("");
   const [list, setList] = useState<GetBankStatementDto[]>([]);
-  const [showFloatingButton, setShowFloatingButton] = useState(false);
+  const [currentAccount, setCurrentAccount] = useState<GetCurrentAccountDto>();
 
   const headerRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          handleGetBankStatement();
-        }
-      },
-      { threshold: 1 }
-    );
+  const currentSkip = useRef(0);
+  const totalCount = useRef(0);
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
-    }
+  const handleGetBankStatement = useCallback(async (): Promise<void> => {
+    if (totalCount.current > 0 && currentSkip.current >= totalCount.current) return;
 
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!headerRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowFloatingButton(!entry.isIntersecting);
-      },
-      {
-        threshold: 0,
-      }
-    );
-
-    observer.observe(headerRef.current);
-
-    return () => observer.disconnect();
-  }, []);
-
-  const handleGetBankStatement = async (): Promise<void> => {
-    if (totalCount > 0 && currentSkip >= totalCount) return;
-
-    const remaining = totalCount - currentSkip;
-
+    const remaining = totalCount.current - currentSkip.current;
     const take =
-      totalCount === 0
+      totalCount.current === 0
         ? takeBankStatement
         : Math.min(takeBankStatement, remaining);
 
     const { count, bankStatement } = await bankStatementService.findAll({
       all: false,
       orderBy: "desc",
-      skip: currentSkip,
+      skip: currentSkip.current,
       take,
     });
 
-    totalCount = count;
-
+    totalCount.current = count;
     setList((prev) => [...prev, ...(bankStatement ?? [])]);
+    currentSkip.current += bankStatement.length;
+  }, []);
 
-    currentSkip += bankStatement.length;
-  };
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.target === loadMoreRef.current && entry.isIntersecting) {
+          handleGetBankStatement();
+        }
+      });
+    });
+
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [handleGetBankStatement]);
 
   const filteredBankStatement = useMemo(() => {
-    if (!search.trim()) {
-      return list;
-    }
-
+    if (!search.trim()) return list;
     return list.filter((item) =>
-      item.financalCategory.name
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      item.financalCategory.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [list, search]);
 
   const handleNewStatement = () => {
     console.log("Novo lançamento");
   };
-
-  const handleOnChangeSearch = (search: string): void => setSearch(search);
 
   return (
     <div className="min-h-screen bg-slate-100 p-6">
@@ -110,9 +109,7 @@ export default function StatementPage() {
           <Header
             onClick={handleNewStatement}
             balanceData={5250}
-            buttonTitle={
-              showFloatingButton ? '' : "Adicionar extrato"
-            }
+            buttonTitle="Adicionar extrato"
             headerTitle="Extrato bancário"
             primaryData={{
               title: "Banco",
@@ -125,7 +122,7 @@ export default function StatementPage() {
           />
         </div>
 
-        <SearchComponent onChange={handleOnChangeSearch} />
+        <SearchComponent onChange={setSearch} />
 
         <BankStatementList
           data={[
@@ -255,9 +252,7 @@ export default function StatementPage() {
         />
       </div>
 
-      {showFloatingButton && (
-        <FloatingButton onClick={handleNewStatement} />
-      )}
+      <FloatingButton onClick={handleNewStatement} />
 
       <div ref={loadMoreRef} style={{ height: 1 }} />
     </div>

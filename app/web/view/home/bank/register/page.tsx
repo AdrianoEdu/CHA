@@ -12,6 +12,7 @@ import BankModal from "@/app/web/components/modal/upsert-bank/upsert-bank";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { DeleteIcon } from "@/app/web/icons";
+import EditIcon from "@/app/web/icons/edit-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankService } from "@/app/web/services/bankService/bankService";
@@ -119,7 +120,11 @@ export default function BankScreen() {
     });
   };
 
-  const handleOpenBankModal = (row?: GetBankDto): void => {
+  const handleOpenBankModal = (
+    e?: React.MouseEvent,
+    row?: GetBankDto): void => {
+    if (e) e.stopPropagation();
+
     openModal(
       <BankModal
         data={row}
@@ -194,10 +199,16 @@ export default function BankScreen() {
                   onClick={(e) => handleOpenModalRemove(e, row.id)}
                 />
               )}
+              <Button
+                icon={<EditIcon />}
+                className="bg-green-500"
+                onClick={(e) => handleOpenBankModal(e, row)}
+              />
             </div>
           );
         },
-      });
+      },
+      );
 
     return columns;
   };
@@ -213,7 +224,6 @@ export default function BankScreen() {
         countRows={currentCountBank}
         title={"Agências bancárias"}
         onPageChange={setCurrentPage}
-        onRowClick={handleOpenBankModal}
         onActionClicked={handleOpenBankModal}
         onFilterChange={handleSetFilterBankName}
       />
