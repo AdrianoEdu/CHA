@@ -115,7 +115,7 @@ export default function SideBar() {
                 href="/web/view/home/customer/register"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
-                Novo cliente
+                Registrar
               </Link>
             </div>
           )}

@@ -6,15 +6,16 @@
 "use client";
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
-import { formatCNPJ, formatMoney } from "../../utils/inputFormatter";
+import { formatCNPJ, formatCPF, formatMoney } from "../../utils/inputFormatter";
 
 export enum InputType {
+  CPF = "Cpf",
   Text = "text",
-  Password = "password",
-  Number = "number",
-  Money = "money",
-  Cnpj = "Cnpj",
   Date = "date",
+  Cnpj = "Cnpj",
+  Money = "money",
+  Number = "number",
+  Password = "password",
   Annotation = "annotation",
 }
 
@@ -23,7 +24,6 @@ type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
 interface InputProps extends BaseInputProps {
   inputType?: InputType;
 
-  // Label opcional exibida acima do input
   label?: string;
 
   onChange?: (
@@ -55,6 +55,7 @@ export default function Input({
   > = {
     [InputType.Money]: formatMoney,
     [InputType.Cnpj]: formatCNPJ,
+    [InputType.CPF]: formatCPF,
   };
 
   useEffect(() => {
@@ -182,7 +183,6 @@ export default function Input({
   return (
     <div className="bg-transparent p-2 rounded-lg">
       <div className="relative w-full">
-        {/* Label opcional acima do input */}
         {label && (
           <span className="block mb-1 text-2xl font-medium text-gray-700">
             {label}
@@ -207,7 +207,9 @@ export default function Input({
             onChange={handleOnPress}
             type={resolveHtmlType(inputType)}
             value={
-              inputType === InputType.Money || inputType === InputType.Cnpj
+              inputType === InputType.Money ||
+              inputType === InputType.Cnpj ||
+              inputType === InputType.CPF
                 ? displayValue
                 : inputType === InputType.Date
                   ? displayValue
@@ -217,7 +219,6 @@ export default function Input({
           />
         )}
 
-        {/* Label interna/flutuante original */}
         <label
           htmlFor={rest.name}
           className="

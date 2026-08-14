@@ -8,6 +8,20 @@ export type FormatterResult = {
   formatted: string;
 };
 
+export function formatCPF(value: string) {
+  const raw = value.replace(/\D/g, "").slice(0, 11);
+
+  const formatted = raw
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1-$2");
+
+  return {
+    raw,
+    formatted,
+  };
+}
+
 export function formatCNPJ(value: string) {
   const raw = value.replace(/\D/g, "");
 

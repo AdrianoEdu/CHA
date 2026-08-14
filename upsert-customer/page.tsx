@@ -14,6 +14,9 @@ import {
   CreateCustomerDto,
   UpdateCustomerDto,
 } from "@/app/web/dto/customer.dto";
+import { validateIsNan } from "@/app/web/utils/validateParameters";
+import { validateCustomerForm } from "@/app/web/utils/customer/customer";
+import { Toggle } from "@/app/web/components/toggle/toggle";
 
 export type SelectComboboxProps = {
   label: string;
@@ -41,26 +44,47 @@ type RegisterCustomerProps = {
 
 const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
+const labelCNPJ = "Informe o CNPJ";
+const labelCPF = "Informe o CPF";
+
 export function UpsertCustomer({
   data,
   onClose,
   onUpdated,
   onRegister,
 }: Readonly<RegisterCustomerProps>) {
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
+  const [status, setStatus] = useState(false);
   const [disable, setDisable] = useState(false);
-  const [identification, setIdentification] = useState("");
+  const [customer, setCustomer] = useState<UpdateCustomerDto>({ id: "" });
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   const isRegister = !data;
 
+  const { inputType, label, regex, maxLength } = {
+    maxLength: status ? 18 : 14,
+    label: status ? labelCNPJ : labelCPF,
+    regex: status ? Regex.onlyCNPJ : Regex.onlyCPF,
+    inputType: status ? InputType.Cnpj : InputType.CPF,
+  };
+
+  const formStatus = validateCustomerForm({ customer, maxLength });
+
+  const handleSetStatus = (status: boolean): void => {
+    setStatus(status);
+    handleSetCustomer({ code: "" });
+  };
+
   useEffect(() => {
     if (isRegister) return;
 
-    setName(data.name!);
-    setCode(data.code!);
-    setIdentification(data.numberId?.toString()!);
+    setCustomer({
+      id: data.id,
+      name: data.name,
+      code: data.code,
+      numberId: data.numberId,
+      customerType: data.customerType,
+    });
+
     setSelected(
       data.customerType
         ? {
@@ -72,62 +96,71 @@ export function UpsertCustomer({
   }, [data]);
 
   const handleUpsertCustomer = (): void => {
-    const numberId = Number(identification);
-
-    if (onUpdated) {
-      onUpdated({
-        id: data?.id!,
-        code,
-        name,
-        numberId,
-        customerType: selected?.value,
-      });
+    if (!isRegister && onUpdated) {
+      onUpdated(customer);
       return;
     }
 
     if (onRegister)
       onRegister({
-        code,
-        name,
-        numberId,
-        customerType: selected?.value!,
+        name: customer.name ?? "",
+        code: customer?.code ?? "",
+        numberId: customer.numberId ?? 0,
+        customerType: customer.customerType ?? CustomerType.CLIENT,
       });
+  };
+
+  const handleSelectOption = (data: SelectComboboxProps | null): void => {
+    setSelected(data);
+    handleSetCustomer({ customerType: data?.value });
   };
 
   const handleIsRegexError = (status: boolean) => setDisable(status);
 
+  const handleSetCustomer = (data: Partial<UpdateCustomerDto>) => {
+    setCustomer((prev) => ({ ...prev, ...data }));
+  };
+
   return (
     <div className="flex flex-col w-full gap-2">
+      <Toggle
+        value={status}
+        title={"Pessoal jurídica?"}
+        onChange={handleSetStatus}
+      />
+
       <Input
         className="flex-1"
         disabled={!isRegister}
-        value={identification}
+        value={customer.numberId}
         regex={Regex.onlyNumbers}
         onRegexError={handleIsRegexError}
         name={"Informe a identificação do cliente"}
-        onChange={(e) => setIdentification(e.target.value)}
         regexMessageError={
           "Por favor informar caracteres válidos (apenas números)"
+        }
+        onChange={(e) =>
+          handleSetCustomer({ numberId: validateIsNan(Number(e.target.value)) })
         }
       />
 
       <Input
-        value={name}
         className="flex-1"
+        value={customer.name}
         name={"Informe o nome do cliente"}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => handleSetCustomer({ name: e.target.value })}
       />
 
       <Input
-        value={code}
-        maxLength={14}
         className="flex-1"
-        regex={Regex.onlyCNPJ}
-        name={"Informe o CNPJ"}
-        inputType={InputType.Cnpj}
+        name={label}
+        regex={regex}
+        maxLength={maxLength}
+        value={customer.code}
+        inputType={inputType}
         onRegexError={handleIsRegexError}
-        onChange={(e) => setCode(e.target.value)}
         regexMessageError={"Por favor informar caracteres válidos"}
+        onChange={(e) => handleSetCustomer({ code: e.target.value })}
       />
 
       <ComboBox<SelectComboboxProps>
@@ -135,8 +168,9 @@ export function UpsertCustomer({
         valueKey={"value"}
         labelKey={"label"}
         selected={selected}
-        onSelectOption={setSelected}
+        onSelectOption={handleSelectOption}
       />
+
       <div className="mt-6 flex justify-end gap-4">
         <Button
           text={cancelButton}
@@ -144,8 +178,8 @@ export function UpsertCustomer({
           status={ButtonStatusEnum.CANCEL}
         />
         <Button
-          disabled={disable}
           onPress={handleUpsertCustomer}
+          disabled={disable || !formStatus}
           text={isRegister ? registerButton : updateButton}
           status={
             isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE

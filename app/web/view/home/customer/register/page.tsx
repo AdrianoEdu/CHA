@@ -5,18 +5,20 @@
 
 "use client";
 
-import { customerService } from "@/app/api/resources/customer/customer.service";
-import { employeeService } from "@/app/api/resources/employee/employee.service";
 import { BodyPage } from "@/app/web/components/bodypage/bodypage";
 import Button from "@/app/web/components/button/button";
 import ComboBox from "@/app/web/components/combobox/combobox";
 import { Footer } from "@/app/web/components/footer/footer";
 import { Header } from "@/app/web/components/header/header";
 import Input, { InputType } from "@/app/web/components/input/input";
+import { Toggle } from "@/app/web/components/toggle/toggle";
 import { CustomerType } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { Regex } from "@/app/web/constants/regex";
 import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
+import { customerService } from "@/app/web/services/customerService/customerService";
+import { validateCustomerForm } from "@/app/web/utils/customer/customer";
+import { validateIsNan } from "@/app/web/utils/validateParameters";
 import { SelectComboboxProps } from "@/upsert-customer/page";
 import React, { JSX, useState } from "react";
 import { toast } from "react-toastify";
@@ -43,53 +45,84 @@ const defaultCustomer = {
   numberId: 0,
 };
 
+const labelCNPJ = "Informe o CNPJ";
+const labelCPF = "Informe o CPF";
+
 export default function RegisterCustomer(): JSX.Element {
+  const [status, setStatus] = useState(true);
+  const [disable, setDisable] = useState(false);
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
   const [customer, setCustomer] = useState<CreateCustomerDto>(defaultCustomer);
 
+  const { inputType, label, regex, maxLength } = {
+    maxLength: status ? 18 : 14,
+    label: status ? labelCNPJ : labelCPF,
+    regex: status ? Regex.onlyCNPJ : Regex.onlyCPF,
+    inputType: status ? InputType.Cnpj : InputType.CPF,
+  };
+
+  const formStatus = validateCustomerForm({ customer, maxLength });
+
   const handleRegisterCustomer = async (): Promise<void> => {
-    await customerService.create(customer).then(() => {
+    try {
+      await customerService.create(customer);
       toast.success("Cliente registrado com sucesso");
       setCustomer(defaultCustomer);
-    });
+      setSelected(null);
+    } catch (error) {
+      toast.error(`Houve um problema ao registrar o cliente: ${error}`);
+    }
   };
 
   const handleSetCustomer = (data: Partial<CreateCustomerDto>): void => {
     setCustomer((prev) => ({ ...prev, ...data }));
   };
 
-  const handleSetCustomerName = (name: string): void =>
-    handleSetCustomer({ name });
+  const handleIsRegexError = (status: boolean) => setDisable(status);
 
-  const handleSetCustomerNumberId = (numberId: number): void =>
-    handleSetCustomer({ numberId });
-
-  const handleSetCustomerCode = (code: string) =>
-    void handleSetCustomer({ code });
+  const handleSetStatus = (status: boolean): void => {
+    setStatus(status);
+    handleSetCustomer({ code: "" });
+  };
 
   return (
     <div>
       <Header title="Novo Cliente" />
+
       <BodyPage>
+        <Toggle
+          value={status}
+          onChange={handleSetStatus}
+          title={"Pessoal jurídica?"}
+        />
+
         <Input
           value={customer?.name}
-          label="Nome do cliente:"
-          onChange={(e) => handleSetCustomerName(e.target.value)}
+          label={"Nome do cliente:"}
+          onChange={(e) => handleSetCustomer({ name: e.target.value })}
         />
+
         <Input
-          value={customer?.numberId}
+          maxLength={10}
           label="Código do cliente"
-          onChange={(e) => handleSetCustomerNumberId(Number(e.target.value))}
+          value={customer?.numberId}
+          onRegexError={handleIsRegexError}
+          onChange={(e) =>
+            handleSetCustomer({
+              numberId: validateIsNan(Number(e.target.value)),
+            })
+          }
         />
+
         <Input
-          maxLength={14}
+          label={label}
+          regex={regex}
           className="flex-1"
+          maxLength={maxLength}
+          inputType={inputType}
           value={customer?.code}
-          regex={Regex.onlyCNPJ}
-          label={"Informe o CNPJ"}
-          inputType={InputType.Cnpj}
-          onChange={(e) => handleSetCustomerCode(e.target.value)}
           regexMessageError={"Por favor informar caracteres válidos"}
+          onChange={(e) => handleSetCustomer({ code: e.target.value })}
         />
 
         <ComboBox<SelectComboboxProps>
@@ -102,7 +135,11 @@ export default function RegisterCustomer(): JSX.Element {
         />
 
         <Footer>
-          <Button text="Registrar" onClick={handleRegisterCustomer} />
+          <Button
+            text="Registrar"
+            onClick={handleRegisterCustomer}
+            disabled={disable || !formStatus}
+          />
         </Footer>
       </BodyPage>
     </div>
