@@ -1,3 +1,8 @@
+// Copyright (c) 2026-08-14
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 "use client";
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
@@ -10,16 +15,21 @@ export enum InputType {
   Money = "money",
   Cnpj = "Cnpj",
   Date = "date",
-  Annotation = "annotation", // ✅ NOVO
+  Annotation = "annotation",
 }
 
 type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
 
 interface InputProps extends BaseInputProps {
   inputType?: InputType;
+
+  // Label opcional exibida acima do input
+  label?: string;
+
   onChange?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
+
   onValueChange?: (value: number | string | Date) => void;
 
   regex?: RegExp;
@@ -31,6 +41,7 @@ export default function Input({
   regex,
   regexMessageError,
   inputType = InputType.Text,
+  label,
   onChange,
   onValueChange,
   ...rest
@@ -50,20 +61,24 @@ export default function Input({
     if (inputType === InputType.Money) {
       if (typeof rest.value === "number") {
         const cents = Math.round(rest.value * 100).toString();
+
         setDisplayValue(formatMoney(cents).formatted);
       }
+
       return;
     }
 
     if (inputType === InputType.Date) {
       if (rest.value instanceof Date) {
         const iso = rest.value.toISOString().split("T")[0];
+
         setDisplayValue(iso);
       } else if (typeof rest.value === "string") {
         setDisplayValue(rest.value);
       } else {
         setDisplayValue("");
       }
+
       return;
     }
 
@@ -82,6 +97,7 @@ export default function Input({
     if (type === InputType.Number) return "number";
     if (type === InputType.Password) return "password";
     if (type === InputType.Date) return "date";
+
     return "text";
   }
 
@@ -130,15 +146,17 @@ export default function Input({
       if (!value) {
         onValueChange?.("");
         onChange?.(e);
+
         return;
       }
 
       const [year, month, day] = value.split("-");
+
       const date = new Date(Number(year), Number(month) - 1, Number(day));
 
       setDisplayValue(value);
 
-      onValueChange?.(date); // 👈 AGORA retorna Date
+      onValueChange?.(date);
       onChange?.(e);
 
       return;
@@ -153,6 +171,7 @@ export default function Input({
       setMessageErrorRegex(currentMessageErrorRegex);
 
       const showError = !regex.test(value);
+
       setShowErrorRegex(showError);
     }
 
@@ -162,7 +181,14 @@ export default function Input({
 
   return (
     <div className="bg-transparent p-2 rounded-lg">
-      <div className="relative w-72">
+      <div className="relative w-full">
+        {/* Label opcional acima do input */}
+        {label && (
+          <span className="block mb-1 text-2xl font-medium text-gray-700">
+            {label}
+          </span>
+        )}
+
         {inputType === InputType.Annotation ? (
           <textarea
             id={rest.name}
@@ -171,7 +197,7 @@ export default function Input({
             onChange={handleOnPress}
             value={displayValue}
             rows={4}
-            className={`peer bg-white w-full min-h-[100px] rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${rest.className}`}
+            className={`peer bg-white w-full min-h-25 rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${rest.className ?? ""}`}
           />
         ) : (
           <input
@@ -187,14 +213,15 @@ export default function Input({
                   ? displayValue
                   : (rest.value ?? "")
             }
-            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className}`}
+            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className ?? ""}`}
           />
         )}
 
+        {/* Label interna/flutuante original */}
         <label
           htmlFor={rest.name}
           className="
-            absolute left-2 
+            absolute left-2
             bg-white px-1
             text-gray-500 text-sm
             transition-all

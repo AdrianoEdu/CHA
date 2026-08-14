@@ -43,16 +43,21 @@ export default function ComboBox<T>({
   };
 
   return (
-    <div className="relative w-72 px-2">
-      {label && <p className="text-sm text-gray-500 mb-2">{label}</p>}
+    <div className="relative w-full px-2">
+      {/* Label opcional acima do componente */}
+      {label && (
+        <span className="block mb-1 text-[24px] font-medium text-gray-700">
+          {label}
+        </span>
+      )}
 
       <select
         {...rest}
         value={selectedValue}
         onChange={(e) => handleChange(e.target.value)}
-        className={`peer bg-white h-10 w-72 rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none appearance-none ${className ?? ""}`}
+        className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none appearance-none ${className ?? ""}`}
       >
-        {/* placeholder controlado */}
+        {/* Placeholder controlado */}
         <option value="" disabled>
           {placeholder}
         </option>
