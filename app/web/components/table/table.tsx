@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import React from "react";
-import TablePagination from "../tablepagination/page";
+import TablePagination from "../tablepagination/table-pagination";
 
 export interface TableColumn<T> {
   label: string;

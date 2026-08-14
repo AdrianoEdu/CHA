@@ -5,9 +5,9 @@
 
 "use client";
 
-import { BankStatementList } from "@/app/web/components/statement/bank/page";
-import Header from "@/app/web/components/statement/header/page";
-import { SearchComponent } from "@/app/web/components/statement/search/page";
+import { BankStatementList } from "@/app/web/components/statement/bank/bank-statement-list";
+import Header from "@/app/web/components/statement/header/statement-header";
+import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
@@ -57,7 +57,8 @@ export default function StatementPage() {
   const totalCount = useRef(0);
 
   const handleGetBankStatement = useCallback(async (): Promise<void> => {
-    if (totalCount.current > 0 && currentSkip.current >= totalCount.current) return;
+    if (totalCount.current > 0 && currentSkip.current >= totalCount.current)
+      return;
 
     const remaining = totalCount.current - currentSkip.current;
     const take =
@@ -94,7 +95,7 @@ export default function StatementPage() {
   const filteredBankStatement = useMemo(() => {
     if (!search.trim()) return list;
     return list.filter((item) =>
-      item.financalCategory.name.toLowerCase().includes(search.toLowerCase())
+      item.financalCategory.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [list, search]);
 

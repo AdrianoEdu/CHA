@@ -9,6 +9,8 @@ import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory"
 export type CreateBankStatementDto = {
   value: number;
   createdAt: Date;
+  title: string;
+  description: string;
   currentAccountId: string;
   financialCategoryId: string;
 };

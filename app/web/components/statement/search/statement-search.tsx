@@ -3,7 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+"use client";
+
+import { ChangeEvent, useRef, useState } from "react";
 import { SearchComponentProps } from "./type";
 
 const DEBOUNCE_TIME = 500;
@@ -13,9 +15,7 @@ export function SearchComponent({ onChange }: SearchComponentProps) {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleOnChangeText = (
-    e: ChangeEvent<HTMLInputElement>,
-  ): void => {
+  const handleOnChangeText = (e: ChangeEvent<HTMLInputElement>): void => {
     const text = e.target.value;
 
     setSearch(text);
