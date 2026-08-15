@@ -98,7 +98,7 @@ export default function UpserCurrentAccountModal({
         </h2>
       </div>
 
-      <div className="flex flex-col w-full gap-2">
+      <div className="flex flex-col gap-8 p-5">
         <ComboBox
           valueKey="id"
           labelKey="name"

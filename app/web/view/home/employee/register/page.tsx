@@ -7,23 +7,14 @@
 
 import { BodyPage } from "@/app/web/components/bodypage/bodypage";
 import Button from "@/app/web/components/button/button";
-import ComboBox from "@/app/web/components/combobox/combobox";
 import { Footer } from "@/app/web/components/footer/footer";
 import { Header } from "@/app/web/components/header/header";
 import Input, { InputType } from "@/app/web/components/input/input";
-import { Toggle } from "@/app/web/components/toggle/toggle";
-import { CustomerType } from "@/app/web/constants/enum";
-import { i18n } from "@/app/web/constants/i18n";
 import { Regex } from "@/app/web/constants/regex";
-import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
 import { CreateEmployeeDto } from "@/app/web/dto/employee.dto";
-import { customerService } from "@/app/web/services/customerService/customerService";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
-import { validateCustomerForm } from "@/app/web/utils/customer/customer";
 import { validateEmployeeForm } from "@/app/web/utils/employee/employee";
-import { validateIsNan } from "@/app/web/utils/validateParameters";
-import { SelectComboboxProps } from "@/upsert-customer/page";
-import React, { JSX, useState } from "react";
+import { JSX, useState } from "react";
 import { toast } from "react-toastify";
 
 const defaultEmployee = {
@@ -33,11 +24,6 @@ const defaultEmployee = {
 };
 
 const MAX_LENGTH_CPF = 14;
-
-const { cancelButton, RegisterEmployee, registerButton, updateButton } =
-  i18n["Pt-Br"].Modal;
-
-const { inputNamePlaceholder } = RegisterEmployee;
 
 export default function RegisterEmployeeScreen(): JSX.Element {
   const [status, setStatus] = useState(true);

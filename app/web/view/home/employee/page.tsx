@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
+const { UpsertEmployee, UpdateStatusEmployee, RemoveEmployee } =
   i18n["Pt-Br"].Modal;
 
 let countEmployee = 0;
@@ -69,7 +69,7 @@ export default function EmployeeScreen() {
   }: CreateEmployeeDto): Promise<void> => {
     try {
       await employeeService.create({ name, document, dateOfBirth });
-      toast.success(RegisterEmployee.successRegisterEmployee);
+      toast.success(UpsertEmployee.successRegisterEmployee);
       handleFindEmployees(currentPage);
       closeModal();
     } catch (error) {
@@ -81,7 +81,7 @@ export default function EmployeeScreen() {
     try {
       await employeeService.patch(data);
       handleFindEmployees(currentPage);
-      toast.success(RegisterEmployee.successUpdateEmployee);
+      toast.success(UpsertEmployee.successUpdateEmployee);
       closeModal();
     } catch (error) {
       toast.error("Erro ao atualizar registro do funcionário");
@@ -124,7 +124,7 @@ export default function EmployeeScreen() {
         onUpdate={handleUpdateEmployee}
         onRegister={handleRegisterEmployee}
       />,
-      RegisterEmployee.title,
+      !data ? UpsertEmployee.registerTitle : UpsertEmployee.updateTitle,
     );
   };
 

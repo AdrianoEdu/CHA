@@ -35,9 +35,6 @@ const options: SelectComboboxProps[] = (
   label: customerTypeLabels[type],
 }));
 
-const { RegisterEmployee, UpdateStatusEmployee, RemoveEmployee } =
-  i18n["Pt-Br"].Modal;
-
 const defaultCustomer = {
   code: "",
   customerType: CustomerType.CLIENT,

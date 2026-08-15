@@ -5,6 +5,7 @@
 
 "use client";
 
+import { UpsertBankStatementModal } from "@/app/web/components/modal/upsert-bank-statement/upsert-bank-statement";
 import { BankStatementList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
@@ -12,11 +13,136 @@ import { FinancialFlowType } from "@/app/web/constants/enum";
 import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
+import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankStatementService } from "@/app/web/services/bankStatementService/bankStatementService";
+import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const takeBankStatement = 20;
+
+const mockDataBankStatement = [
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Recebido",
+    id: "123",
+    value: 250,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.IN,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Enviado",
+    id: "123",
+    value: -180,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.OUT,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Enviado",
+    id: "123",
+    value: -180,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.OUT,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Enviado",
+    id: "123",
+    value: -180,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.OUT,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Enviado",
+    id: "123",
+    value: -180,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.OUT,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+  {
+    createdAt: new Date(),
+    description: "João da Silva",
+    title: "Pix Enviado",
+    id: "123",
+    value: -180,
+    currentAccount: {
+      accountNumber: "er2r",
+      balance: 343,
+      bank: {} as GetBankDto,
+      createdAt: new Date(),
+      id: "erdwqr",
+    },
+    financalCategory: {
+      financialFlowType: FinancialFlowType.OUT,
+      createdAt: new Date(),
+      id: "122323312",
+      name: "asndlk",
+    },
+  },
+];
 
 function FloatingButton({ onClick }: { onClick: () => void }) {
   return (
@@ -50,6 +176,8 @@ export default function StatementPage() {
   const [list, setList] = useState<GetBankStatementDto[]>([]);
   const [currentAccount, setCurrentAccount] = useState<GetCurrentAccountDto>();
 
+  const { openModal, closeModal } = useModal();
+
   const headerRef = useRef<HTMLDivElement | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
@@ -78,6 +206,23 @@ export default function StatementPage() {
     currentSkip.current += bankStatement.length;
   }, []);
 
+  const handleGetBankAccount = async (): Promise<void> => {
+    const id = params.id as string;
+
+    const { currentAccount } = await currentAccountService.findAll({
+      where: { id },
+      include: { bank: true },
+    });
+
+    const currentAccountItem = currentAccount[0];
+
+    setCurrentAccount(currentAccountItem);
+  };
+
+  useEffect(() => {
+    handleGetBankAccount();
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -100,7 +245,7 @@ export default function StatementPage() {
   }, [list, search]);
 
   const handleNewStatement = () => {
-    console.log("Novo lançamento");
+    openModal(<UpsertBankStatementModal />);
   };
 
   return (
@@ -109,147 +254,26 @@ export default function StatementPage() {
         <div ref={headerRef}>
           <Header
             onClick={handleNewStatement}
-            balanceData={5250}
             buttonTitle="Adicionar extrato"
             headerTitle="Extrato bancário"
             primaryData={{
               title: "Banco",
-              description: "Banco do Brasil",
+              description: currentAccount?.bank.name ?? "",
             }}
             secondData={{
               title: "Conta",
-              description: "00012345-6",
+              description: currentAccount?.accountNumber ?? "",
             }}
+            balanceData={currentAccount?.balance ?? 0}
           />
         </div>
 
         <SearchComponent onChange={setSearch} />
 
         <BankStatementList
-          data={[
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Recebido",
-              id: "123",
-              value: 250,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.IN,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Enviado",
-              id: "123",
-              value: -180,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.OUT,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Enviado",
-              id: "123",
-              value: -180,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.OUT,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Enviado",
-              id: "123",
-              value: -180,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.OUT,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Enviado",
-              id: "123",
-              value: -180,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.OUT,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-            {
-              createdAt: new Date(),
-              description: "João da Silva",
-              title: "Pix Enviado",
-              id: "123",
-              value: -180,
-              currentAccount: {
-                accountNumber: "er2r",
-                balance: 343,
-                bank: {} as GetBankDto,
-                createdAt: new Date(),
-                id: "erdwqr",
-              },
-              financalCategory: {
-                financialFlowType: FinancialFlowType.OUT,
-                createdAt: new Date(),
-                id: "122323312",
-                name: "asndlk",
-              },
-            },
-          ]}
-          balanceAccount={5250}
+          data={list}
           onSelect={() => alert("xpto")}
+          balanceAccount={currentAccount?.balance ?? 0}
         />
       </div>
 

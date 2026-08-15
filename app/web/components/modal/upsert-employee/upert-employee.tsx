@@ -13,10 +13,10 @@ import { i18n } from "@/app/web/constants/i18n";
 import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";
 import { validateEmployeeForm } from "@/app/web/utils/employee/employee";
 
-const { cancelButton, RegisterEmployee, registerButton, updateButton } =
+const { cancelButton, UpsertEmployee, registerButton, updateButton } =
   i18n["Pt-Br"].Modal;
 
-const { inputNamePlaceholder } = RegisterEmployee;
+const { inputNamePlaceholder } = UpsertEmployee;
 
 export type UpsertEmployeeProps = {
   data?: EmployeeDto;
@@ -90,7 +90,7 @@ export default function UspertEmployeeModal({
   };
 
   return (
-    <div className="flex flex-col w-full gap-4">
+    <div className="flex flex-col w-full gap-5">
       <Input
         className="flex-1"
         value={employee.name}
@@ -105,7 +105,7 @@ export default function UspertEmployeeModal({
       <Input
         className="flex-1"
         inputType={InputType.Date}
-        name="Insira data de nascimento"
+        name="Data de nascimento:"
         value={employee.dateOfBirth}
         onValueChange={(currentDate) => {
           if (currentDate instanceof Date) {
@@ -121,9 +121,9 @@ export default function UspertEmployeeModal({
         regex={Regex.onlyCPF}
         value={employee.document}
         inputType={InputType.CPF}
+        name={"CPF:"}
         maxLength={MAX_LENGTH_CPF}
         onRegexError={handleIsRegexError}
-        name="Insira registro do usuário"
         onChange={(e) =>
           handleSetEmployee({
             document: e.target.value,

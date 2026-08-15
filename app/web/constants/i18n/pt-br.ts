@@ -5,8 +5,9 @@
 
 export const PtBr = {
   Modal: {
-    RegisterEmployee: {
-      title: "Registrar Funcionário",
+    UpsertEmployee: {
+      updateTitle: "Atualizar functionário",
+      registerTitle: "Registrar funcionário",
       inputNamePlaceholder: "Informe o nome do funcionário",
       errorEmptyName: "Por favor, informe o nome do funcionário.",
       errorInvalidName: "Por favor, informe um nome válido (apenas letras).",

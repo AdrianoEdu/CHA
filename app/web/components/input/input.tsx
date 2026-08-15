@@ -207,7 +207,7 @@ export default function Input({
         : undefined;
 
   return (
-    <div className="bg-transparent p-2 rounded-lg">
+    <div className="bg-transparent rounded-lg">
       <div className="relative w-full">
         {label && (
           <span className="block mb-1 text-2xl font-medium text-gray-700">

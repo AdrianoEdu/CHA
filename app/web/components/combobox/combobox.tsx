@@ -43,7 +43,7 @@ export default function ComboBox<T>({
   };
 
   return (
-    <div className="relative w-full px-2">
+    <div className="relative w-full">
       {/* Label opcional acima do componente */}
       {label && (
         <span className="block mb-1 text-[24px] font-medium text-gray-700">
