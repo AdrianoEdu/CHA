@@ -87,7 +87,7 @@ export default function RegisterCustomer(): JSX.Element {
 
   return (
     <div>
-      <Header title="Novo Cliente" />
+      <Header title="Novo cliente" />
 
       <BodyPage>
         <Toggle

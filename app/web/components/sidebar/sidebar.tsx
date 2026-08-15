@@ -142,10 +142,10 @@ export default function SideBar() {
               </Link>
 
               <Link
-                href="/web/view/home/employee/create"
+                href="/web/view/home/employee/register"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
-                Novo funcionário
+                Registrar
               </Link>
             </div>
           )}
