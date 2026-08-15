@@ -9,7 +9,10 @@ import { PaginationDto } from "./pagination.dto";
 
 export type CreateBankStatementDto = {
   value: number;
+  title: string;
   createdAt: Date;
+  filePath: string;
+  description: string;
   currentAccountId: string;
   financialCategoryId: string;
 };
@@ -23,6 +26,7 @@ export type GetBankStatementDto = {
   value: number;
   title: string;
   createdAt: Date;
+  filePath: string;
   description: string;
   currentAccount: GetCurrentAccountDto;
   financalCategory: GetFinancialCategoryDto;

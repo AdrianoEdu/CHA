@@ -68,8 +68,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
 
       # SeaweedFS
-      SEAWEEDFS_URL: http://seaweedfs:9333
-      SEAWEEDFS_S3_URL: http://seaweedfs:8333
+      SEAWEEDFS_URL: ${SEAWEEDFS_URL}
+      SEAWEEDFS_S3_URL: ${SEAWEEDFS_S3_URL}
       AWS_ACCESS_KEY_ID: ${SEAWEEDFS_ACCESS_KEY}
       AWS_SECRET_ACCESS_KEY: ${SEAWEEDFS_SECRET_KEY}
 

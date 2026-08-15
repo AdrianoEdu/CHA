@@ -12,7 +12,8 @@ import {
 import { JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
 import ComboBox from "../../combobox/combobox";
-import { SelectComboboxProps } from "@/upsert-customer/page";
+import { SelectComboboxProps } from "../upsert-financial-category/upsert-financial-category";
+import { FinancialFlowType } from "@/app/web/constants/enum";
 
 export type UpsertBankStatementModalProps = {
   data?: GetBankStatementDto;
@@ -20,12 +21,27 @@ export type UpsertBankStatementModalProps = {
   onUpdate: (data: UpdateBankStatementDto) => void;
 };
 
+const financialCategoryTypeLabels: Record<FinancialFlowType, string> = {
+  IN: "Entrada",
+  OUT: "Saída",
+};
+
+const options: SelectComboboxProps[] = (
+  Object.values(FinancialFlowType) as FinancialFlowType[]
+).map((type) => ({
+  value: type,
+  label: financialCategoryTypeLabels[type],
+}));
+
+const defaultBankStatement = {};
+
 export function UpsertBankStatementModal({
   data,
   onUpdate,
   onRegister,
 }: UpsertBankStatementModalProps): JSX.Element {
   const [bankStatement, setBankStatement] = useState<GetBankStatementDto>();
+  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   const isRegister = !data;
 
@@ -52,24 +68,10 @@ export function UpsertBankStatementModal({
           selected={selected}
           onSelectOption={setSelected}
         />
+
+        <Input name="Valor" className="flex-1" inputType={InputType.Money} />
       </div>
       <div className="flex flex-col bg-amber-900"></div>
     </div>
   );
 }
-
-// model BankStatement {
-//   id                   String @id @default(uuid())
-//   value                Float
-//   title                String
-//   description          String
-
-//   currentAccountId     String
-//   currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])
-
-//   financialCategoryId  String
-//   financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }

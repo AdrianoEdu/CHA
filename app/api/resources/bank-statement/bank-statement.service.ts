@@ -12,7 +12,7 @@ import {
 } from "../../dto/BankStatement/BankStatement";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
-import { BankStatemenrtWithRelations, bankStatementSelect } from "./type";
+import { BankStatemenrtWithRelations } from "./type";
 import { GetBankDtoParams } from "../../dto/Bank/bank";
 
 class BankStatementService {
@@ -73,6 +73,7 @@ class BankStatementService {
       id: bankStatement.id,
       value: bankStatement.value,
       title: bankStatement.title,
+      filePath: bankStatement.filePath,
       createdAt: bankStatement.createdAt,
       description: bankStatement.description,
       currentAccount: {

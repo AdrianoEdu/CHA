@@ -175,6 +175,7 @@ model BankStatement {
   title                String
   description          String
 
+  filePath             String
   currentAccountId     String
   currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
 

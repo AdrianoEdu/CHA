@@ -10,6 +10,7 @@ import { BankStatementList } from "@/app/web/components/statement/bank/bank-stat
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
 import { FinancialFlowType } from "@/app/web/constants/enum";
+import { i18n } from "@/app/web/constants/i18n";
 import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
@@ -20,6 +21,8 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const takeBankStatement = 20;
+
+const { UpsertBankStatement } = i18n["Pt-Br"].Modal;
 
 const mockDataBankStatement = [
   {
@@ -244,8 +247,22 @@ export default function StatementPage() {
     );
   }, [list, search]);
 
-  const handleNewStatement = () => {
-    openModal(<UpsertBankStatementModal />);
+  const handleNewStatement = (
+    data?: GetBankStatementDto,
+    e?: React.MouseEvent,
+  ) => {
+    if (e) e.stopPropagation();
+
+    openModal(
+      <UpsertBankStatementModal
+        data={data}
+        onRegister={() => {}}
+        onUpdate={() => {}}
+      />,
+      !data
+        ? UpsertBankStatement.registerTitle
+        : UpsertBankStatement.updateTitle,
+    );
   };
 
   return (
@@ -253,7 +270,7 @@ export default function StatementPage() {
       <div className="mx-auto max-w-6xl">
         <div ref={headerRef}>
           <Header
-            onClick={handleNewStatement}
+            onClick={() => handleNewStatement()}
             buttonTitle="Adicionar extrato"
             headerTitle="Extrato bancário"
             primaryData={{

@@ -10,6 +10,7 @@ export type CreateBankStatementDto = {
   value: number;
   createdAt: Date;
   title: string;
+  filePath: string;
   description: string;
   currentAccountId: string;
   financialCategoryId: string;
@@ -24,6 +25,7 @@ export type GetBankStatementDto = {
   value: number;
   title: string;
   createdAt: Date;
+  filePath: string;
   description: string;
   currentAccount: GetCurrentAccountDto;
   financalCategory: GetFinancialCategoryDto;
