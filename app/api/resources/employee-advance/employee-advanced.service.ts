@@ -11,8 +11,6 @@ import {
   GetEmployeeAdvanceDto,
   GetEmployeeAdvanceDtoParams,
 } from "../../dto/EmployeeAdvance/employeeAdvance";
-import { NotFoundException } from "../../error/NotFoundException";
-import { connect } from "http2";
 
 class EmployeeAdvanceService {
   private databaseService = databaseService;

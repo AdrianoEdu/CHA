@@ -8,12 +8,8 @@ import { AuthDto } from "../dto/auth.dto";
 import { ActionEnum } from "../constants/enum";
 import LoadingModal from "../components/modal/loaded/loaded";
 import { useModal } from "./ModalProvider";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { healthService } from "../services/healthService/healthService";
+import { i18n } from "../constants/i18n";
 
 interface AuthContextType {
   user: AuthDto;
@@ -27,6 +23,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const defaultPath = "/web/view";
 const homePath = `${defaultPath}/home`;
 const loginPath = `${defaultPath}/login`;
+
+const { Toast } = i18n["Pt-Br"].Screen.Login;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -45,6 +43,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const auth = async (userName: string, password: string): Promise<void> => {
     try {
+      const healthStatus = await healthService.getHealth();
+
+      if (!healthStatus.database) {
+        toast.error(Toast.systemDownError);
+        return;
+      }
+
       const result = (await authService.login({
         login: userName,
         password,
@@ -53,9 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(result);
       router.push(homePath);
-      toast.success("Auntenticação bem sucedida");
+      toast.success(Toast.authSuccess);
     } catch (err) {
-      toast.error("Erro na autenticação");
+      toast.error(Toast.authError);
     }
   };
 

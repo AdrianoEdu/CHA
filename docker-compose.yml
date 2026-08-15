@@ -19,6 +19,31 @@ services:
       timeout: 5s
       retries: 10
 
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: contabilidade_seaweedfs
+    restart: always
+    ports:
+      - "9333:9333"
+      - "8080:8080"
+      - "8333:8333"
+    volumes:
+      - seaweedfs_data:/data
+    command: server -dir=/data -s3
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "http://localhost:9333/cluster/status",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   front:
     build:
       context: .
@@ -27,9 +52,13 @@ services:
     restart: always
     ports:
       - "3000:3000"
+
     depends_on:
       postgres:
         condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
     environment:
       NODE_ENV: ${NODE_ENV}
       PRETTY_LOG: ${PRETTY_LOG}
@@ -37,6 +66,12 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       AES_SECRET: ${AES_SECRET}
       JWT_SECRET: ${JWT_SECRET}
+
+      # SeaweedFS
+      SEAWEEDFS_URL: http://seaweedfs:9333
+      SEAWEEDFS_S3_URL: http://seaweedfs:8333
+      AWS_ACCESS_KEY_ID: ${SEAWEEDFS_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${SEAWEEDFS_SECRET_KEY}
 
     command: sh -c "
       npx prisma@5.22.0 migrate deploy &&
@@ -46,3 +81,4 @@ services:
 
 volumes:
   pgdata:
+  seaweedfs_data:

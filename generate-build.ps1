@@ -37,12 +37,23 @@ Write-Host "[INFO] Preparando POSTGRES..."
 docker pull postgres:15
 
 # =========================
+# SEAWEEDFS
+# =========================
+
+Write-Host "[INFO] Preparando SEAWEEDFS..."
+
+docker pull chrislusf/seaweedfs:latest
+
+# =========================
 # EXPORT IMAGEM
 # =========================
 
 Write-Host "[INFO] Exportando imagens..."
 
-docker save -o "$OUTPUT_DIR\contabilidade-front.tar" contabilidade-front
+docker save `
+  -o "$OUTPUT_DIR\contabilidade-front.tar" `
+  contabilidade-front `
+  chrislusf/seaweedfs:latest
 
 # =========================
 # COPIAR ICONE
@@ -84,6 +95,18 @@ services:
       timeout: 5s
       retries: 10
 
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    container_name: contabilidade_seaweedfs
+    restart: always
+    ports:
+      - "9333:9333"
+      - "8080:8080"
+      - "8333:8333"
+    volumes:
+      - seaweedfs_data:/data
+    command: server -dir=/data -s3
+
   front:
     image: contabilidade-front
     container_name: contabilidade_front
@@ -93,6 +116,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      seaweedfs:
+        condition: service_started
     env_file:
       - .env
     volumes:
@@ -105,6 +130,7 @@ services:
 
 volumes:
   pgdata:
+  seaweedfs_data:
 '@
 
 $composePath = Join-Path $OUTPUT_DIR "docker-compose.yml"

@@ -122,7 +122,8 @@ export default function BankScreen() {
 
   const handleOpenBankModal = (
     e?: React.MouseEvent,
-    row?: GetBankDto): void => {
+    row?: GetBankDto,
+  ): void => {
     if (e) e.stopPropagation();
 
     openModal(
@@ -207,8 +208,7 @@ export default function BankScreen() {
             </div>
           );
         },
-      },
-      );
+      });
 
     return columns;
   };

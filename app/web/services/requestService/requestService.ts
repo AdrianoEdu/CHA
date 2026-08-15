@@ -62,6 +62,10 @@ class RequestService {
     return this.request<TResponse>(`${url}/${id}`, { method: "GET" });
   }
 
+  get<TResponse>(url: string) {
+    return this.request<TResponse>(`${url}`, { method: "GET" });
+  }
+
   getByFilters<TBody, TResponse>(url: string, filters: TBody) {
     const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
     return this.request<TResponse>(`${url}`, { method: "GET" });

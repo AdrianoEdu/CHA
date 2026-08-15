@@ -10,6 +10,9 @@ import Input, { InputType } from "../../components/input/input";
 import Button from "../../components/button/button";
 import { useState } from "react";
 import { useAuth } from "../../providers/AuthProvider";
+import { i18n } from "../../constants/i18n";
+
+const { Input: InputText } = i18n["Pt-Br"].Screen.Login;
 
 export default function Login() {
   const [login, setLogin] = useState("");
@@ -40,14 +43,14 @@ export default function Login() {
 
         <div className="flex flex-col justify-center gap-4 p-8 bg-transparent">
           <Input
-            name="Informe seu usuário"
+            name={InputText.labelUser}
             value={login}
             onChange={(e) => setLogin(e.target.value)}
           />
 
           <Input
             value={password}
-            name="Informe sua senha"
+            name={InputText.labelPassword}
             inputType={InputType.Password}
             onChange={(e) => setPassword(e.target.value)}
           />

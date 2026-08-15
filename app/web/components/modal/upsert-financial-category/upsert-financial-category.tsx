@@ -6,9 +6,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Input, { InputType } from "../../input/input";
-import { Regex } from "@/app/web/constants/regex";
-import { FormatterResult } from "@/app/web/utils/inputFormatter";
+import Input from "../../input/input";
 import ComboBox from "../../combobox/combobox";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import Button, { ButtonStatusEnum } from "../../button/button";

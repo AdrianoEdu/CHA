@@ -4,7 +4,24 @@
 // All rights reserved.
 
 export const PtBr = {
+  Screen: {
+    Login: {
+      Input: {
+        labelUser: "Informe seu usuário",
+        labelPassword: "Informe a sua senha",
+      },
+      Toast: {
+        authError: "Erro ao autenticar usuário",
+        authSuccess: "Usuário autenticado com sucesso",
+        systemDownError: "Sistema fora do Ar, tente novamente mais tarde",
+      },
+    },
+  },
   Modal: {
+    UpsertBankStatement: {
+      registerTitle: "Registrar extrato",
+      updateTitle: "Atualizar extrato",
+    },
     UpsertEmployee: {
       updateTitle: "Atualizar functionário",
       registerTitle: "Registrar funcionário",
