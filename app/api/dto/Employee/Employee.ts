@@ -6,8 +6,10 @@
 export interface EmployeeDto {
   id?: string;
   name: string;
-  isActive?: boolean;
+  document: string;
   createdAt?: Date;
+  dateOfBirth: Date;
+  isActive?: boolean;
   updatedAt?: Date | null;
 }
 

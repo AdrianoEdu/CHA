@@ -54,8 +54,20 @@ export class EmployeeController {
     }
   }
 
-  async patch({ isActive, id }: Partial<EmployeeDto>) {
-    await this.employeeService.updateStatusUser({ isActive, id });
+  async patch({
+    id,
+    name,
+    document,
+    isActive,
+    dateOfBirth,
+  }: Partial<EmployeeDto>) {
+    await this.employeeService.updateStatusUser({
+      id,
+      name,
+      document,
+      isActive,
+      dateOfBirth,
+    });
   }
 
   async delete({ id }: Partial<EmployeeDto>): Promise<void> {

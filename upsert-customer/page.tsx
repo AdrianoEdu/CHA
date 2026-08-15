@@ -125,8 +125,8 @@ export function UpsertCustomer({
     <div className="flex flex-col w-full gap-2">
       <Toggle
         value={status}
-        title={"Pessoal jurídica?"}
         onChange={handleSetStatus}
+        title={"Pessoal jurídica?"}
       />
 
       <Input

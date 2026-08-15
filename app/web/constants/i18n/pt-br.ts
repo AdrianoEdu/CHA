@@ -11,6 +11,7 @@ export const PtBr = {
       errorEmptyName: "Por favor, informe o nome do funcionário.",
       errorInvalidName: "Por favor, informe um nome válido (apenas letras).",
       successRegisterEmployee: "Funcionário registrado com sucesso",
+      successUpdateEmployee: "Funcionário atualizado com sucesso",
     },
     RegisterEmployeeAdvanced: {
       title: "Registrar adiantamento",

@@ -28,10 +28,13 @@ class EmployeeService {
     );
   }
 
-  patch({ isActive, id }: Partial<EmployeeDto>) {
+  patch({ isActive, document, name, dateOfBirth, id }: Partial<EmployeeDto>) {
     return requestService.patch<Partial<EmployeeDto>, void>(this.url, {
-      isActive,
       id,
+      name,
+      document,
+      isActive,
+      dateOfBirth,
     });
   }
 

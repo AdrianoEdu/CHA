@@ -66,10 +66,17 @@ class EmployeeService {
     });
   }
 
-  async updateStatusUser({ isActive, id }: Partial<EmployeeDto>) {
+  async updateStatusUser({
+    id,
+    name,
+    document,
+    isActive,
+    dateOfBirth,
+  }: Partial<EmployeeDto>) {
+    console.log(`${id} ${name} ${document} ${isActive} ${dateOfBirth}`);
     await this.databaseService.employee.update({
       where: { id },
-      data: { isActive },
+      data: { isActive, dateOfBirth, document, name },
     });
   }
 

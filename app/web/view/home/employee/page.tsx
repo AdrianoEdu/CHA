@@ -7,14 +7,15 @@
 
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/button";
-import RegisterEmployeeModal from "@/app/web/components/modal/register-employee/register-employee";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
+import UspertEmployeeModal from "@/app/web/components/modal/upsert-employee/upert-employee";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import { i18n } from "@/app/web/constants/i18n";
-import { EmployeeDto } from "@/app/web/dto/employee.dto";
+import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";
 import { DeleteIcon, EnableIcon } from "@/app/web/icons";
 import DisableIcon from "@/app/web/icons/disable-icon";
+import EditIcon from "@/app/web/icons/edit-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
@@ -61,12 +62,30 @@ export default function EmployeeScreen() {
     router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
   };
 
-  const handleRegisterEmployee = async (name: string): Promise<void> => {
-    employeeService.create({ name }).then(() => {
+  const handleRegisterEmployee = async ({
+    name,
+    document,
+    dateOfBirth,
+  }: CreateEmployeeDto): Promise<void> => {
+    try {
+      await employeeService.create({ name, document, dateOfBirth });
       toast.success(RegisterEmployee.successRegisterEmployee);
       handleFindEmployees(currentPage);
       closeModal();
-    });
+    } catch (error) {
+      toast.error(`Erro ao registrar funcionário ${error}`);
+    }
+  };
+
+  const handleUpdateEmployee = async (data: EmployeeDto): Promise<void> => {
+    try {
+      await employeeService.patch(data);
+      handleFindEmployees(currentPage);
+      toast.success(RegisterEmployee.successUpdateEmployee);
+      closeModal();
+    } catch (error) {
+      toast.error("Erro ao atualizar registro do funcionário");
+    }
   };
 
   const handleUpdateStatusEmployee = async (
@@ -92,10 +111,17 @@ export default function EmployeeScreen() {
     });
   };
 
-  const handleOpenRegisterEmployeeModal = (): void => {
+  const handleUpsertEmployeeModal = (
+    data?: EmployeeDto,
+    e?: React.MouseEvent,
+  ): void => {
+    if (e) e.stopPropagation();
+
     openModal(
-      <RegisterEmployeeModal
+      <UspertEmployeeModal
+        data={data}
         onClose={closeModal}
+        onUpdate={handleUpdateEmployee}
         onRegister={handleRegisterEmployee}
       />,
       RegisterEmployee.title,
@@ -188,6 +214,8 @@ export default function EmployeeScreen() {
     const columns: TableColumn<EmployeeDto>[] = [
       { label: "Criado em", accessor: "createdAt" },
       { label: "Nome", accessor: "name" },
+      { label: "Documento", accessor: "document" },
+      { label: "Data de nascimento", accessor: "dateOfBirth" },
       {
         label: "Ativo",
         render: (row) => (row.isActive ? "Sim" : "Não"),
@@ -201,6 +229,12 @@ export default function EmployeeScreen() {
         render: (row) => {
           return (
             <div className="flex gap-2 justify-center">
+              <Button
+                icon={<EditIcon />}
+                className="bg-green-500"
+                onClick={(e) => handleUpsertEmployeeModal(row, e)}
+              />
+
               {row.isActive ? (
                 <Button
                   className="bg-red-500"
@@ -245,7 +279,7 @@ export default function EmployeeScreen() {
         onFilterChange={handleSetFilterEmployeeName}
         onPageChange={(page) => setCurrentPage(page)}
         onRowClick={handleNavigateEmployeeAdvancedScreen}
-        onActionClicked={handleOpenRegisterEmployeeModal}
+        onActionClicked={() => handleUpsertEmployeeModal()}
       />
     </div>
   );

@@ -7,6 +7,7 @@
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
 import { formatCNPJ, formatCPF, formatMoney } from "../../utils/inputFormatter";
+import Calendar from "../calendar/calendar";
 
 export enum InputType {
   CPF = "Cpf",
@@ -19,11 +20,15 @@ export enum InputType {
   Annotation = "annotation",
 }
 
-type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
+type BaseInputProps = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "onChange" | "value"
+> & {
+  value?: string | number | Date | readonly string[];
+};
 
 interface InputProps extends BaseInputProps {
   inputType?: InputType;
-
   label?: string;
 
   onChange?: (
@@ -44,11 +49,13 @@ export default function Input({
   label,
   onChange,
   onValueChange,
+  onRegexError,
   ...rest
 }: Readonly<InputProps>) {
   const [showErrorRegex, setShowErrorRegex] = useState(false);
   const [displayValue, setDisplayValue] = useState<string>("");
   const [messageErrorRegex, setMessageErrorRegex] = useState(regexMessageError);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const formatters: Partial<
     Record<InputType, (value: string) => { raw: string; formatted: string }>
@@ -64,6 +71,8 @@ export default function Input({
         const cents = Math.round(rest.value * 100).toString();
 
         setDisplayValue(formatMoney(cents).formatted);
+      } else {
+        setDisplayValue("");
       }
 
       return;
@@ -71,11 +80,13 @@ export default function Input({
 
     if (inputType === InputType.Date) {
       if (rest.value instanceof Date) {
-        const iso = rest.value.toISOString().split("T")[0];
+        setDisplayValue(rest.value.toLocaleDateString("pt-BR"));
+      } else if (typeof rest.value === "string" && rest.value) {
+        const date = new Date(rest.value);
 
-        setDisplayValue(iso);
-      } else if (typeof rest.value === "string") {
-        setDisplayValue(rest.value);
+        setDisplayValue(
+          isNaN(date.getTime()) ? rest.value : date.toLocaleDateString("pt-BR"),
+        );
       } else {
         setDisplayValue("");
       }
@@ -97,7 +108,6 @@ export default function Input({
   function resolveHtmlType(type: InputType) {
     if (type === InputType.Number) return "number";
     if (type === InputType.Password) return "password";
-    if (type === InputType.Date) return "date";
 
     return "text";
   }
@@ -106,6 +116,11 @@ export default function Input({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const value = e.target.value;
+
+    if (inputType === InputType.Date) {
+      setShowCalendar(true);
+      return;
+    }
 
     if (inputType === InputType.Money) {
       const onlyNumbers = value.replace(/\D/g, "");
@@ -132,33 +147,21 @@ export default function Input({
 
     const formatter = formatters[inputType];
 
-    if (formatter && inputType !== InputType.Date) {
+    if (formatter) {
       const { raw, formatted } = formatter(value);
 
       setDisplayValue(formatted);
 
+      const newEvent = {
+        ...e,
+        target: {
+          ...e.target,
+          value: formatted,
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
       onValueChange?.(raw);
-      onChange?.(e);
-
-      return;
-    }
-
-    if (inputType === InputType.Date) {
-      if (!value) {
-        onValueChange?.("");
-        onChange?.(e);
-
-        return;
-      }
-
-      const [year, month, day] = value.split("-");
-
-      const date = new Date(Number(year), Number(month) - 1, Number(day));
-
-      setDisplayValue(value);
-
-      onValueChange?.(date);
-      onChange?.(e);
+      onChange?.(newEvent);
 
       return;
     }
@@ -171,14 +174,37 @@ export default function Input({
 
       setMessageErrorRegex(currentMessageErrorRegex);
 
-      const showError = !regex.test(value);
+      // Evita problema com RegExp usando /g ou /y
+      regex.lastIndex = 0;
+      const isValid = regex.test(value);
+      regex.lastIndex = 0;
+
+      const showError = value.trim() !== "" && !isValid;
 
       setShowErrorRegex(showError);
+      onRegexError?.(showError);
+    } else {
+      setShowErrorRegex(false);
+      onRegexError?.(false);
     }
 
     onValueChange?.(value);
     onChange?.(e);
   }
+
+  function handleCalendarChange(date: Date) {
+    setDisplayValue(date.toLocaleDateString("pt-BR"));
+    setShowCalendar(false);
+
+    onValueChange?.(date);
+  }
+
+  const calendarValue =
+    rest.value instanceof Date
+      ? rest.value
+      : typeof rest.value === "string" && rest.value
+        ? new Date(rest.value)
+        : undefined;
 
   return (
     <div className="bg-transparent p-2 rounded-lg">
@@ -205,17 +231,35 @@ export default function Input({
             placeholder=" "
             disabled={rest.disabled}
             onChange={handleOnPress}
-            type={resolveHtmlType(inputType)}
+            onClick={() => {
+              if (inputType === InputType.Date) {
+                setShowCalendar(true);
+              }
+            }}
+            type="text"
             value={
               inputType === InputType.Money ||
               inputType === InputType.Cnpj ||
-              inputType === InputType.CPF
+              inputType === InputType.CPF ||
+              inputType === InputType.Date
                 ? displayValue
-                : inputType === InputType.Date
-                  ? displayValue
-                  : (rest.value ?? "")
+                : typeof rest.value === "string" ||
+                    typeof rest.value === "number" ||
+                    Array.isArray(rest.value)
+                  ? rest.value
+                  : ""
             }
             className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className ?? ""}`}
+          />
+        )}
+
+        {inputType === InputType.Date && showCalendar && (
+          <Calendar
+            value={calendarValue}
+            disabled={rest.disabled}
+            open={showCalendar}
+            onClose={() => setShowCalendar(false)}
+            onChange={handleCalendarChange}
           />
         )}
 

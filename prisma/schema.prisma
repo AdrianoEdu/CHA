@@ -85,11 +85,13 @@ model User {
 }
 
 model Employee {
-  id        String    @id @default(uuid())
-  name      String
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  id          String    @id @default(uuid())
+  name        String
+  document    String 
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  dateOfBirth DateTime
 
   advances  EmployeeAdvance[]
 
