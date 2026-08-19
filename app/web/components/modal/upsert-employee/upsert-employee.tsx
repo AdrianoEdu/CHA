@@ -34,6 +34,7 @@ export default function UspertEmployeeModal({
   onRegister,
 }: Readonly<UpsertEmployeeProps>) {
   const [disable, setDisable] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const [employee, setEmployee] = useState<EmployeeDto>({
     ...(data ?? {}),
@@ -90,48 +91,58 @@ export default function UspertEmployeeModal({
   };
 
   return (
-    <div className="flex flex-col w-full gap-5">
-      <Input
-        className="flex-1"
-        value={employee.name}
-        name={inputNamePlaceholder}
-        onChange={(e) =>
-          handleSetEmployee({
-            name: e.target.value,
-          })
-        }
-      />
-
-      <Input
-        className="flex-1"
-        inputType={InputType.Date}
-        name="Data de nascimento:"
-        value={employee.dateOfBirth}
-        onValueChange={(currentDate) => {
-          if (currentDate instanceof Date) {
+    <div
+      className={`
+      flex flex-col w-full mt-5
+      transition-[min-height] duration-300 ease-in-out
+      ${showCalendar ? "min-h-125" : ""}
+    `}
+    >
+      <div className="flex flex-col w-full gap-5">
+        <Input
+          className="flex-1"
+          value={employee.name}
+          name={inputNamePlaceholder}
+          onChange={(e) =>
             handleSetEmployee({
-              dateOfBirth: currentDate,
-            });
+              name: e.target.value,
+            })
           }
-        }}
-      />
+        />
 
-      <Input
-        className="flex-1"
-        regex={Regex.onlyCPF}
-        value={employee.document}
-        inputType={InputType.CPF}
-        name={"CPF:"}
-        maxLength={MAX_LENGTH_CPF}
-        onRegexError={handleIsRegexError}
-        onChange={(e) =>
-          handleSetEmployee({
-            document: e.target.value,
-          })
-        }
-      />
+        <Input
+          className="flex-1"
+          inputType={InputType.Date}
+          showCalendar={showCalendar}
+          name="Data de nascimento:"
+          value={employee.dateOfBirth}
+          onValueChange={(currentDate) => {
+            if (currentDate instanceof Date) {
+              handleSetEmployee({
+                dateOfBirth: currentDate,
+              });
+            }
+          }}
+          onCalendarVisibilityChange={setShowCalendar}
+        />
 
-      <div className="mt-6 flex justify-end gap-4">
+        <Input
+          className="flex-1"
+          regex={Regex.onlyCPF}
+          value={employee.document}
+          inputType={InputType.CPF}
+          name="CPF:"
+          maxLength={MAX_LENGTH_CPF}
+          onRegexError={handleIsRegexError}
+          onChange={(e) =>
+            handleSetEmployee({
+              document: e.target.value,
+            })
+          }
+        />
+      </div>
+
+      <div className="mt-auto pt-6 flex justify-end gap-4">
         <Button
           text={cancelButton}
           onPress={onClose}

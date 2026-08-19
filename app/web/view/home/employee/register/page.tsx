@@ -28,6 +28,7 @@ const MAX_LENGTH_CPF = 14;
 export default function RegisterEmployeeScreen(): JSX.Element {
   const [status, setStatus] = useState(true);
   const [disable, setDisable] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [employee, setEmployee] = useState<CreateEmployeeDto>(defaultEmployee);
 
   const formStatus = validateEmployeeForm({
@@ -70,7 +71,8 @@ export default function RegisterEmployeeScreen(): JSX.Element {
         <Input
           className="flex-1"
           inputType={InputType.Date}
-          label="Data de nascimento:"
+          showCalendar={showCalendar}
+          label={"Data de nascimento:"}
           value={employee.dateOfBirth}
           onValueChange={(currentDate) => {
             if (currentDate instanceof Date) {
@@ -79,6 +81,7 @@ export default function RegisterEmployeeScreen(): JSX.Element {
               });
             }
           }}
+          onCalendarVisibilityChange={setShowCalendar}
         />
 
         <Input

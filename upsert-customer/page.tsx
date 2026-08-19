@@ -122,7 +122,7 @@ export function UpsertCustomer({
   };
 
   return (
-    <div className="flex flex-col w-full gap-2">
+    <div className="flex flex-col w-full gap-5">
       <Toggle
         value={status}
         onChange={handleSetStatus}

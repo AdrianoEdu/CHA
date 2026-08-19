@@ -9,7 +9,7 @@ import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
-import UspertEmployeeModal from "@/app/web/components/modal/upsert-employee/upert-employee";
+import UspertEmployeeModal from "@/app/web/components/modal/upsert-employee/upsert-employee";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import { i18n } from "@/app/web/constants/i18n";
 import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";

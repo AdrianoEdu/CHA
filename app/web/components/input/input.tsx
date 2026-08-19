@@ -40,6 +40,9 @@ interface InputProps extends BaseInputProps {
   regex?: RegExp;
   regexMessageError?: string;
   onRegexError?: (status: boolean) => void;
+
+  showCalendar?: boolean;
+  onCalendarVisibilityChange?: (visible: boolean) => void;
 }
 
 export default function Input({
@@ -47,15 +50,16 @@ export default function Input({
   regexMessageError,
   inputType = InputType.Text,
   label,
+  showCalendar,
   onChange,
   onValueChange,
   onRegexError,
+  onCalendarVisibilityChange,
   ...rest
 }: Readonly<InputProps>) {
   const [showErrorRegex, setShowErrorRegex] = useState(false);
   const [displayValue, setDisplayValue] = useState<string>("");
   const [messageErrorRegex, setMessageErrorRegex] = useState(regexMessageError);
-  const [showCalendar, setShowCalendar] = useState(false);
 
   const formatters: Partial<
     Record<InputType, (value: string) => { raw: string; formatted: string }>
@@ -72,7 +76,7 @@ export default function Input({
 
         setDisplayValue(formatMoney(cents).formatted);
       } else {
-        setDisplayValue("");
+        setDisplayValue(String(rest.value ?? ""));
       }
 
       return;
@@ -112,13 +116,17 @@ export default function Input({
     return "text";
   }
 
+  function handleCalendarVisibility(visible: boolean) {
+    onCalendarVisibilityChange?.(visible);
+  }
+
   function handleOnPress(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) {
     const value = e.target.value;
 
     if (inputType === InputType.Date) {
-      setShowCalendar(true);
+      handleCalendarVisibility(true);
       return;
     }
 
@@ -174,7 +182,6 @@ export default function Input({
 
       setMessageErrorRegex(currentMessageErrorRegex);
 
-      // Evita problema com RegExp usando /g ou /y
       regex.lastIndex = 0;
       const isValid = regex.test(value);
       regex.lastIndex = 0;
@@ -194,9 +201,14 @@ export default function Input({
 
   function handleCalendarChange(date: Date) {
     setDisplayValue(date.toLocaleDateString("pt-BR"));
-    setShowCalendar(false);
+
+    handleCalendarVisibility(false);
 
     onValueChange?.(date);
+  }
+
+  function handleCalendarClose() {
+    handleCalendarVisibility(false);
   }
 
   const calendarValue =
@@ -223,7 +235,9 @@ export default function Input({
             onChange={handleOnPress}
             value={displayValue}
             rows={4}
-            className={`peer bg-white w-full min-h-25 rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${rest.className ?? ""}`}
+            className={`peer bg-white w-full min-h-25 rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${
+              rest.className ?? ""
+            }`}
           />
         ) : (
           <input
@@ -233,23 +247,14 @@ export default function Input({
             onChange={handleOnPress}
             onClick={() => {
               if (inputType === InputType.Date) {
-                setShowCalendar(true);
+                handleCalendarVisibility(true);
               }
             }}
-            type="text"
-            value={
-              inputType === InputType.Money ||
-              inputType === InputType.Cnpj ||
-              inputType === InputType.CPF ||
-              inputType === InputType.Date
-                ? displayValue
-                : typeof rest.value === "string" ||
-                    typeof rest.value === "number" ||
-                    Array.isArray(rest.value)
-                  ? rest.value
-                  : ""
-            }
-            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${rest.className ?? ""}`}
+            type={resolveHtmlType(inputType)}
+            value={displayValue}
+            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${
+              rest.className ?? ""
+            }`}
           />
         )}
 
@@ -258,7 +263,7 @@ export default function Input({
             value={calendarValue}
             disabled={rest.disabled}
             open={showCalendar}
-            onClose={() => setShowCalendar(false)}
+            onClose={handleCalendarClose}
             onChange={handleCalendarChange}
           />
         )}

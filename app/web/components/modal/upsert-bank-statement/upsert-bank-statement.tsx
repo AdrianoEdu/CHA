@@ -14,6 +14,8 @@ import Input, { InputType } from "../../input/input";
 import ComboBox from "../../combobox/combobox";
 import { SelectComboboxProps } from "../upsert-financial-category/upsert-financial-category";
 import { FinancialFlowType } from "@/app/web/constants/enum";
+import UploadFile from "../../uploadFile/uploadFile";
+import FileUpload from "../../uploadFile/uploadFile";
 
 export type UpsertBankStatementModalProps = {
   data?: GetBankStatementDto;
@@ -40,6 +42,7 @@ export function UpsertBankStatementModal({
   onUpdate,
   onRegister,
 }: UpsertBankStatementModalProps): JSX.Element {
+  const [file, setFile] = useState<File | null>(null);
   const [bankStatement, setBankStatement] = useState<GetBankStatementDto>();
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
@@ -51,14 +54,35 @@ export function UpsertBankStatementModal({
     setBankStatement(data);
   }, []);
 
+  const handleSetBankStatement = (data: Partial<GetBankStatementDto>): void => {
+    setBankStatement((prev) => {
+      if (!prev) return undefined;
+
+      return {
+        ...prev,
+        ...data,
+      };
+    });
+  };
+
   return (
-    <div className="flex flex-row w-250 h-100 mt-10 mb-10">
-      <div className="flex flex-col w-1/2 bg-amber-600 gap-5">
-        <Input className="flex-1" name="Titulo do extrato" />
+    <div className="flex flex-row w-300 h-100 mt-10 mb-10 gap-5 bg-gray-100 p-5 rounded-2xl">
+      <div className="flex flex-col w-full gap-5 justify-center">
+        <Input
+          className="flex-1"
+          name="Decrição do extrado"
+          value={bankStatement?.title}
+          onChange={(e) => handleSetBankStatement({ title: e.target.value })}
+        />
+
         <Input
           className="flex-1"
           name="Decrição do extrado"
           inputType={InputType.Annotation}
+          value={bankStatement?.description}
+          onChange={(e) =>
+            handleSetBankStatement({ description: e.target.value })
+          }
         />
 
         <ComboBox<SelectComboboxProps>
@@ -67,11 +91,21 @@ export function UpsertBankStatementModal({
           labelKey={"label"}
           selected={selected}
           onSelectOption={setSelected}
+          name="Selecione o tipo de extrado"
         />
-
-        <Input name="Valor" className="flex-1" inputType={InputType.Money} />
+        <Input
+          name="Valor"
+          className="flex-1"
+          inputType={InputType.Money}
+          value={bankStatement?.value}
+          onChange={(e) =>
+            handleSetBankStatement({ value: Number(e.target.value) })
+          }
+        />
       </div>
-      <div className="flex flex-col bg-amber-900"></div>
+      <div className="flex flex-col justify-center items-center w-full">
+        <FileUpload value={file} onChange={setFile} maxSizeInMB={10} />
+      </div>
     </div>
   );
 }
