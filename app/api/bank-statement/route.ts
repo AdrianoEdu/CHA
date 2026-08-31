@@ -12,13 +12,23 @@ export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    let result = await bankStatementConttroller.findAll(req);
+    const result = await bankStatementConttroller.findAll(req);
 
-    return new Response(JSON.stringify(result), { status: 200 });
+    return Response.json(result, { status: 200 });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Erro interno" }), {
-      status: 500,
-    });
+    if (error instanceof HttpException) {
+      return Response.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -26,17 +36,28 @@ export async function POST(req: Request) {
   try {
     authGuard(req);
 
-    const body = await req.json();
+    const formData = await req.formData();
 
-    const payload = body?.payload;
+    const payloadRaw = formData.get("payload");
+    const file = formData.get("file");
 
-    if (!payload) throw new Error("Payload ausente no request");
+    if (typeof payloadRaw !== "string") {
+      throw new Error("Payload ausente no request");
+    }
+
+    const payload = JSON.parse(payloadRaw);
 
     const decrypted = await decryptMiddleware(payload);
 
-    const result = await bankStatementConttroller.create(decrypted);
-    return Response.json(result);
+    await bankStatementConttroller.create({
+      ...decrypted,
+      file: file instanceof File ? file : undefined,
+    });
+
+    return Response.json({ status: 200 });
   } catch (error) {
+    console.error("BANK STATEMENT POST ERROR:", error);
+
     if (error instanceof HttpException) {
       return Response.json(
         { error: error.message },
@@ -44,7 +65,12 @@ export async function POST(req: Request) {
       );
     }
 
-    return Response.json({ error: "Erro interno" }, { status: 500 });
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
   }
 }
 
@@ -52,15 +78,26 @@ export async function PUT(req: Request) {
   try {
     authGuard(req);
 
-    const body = await req.json();
-    const payload = body?.payload;
+    const formData = await req.formData();
 
-    if (!payload) throw new Error("Payload ausente no request");
+    const payload = formData.get("payload");
+    const file = formData.get("file");
+
+    if (typeof payload !== "string") {
+      throw new Error("Payload ausente no request");
+    }
 
     const decrypted = await decryptMiddleware(payload);
 
-    return await bankStatementConttroller.update(decrypted);
+    const result = await bankStatementConttroller.update({
+      ...decrypted,
+      file: file instanceof File ? file : undefined,
+    });
+
+    return Response.json(result, { status: 200 });
   } catch (error) {
+    console.error("BANK STATEMENT PUT ERROR:", error);
+
     if (error instanceof HttpException) {
       return Response.json(
         { error: error.message },
@@ -68,6 +105,11 @@ export async function PUT(req: Request) {
       );
     }
 
-    return Response.json({ error: "Erro interno" }, { status: 500 });
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
   }
 }

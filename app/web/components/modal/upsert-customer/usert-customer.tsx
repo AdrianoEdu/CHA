@@ -3,12 +3,14 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+"use client";
+
 import { useEffect, useState } from "react";
-import Input, { InputType } from "../app/web/components/input/input";
+import Input, { InputType } from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
-import ComboBox from "../app/web/components/combobox/combobox";
+import ComboBox from "../../combobox/combobox";
 import { CustomerType } from "@/app/web/constants/enum";
-import Button, { ButtonStatusEnum } from "../app/web/components/button/button";
+import Button, { ButtonStatusEnum } from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateCustomerDto,
@@ -47,7 +49,7 @@ const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 const labelCNPJ = "Informe o CNPJ";
 const labelCPF = "Informe o CPF";
 
-export function UpsertCustomer({
+export default function UpsertCustomerModal({
   data,
   onClose,
   onUpdated,

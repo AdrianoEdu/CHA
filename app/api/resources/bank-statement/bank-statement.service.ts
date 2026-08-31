@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
+import { FinancialFlowType, Prisma } from "@/app/generated/prisma";
 import {
   CreateBankStatementDto,
   GetBankStatementDto,
@@ -14,12 +14,81 @@ import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { BankStatemenrtWithRelations } from "./type";
 import { GetBankDtoParams } from "../../dto/Bank/bank";
+import { storageSrevice } from "../../providers/storage/storage.service";
 
 class BankStatementService {
+  private storageService = storageSrevice;
   private databaseService = databaseService;
 
   async create(data: CreateBankStatementDto) {
-    this.databaseService.bankStatement.create({ data });
+    const { file, ...bankStatementData } = data;
+
+    let key: string | null = null;
+    let fileUploaded = false;
+
+    try {
+      if (file) {
+        const id = crypto.randomUUID();
+
+        const extension = file.name.split(".").pop();
+
+        const date = new Date().toISOString().replace(/:/g, "-");
+
+        key = `bank-statements/${id}/extrato-${date}.${extension}`;
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        await this.storageService.upload(buffer, key, file.type);
+
+        fileUploaded = true;
+      }
+
+      const result = await this.databaseService.$transaction(async (tx) => {
+        const bankStatement = await tx.bankStatement.create({
+          data: {
+            ...bankStatementData,
+            filePath: key ?? "",
+          },
+          include: {
+            currentAccount: true,
+            financialCategory: true,
+          },
+        });
+
+        const isOut =
+          bankStatement.financialCategory.financialFlowType ===
+          FinancialFlowType.OUT;
+
+        const currentValue = isOut
+          ? Number(bankStatement.currentAccount.balance) -
+            Number(bankStatement.value)
+          : Number(bankStatement.currentAccount.balance) +
+            Number(bankStatement.value);
+
+        await tx.currentAccount.update({
+          data: {
+            balance: currentValue,
+          },
+          where: {
+            id: bankStatement.currentAccountId,
+          },
+        });
+
+        return bankStatement;
+      });
+
+      return result;
+    } catch (error) {
+      if (fileUploaded && key) {
+        try {
+          await this.storageService.delete(key);
+        } catch (deleteError) {
+          console.error("Erro ao remover arquivo após falha:", deleteError);
+        }
+      }
+
+      throw error;
+    }
   }
 
   async update(data: UpdateBankStatementDto) {
@@ -31,8 +100,8 @@ class BankStatementService {
 
   async findBankStatement({
     skip,
-    where,
     take,
+    where,
     include,
     orderBy,
   }: PaginationDto<
@@ -57,11 +126,25 @@ class BankStatementService {
     return { count, bankStatement: await this.findMany({ ...baseQuery }) };
   }
 
-  async findMany(
-    baseQuery: Prisma.BankStatementFindManyArgs,
-  ): Promise<GetBankStatementDto[]> {
+  async findMany({
+    include,
+    orderBy,
+    select,
+    skip,
+    take,
+    where,
+  }: Prisma.BankStatementFindManyArgs): Promise<GetBankStatementDto[]> {
+    const query: Prisma.BankStatementFindManyArgs = {
+      skip,
+      where,
+      take,
+      select,
+      include,
+      orderBy,
+    };
+
     const result = await this.databaseService.bankStatement.findMany({
-      ...baseQuery,
+      ...query,
       include: { currentAccount: true, financialCategory: true },
     });
 

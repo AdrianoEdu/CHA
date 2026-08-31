@@ -12,7 +12,7 @@ import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { bankStatementService } from "./bank-statement.service";
 
 class BankStatementController {
-  private bankStatementService;
+  private readonly bankStatementService;
 
   constructor() {
     this.bankStatementService = bankStatementService;
@@ -34,7 +34,7 @@ class BankStatementController {
         Prisma.BankStatementInclude,
         Prisma.BankStatementOrderByWithRelationInput
       >(req);
-      return await this.bankStatementService.findMany(params);
+      return await this.bankStatementService.findBankStatement(params);
     } catch (error: any) {
       return Response.json({ error: error.message }, { status: 500 });
     }

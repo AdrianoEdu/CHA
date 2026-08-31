@@ -18,19 +18,30 @@ class BankStatementService {
     this.url = "/bank-statement";
   }
 
-  create(data: CreateBankStatementDto) {
-    return requestService.post(this.url, data);
+  async create(data: CreateBankStatementDto) {
+    const { file, ...payloadData } = data;
+
+    const formData = new FormData();
+
+    formData.append("payload", JSON.stringify(payloadData));
+
+    if (file) {
+      formData.append("file", file);
+    }
+
+    return requestService.post(this.url, formData);
   }
 
-  update(data: UpdateBankStatementDto) {
+  async update(data: UpdateBankStatementDto) {
     return requestService.update<UpdateBankStatementDto, void>(this.url, data);
   }
 
-  findAll(data: BankStatementParams) {
-    return requestService.getAll<
+  async findAll(data: BankStatementParams) {
+    const result = await requestService.getAll<
       BankStatementParams,
       GetBankStatementParamsDto
     >(this.url, data);
+    return result;
   }
 }
 

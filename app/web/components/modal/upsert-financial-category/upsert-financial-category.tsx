@@ -17,6 +17,7 @@ import {
 } from "@/app/web/dto/financial.dto";
 
 export type SelectComboboxProps = {
+  id?: string;
   label: string;
   value: FinancialFlowType;
 };

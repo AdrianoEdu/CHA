@@ -46,7 +46,7 @@ const BankStatementComponent = ({
   return (
     <List title="Extrato">
       {data.map(
-        ({ createdAt, financalCategory, value, id, title, description }) => (
+        ({ createdAt, financialCategory, value, id, title, description }) => (
           <div
             key={id}
             onClick={onSelect}
@@ -54,10 +54,10 @@ const BankStatementComponent = ({
           >
             <div className="flex gap-4 items-center">
               <div
-                className={`h-12 w-12 rounded-full flex items-center justify-center bg-${getColor(financalCategory.financialFlowType)}-100`}
+                className={`h-12 w-12 rounded-full flex items-center justify-center bg-${getColor(financialCategory?.financialFlowType)}-100`}
               >
                 <GetIcon
-                  financialFlowType={financalCategory.financialFlowType}
+                  financialFlowType={financialCategory?.financialFlowType}
                 />
               </div>
 
@@ -74,10 +74,10 @@ const BankStatementComponent = ({
 
             <div className="text-right">
               <p
-                className={`text-xl font-bold text-${getColor(financalCategory.financialFlowType)}-600`}
+                className={`text-xl font-bold text-${getColor(financialCategory?.financialFlowType)}-600`}
               >
                 {getStatusValue(
-                  financalCategory.financialFlowType,
+                  financialCategory?.financialFlowType,
                   Math.abs(value).toFixed(2),
                 )}
               </p>

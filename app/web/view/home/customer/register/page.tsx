@@ -19,7 +19,7 @@ import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { validateCustomerForm } from "@/app/web/utils/customer/customer";
 import { validateIsNan } from "@/app/web/utils/validateParameters";
-import { SelectComboboxProps } from "@/upsert-customer/page";
+import { SelectComboboxProps } from "@/app/web/components/modal/upsert-customer/usert-customer";
 import React, { JSX, useState } from "react";
 import { toast } from "react-toastify";
 

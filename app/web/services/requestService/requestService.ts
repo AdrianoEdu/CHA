@@ -27,25 +27,62 @@ class RequestService {
     url: string,
     options: RequestOptions,
   ): Promise<TResponse> {
-    const encryptedPayload = options.body ? encrypt(options.body) : null;
+    let body: BodyInit | undefined;
+    let headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+
+    if (options.body instanceof FormData) {
+      const formData = options.body;
+
+      const payload = formData.get("payload");
+
+      if (typeof payload !== "string") {
+        throw new Error("Payload ausente no FormData");
+      }
+
+      const encryptedPayload = encrypt(JSON.parse(payload));
+
+      const multipartData = new FormData();
+
+      multipartData.append("payload", JSON.stringify(encryptedPayload));
+
+      const file = formData.get("file");
+
+      if (file instanceof File) {
+        multipartData.append("file", file);
+      }
+
+      body = multipartData;
+
+      // Não definir Content-Type manualmente.
+      headers = {};
+    } else {
+      const encryptedPayload = options.body ? encrypt(options.body) : null;
+
+      body = encryptedPayload
+        ? JSON.stringify({
+            payload: encryptedPayload,
+          })
+        : undefined;
+    }
 
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: options.method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: encryptedPayload
-        ? JSON.stringify({ payload: encryptedPayload })
-        : undefined,
+      headers,
+      body,
     });
 
     const text = await response.text();
     const data = text ? JSON.parse(text) : undefined;
 
-    if (!response.ok)
-      throw new Error(data.error || `Erro na requisição: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(data?.error || `Erro na requisição: ${response.status}`);
+    }
 
-    if (data?.payload) return decrypt(data.payload) as TResponse;
+    if (data?.payload) {
+      return decrypt(data.payload) as TResponse;
+    }
 
     return data as TResponse;
   }

@@ -11,14 +11,20 @@ import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
-import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto";
+import {
+  CreateBankStatementDto,
+  GetBankStatementDto,
+  UpdateBankStatementDto,
+} from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankStatementService } from "@/app/web/services/bankStatementService/bankStatementService";
 import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
+import { errorToJSON } from "next/dist/server/render";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 const takeBankStatement = 20;
 
@@ -198,10 +204,10 @@ export default function StatementPage() {
         : Math.min(takeBankStatement, remaining);
 
     const { count, bankStatement } = await bankStatementService.findAll({
-      all: false,
-      orderBy: "desc",
-      skip: currentSkip.current,
       take,
+      all: true,
+      skip: currentSkip.current,
+      orderBy: { createdAt: "desc" },
     });
 
     totalCount.current = count;
@@ -243,9 +249,38 @@ export default function StatementPage() {
   const filteredBankStatement = useMemo(() => {
     if (!search.trim()) return list;
     return list.filter((item) =>
-      item.financalCategory.name.toLowerCase().includes(search.toLowerCase()),
+      item.financialCategory.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [list, search]);
+
+  const handleRegisterBankStatemen = async (
+    data: CreateBankStatementDto,
+  ): Promise<void> => {
+    if (!currentAccount) return;
+
+    try {
+      await bankStatementService.create({
+        ...data,
+        currentAccountId: currentAccount?.id,
+      });
+      toast.success("Extrato registrado com successo!");
+      closeModal();
+    } catch (err) {
+      alert(err);
+    }
+  };
+
+  const handleUpdateBankStatemen = async (
+    data: UpdateBankStatementDto,
+  ): Promise<void> => {
+    try {
+      await bankStatementService.update(data);
+      toast.success("Extrato atualizado com successo!");
+      closeModal();
+    } catch (error) {
+      toast.error("Houve um erro ao atualizar o extrato, tente mais tarde");
+    }
+  };
 
   const handleNewStatement = (
     data?: GetBankStatementDto,
@@ -256,8 +291,9 @@ export default function StatementPage() {
     openModal(
       <UpsertBankStatementModal
         data={data}
-        onRegister={() => {}}
-        onUpdate={() => {}}
+        onClose={closeModal}
+        onUpdate={handleUpdateBankStatemen}
+        onRegister={handleRegisterBankStatemen}
       />,
       !data
         ? UpsertBankStatement.registerTitle

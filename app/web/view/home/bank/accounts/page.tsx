@@ -6,7 +6,7 @@
 "use client";
 
 import Button from "@/app/web/components/button/button";
-import UpserCurrentAccountModal from "@/app/web/components/modal/upsert-current-account/page";
+import UpserCurrentAccountModal from "@/app/web/components/modal/upsert-current-account/upsert-current-account";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import {
   CreateCurrentAccountDto,

@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../../providers/AuthProvider";
 
-type MenuKey = "bank" | "financial" | "employee" | "customer" | "transaction";
+type MenuKey =
+  | "bank"
+  | "financial"
+  | "employee"
+  | "customer"
+  | "transaction"
+  | "move";
 
 export default function SideBar() {
   const { user, logout } = useAuth();
@@ -48,7 +54,7 @@ export default function SideBar() {
                 href="/web/view/home/bank/register"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
-                Registrar
+                Cadastro
               </Link>
 
               <Link
@@ -67,7 +73,7 @@ export default function SideBar() {
             onClick={() => toggleMenu("financial")}
             className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
           >
-            <span>Financeiro</span>
+            <span>Entrada e Saída</span>
 
             <span>{openMenu === "financial" ? "−" : "+"}</span>
           </button>
@@ -78,14 +84,7 @@ export default function SideBar() {
                 href="/web/view/home/financial"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
-                Dashboard
-              </Link>
-
-              <Link
-                href="/web/view/home/financial/reports"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Relatórios
+                Cadastrar
               </Link>
             </div>
           )}
@@ -157,7 +156,7 @@ export default function SideBar() {
             onClick={() => toggleMenu("transaction")}
             className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
           >
-            <span>Transações</span>
+            <span>Movimentações</span>
 
             <span>{openMenu === "transaction" ? "−" : "+"}</span>
           </button>
@@ -168,7 +167,65 @@ export default function SideBar() {
                 href="/web/view/home/transaction"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
-                Histórico
+                Livro Caixa
+              </Link>
+
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Cheques pré-datados clientes
+              </Link>
+
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Contas a pagar
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Transações */}
+        <div className="bg-gray-800 rounded-lg overflow-hidden">
+          <button
+            onClick={() => toggleMenu("transaction")}
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+          >
+            <span>Relatórios</span>
+
+            <span>{openMenu === "transaction" ? "−" : "+"}</span>
+          </button>
+
+          {openMenu === "move" && (
+            <div className="flex flex-col">
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Livro Caixa
+              </Link>
+
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Cheques pré-datados clientes
+              </Link>
+
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Banco
+              </Link>
+
+              <Link
+                href="/web/view/home/transaction"
+                className="px-8 py-3 hover:bg-gray-700 transition"
+              >
+                Funcionario
               </Link>
             </div>
           )}

@@ -1,0 +1,14 @@
+{
+  "identities": [
+    {
+      "name": "contabilidade",
+      "credentials": [
+        {
+          "accessKey": "7f4c9b2e6a1d8c53",
+          "secretKey": "3a9e7d1f5c8b2a604e6f9d7c1b3a8e52"
+        }
+      ],
+      "actions": ["Read", "Write", "List"]
+    }
+  ]
+}

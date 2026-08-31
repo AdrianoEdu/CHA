@@ -45,6 +45,14 @@ Write-Host "[INFO] Preparando SEAWEEDFS..."
 docker pull chrislusf/seaweedfs:latest
 
 # =========================
+# SEAWEEDFS CONFIG
+# =========================
+
+Write-Host "[INFO] Copiando configuracao S3..."
+
+Copy-Item "s3.json" "$OUTPUT_DIR\" -Force
+
+# =========================
 # EXPORT IMAGEM
 # =========================
 

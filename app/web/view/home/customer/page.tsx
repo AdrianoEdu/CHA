@@ -8,7 +8,8 @@
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
-import { UpsertCustomer } from "@/upsert-customer/page";
+import UpsertCustomerModal from "@/app/web/components/modal/upsert-customer/usert-customer";
+("@/app/web/components/modal/upsert-customer/usert-customer");
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import {
   CreateCustomerDto,
@@ -56,7 +57,7 @@ export default function Customer() {
 
   const hanleOpenModalRegisterCustomer = (): void => {
     openModal(
-      <UpsertCustomer
+      <UpsertCustomerModal
         onClose={closeModal}
         onRegister={handleRegisterCustomer}
       />,
@@ -147,7 +148,7 @@ export default function Customer() {
     e.stopPropagation();
 
     openModal(
-      <UpsertCustomer
+      <UpsertCustomerModal
         data={row}
         onClose={closeModal}
         onUpdated={handleUpdateCustomer}

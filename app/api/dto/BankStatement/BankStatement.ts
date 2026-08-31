@@ -7,10 +7,10 @@ import { GetCurrentAccountDto } from "../CurrentAccount/CurrentAccount";
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
 
 export type CreateBankStatementDto = {
+  file: File;
+  title: string;
   value: number;
   createdAt: Date;
-  title: string;
-  filePath: string;
   description: string;
   currentAccountId: string;
   financialCategoryId: string;
