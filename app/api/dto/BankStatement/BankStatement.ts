@@ -5,6 +5,7 @@
 
 import { GetCurrentAccountDto } from "../CurrentAccount/CurrentAccount";
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
+import { GetFinancialEntryDto } from "../General";
 
 export type CreateBankStatementDto = {
   file: File;
@@ -20,18 +21,7 @@ export type UpdateBankStatementDto = Partial<CreateBankStatementDto> & {
   id: string;
 };
 
-export type GetBankStatementDto = {
-  id: string;
-  value: number;
-  title: string;
-  createdAt: Date;
-  filePath: string;
-  description: string;
-  currentAccount: GetCurrentAccountDto;
-  financalCategory: GetFinancialCategoryDto;
-};
-
 export type GetBankStatementParamsDto = {
   count: number;
-  bankStatement: GetBankStatementDto[];
+  bankStatement: GetFinancialEntryDto[];
 };

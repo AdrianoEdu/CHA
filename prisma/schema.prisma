@@ -161,6 +161,7 @@ model CurrentAccount {
   accountNumber     String
 
   bankStatement     BankStatement[]
+  cashBook          CashBook[]
 
   bankId            String
   bank              Bank @relation(fields: [bankId], references: [id])
@@ -175,7 +176,25 @@ model BankStatement {
   title                String
   description          String
 
-  filePath             String
+  filePath             String?
+  currentAccountId     String
+  currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
+
+  financialCategoryId  String
+  financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CashBook {
+  id                   String @id @default(uuid())
+  value                Float
+  title                String
+  description          String
+
+  filePath             String?
+
   currentAccountId     String
   currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
 
@@ -232,7 +251,7 @@ model FinancialCategory {
 
   transaction       Transaction[]
   bankStatement     BankStatement[]
-
+  cashBook          CashBook[]
   @@map("financial_categories")
 }
 

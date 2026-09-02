@@ -6,15 +6,15 @@
 import { FinancialFlowType, Prisma } from "@/app/generated/prisma";
 import {
   CreateBankStatementDto,
-  GetBankStatementDto,
   GetBankStatementParamsDto,
   UpdateBankStatementDto,
 } from "../../dto/BankStatement/BankStatement";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { BankStatemenrtWithRelations } from "./type";
-import { GetBankDtoParams } from "../../dto/Bank/bank";
 import { storageSrevice } from "../../providers/storage/storage.service";
+import { GetFinancialEntryDto } from "../../dto/General";
+import { mapFinancialEntry } from "../../utils/mapFinancialEntry";
 
 class BankStatementService {
   private storageService = storageSrevice;
@@ -92,10 +92,84 @@ class BankStatementService {
   }
 
   async update(data: UpdateBankStatementDto) {
-    this.databaseService.bankStatement.update({
-      where: { id: data.id },
-      data: { ...data },
-    });
+    const { id, file, ...bankStatementData } = data;
+
+    let newKey: string | null = null;
+    let fileUploaded = false;
+
+    try {
+      const currentBankStatement =
+        await this.databaseService.bankStatement.findUnique({
+          where: { id },
+        });
+
+      if (!currentBankStatement) {
+        throw new Error("Extrato bancário não encontrado");
+      }
+
+      const oldKey = currentBankStatement.filePath;
+
+      if (file) {
+        const extension = file.name.split(".").pop();
+
+        const date = new Date().toISOString().replace(/:/g, "-");
+
+        newKey = `bank-statements/${id}/extrato-${date}.${extension}`;
+
+        const buffer = Buffer.from(await file.arrayBuffer());
+
+        await this.storageService.upload(buffer, newKey, file.type);
+
+        fileUploaded = true;
+      }
+
+      const result = await this.databaseService.$transaction(async (tx) => {
+        const bankStatement = await tx.bankStatement.update({
+          where: {
+            id,
+          },
+          data: {
+            ...bankStatementData,
+
+            ...(newKey && {
+              filePath: newKey,
+            }),
+          },
+          include: {
+            currentAccount: true,
+            financialCategory: true,
+          },
+        });
+
+        return bankStatement;
+      });
+
+      if (file && oldKey) {
+        try {
+          await this.storageService.delete(oldKey);
+        } catch (deleteError) {
+          console.error(
+            "Erro ao remover arquivo antigo após atualização:",
+            deleteError,
+          );
+        }
+      }
+
+      return result;
+    } catch (error) {
+      if (fileUploaded && newKey) {
+        try {
+          await this.storageService.delete(newKey);
+        } catch (deleteError) {
+          console.error(
+            "Erro ao remover novo arquivo após falha:",
+            deleteError,
+          );
+        }
+      }
+
+      throw error;
+    }
   }
 
   async findBankStatement({
@@ -133,7 +207,7 @@ class BankStatementService {
     skip,
     take,
     where,
-  }: Prisma.BankStatementFindManyArgs): Promise<GetBankStatementDto[]> {
+  }: Prisma.BankStatementFindManyArgs): Promise<GetFinancialEntryDto[]> {
     const query: Prisma.BankStatementFindManyArgs = {
       skip,
       where,
@@ -148,23 +222,7 @@ class BankStatementService {
       include: { currentAccount: true, financialCategory: true },
     });
 
-    return this.mapBankStatement(result);
-  }
-
-  mapBankStatement(data: BankStatemenrtWithRelations[]): GetBankStatementDto[] {
-    return data.map((bankStatement) => ({
-      id: bankStatement.id,
-      value: bankStatement.value,
-      title: bankStatement.title,
-      filePath: bankStatement.filePath,
-      createdAt: bankStatement.createdAt,
-      description: bankStatement.description,
-      currentAccount: {
-        ...bankStatement.currentAccount,
-        balance: Number(bankStatement.currentAccount.balance),
-      },
-      financalCategory: bankStatement.financialCategory,
-    }));
+    return mapFinancialEntry(result);
   }
 }
 
