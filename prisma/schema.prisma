@@ -65,6 +65,11 @@ enum TransactionType {
   RECEIVABLE
 }
 
+enum CurrentAccountType {
+  BANK
+  CASHBOOK
+}
+
 model User {
   id        String @id @default(uuid())
 
@@ -156,18 +161,19 @@ model Bank {
 }
 
 model CurrentAccount {
-  id                String @id @default(uuid())
-  balance           Decimal @db.Decimal(15,2)
-  accountNumber     String
+  id                 String @id @default(uuid())
+  balance            Decimal @db.Decimal(15,2)
+  accountNumber      String
+  currentAccountType CurrentAccountType @default(BANK)
 
-  bankStatement     BankStatement[]
-  cashBook          CashBook[]
+  bankStatement      BankStatement[]
+  cashBook           CashBook[]
 
-  bankId            String
-  bank              Bank @relation(fields: [bankId], references: [id])
+  bankId             String
+  bank               Bank @relation(fields: [bankId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model BankStatement {

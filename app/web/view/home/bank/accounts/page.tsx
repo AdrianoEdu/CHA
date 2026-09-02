@@ -8,6 +8,7 @@
 import Button from "@/app/web/components/button/button";
 import UpserCurrentAccountModal from "@/app/web/components/modal/upsert-current-account/upsert-current-account";
 import Table, { TableColumn } from "@/app/web/components/table/table";
+import { CurrentAccountType } from "@/app/web/constants/enum";
 import {
   CreateCurrentAccountDto,
   GetCurrentAccountDto,
@@ -50,6 +51,7 @@ export default function AccountScreen() {
       },
       take: takeCurrentAccounts,
       orderBy: { createdAt: "desc" },
+      where: { currentAccountType: CurrentAccountType.BANK },
     });
 
     setList(currentAccount);

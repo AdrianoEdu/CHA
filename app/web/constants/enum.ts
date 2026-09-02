@@ -47,3 +47,8 @@ export enum TransactionStatus {
   IN_USE = "IN_USE",
   FINALIZED = "FINALIZED",
 }
+
+export enum CurrentAccountType {
+  BANK = "BANK",
+  CASHBOOK = "CASHBOOK",
+}

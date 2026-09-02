@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { CreateCurrentAccountDto } from "@/app/api/dto/CurrentAccount/CurrentAccount";
+import { CurrentAccountType } from "@/app/generated/prisma";
 import { PrismaClient } from "@prisma/client";
 
 const createCashBookAccount: CreateCurrentAccountDto = {
@@ -18,7 +19,10 @@ export async function seedCashBookAccount(prisma: PrismaClient) {
 
   if (count === 0) {
     await prisma.currentAccount.create({
-      data: createCashBookAccount,
+      data: {
+        ...createCashBookAccount,
+        currentAccountType: CurrentAccountType.CASHBOOK,
+      },
       skipDuplicates: true,
     });
 

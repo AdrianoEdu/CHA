@@ -5,6 +5,7 @@
 
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { PaginationDto } from "./pagination.dto";
+import { CurrentAccountType } from "../constants/enum";
 
 export type CreateCurrentAccountDto = {
   createdAt: Date;
@@ -23,6 +24,7 @@ export type GetCurrentAccountDto = {
   balance: number;
   bank: GetBankDto;
   accountNumber: string;
+  currentAccountType: CurrentAccountType;
 };
 
 export type CurrentAccountWhere = Partial<GetCurrentAccountDto>;
