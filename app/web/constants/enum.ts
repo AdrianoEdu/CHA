@@ -12,11 +12,6 @@ export enum ActionEnum {
   FindByFilters,
 }
 
-export enum CustomerType {
-  CLIENT = "CLIENT",
-  SUPPLIER = "SUPPLIER",
-}
-
 export enum RegisterAction {
   General = "General",
   Bank = "Bank",

@@ -175,7 +175,6 @@ class ReceivedCheckService {
         isActive: item.customer?.isActive,
         numberId: item.customer?.numberId,
         createdAt: item.customer?.createdAt ?? new Date(),
-        customerType: item.customer?.customerType ?? "CLIENT",
       },
       createdAt: item.createdAt,
       checkNumber: item.checkNumber,

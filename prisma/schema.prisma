@@ -44,11 +44,6 @@ enum FinancialStatus {
   CANCELLED
 }
 
-enum CustomerType {
-  CLIENT
-  SUPPLIER
-}
-
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -139,7 +134,6 @@ model Customer {
   transaction        Transaction[]
   receivedChecks     ReceivedCheck[]
 
-  customerType       CustomerType
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 

@@ -184,12 +184,6 @@ export default function Customer() {
       { label: "Nome do cliente", accessor: "name" },
       { label: "CNPJ", accessor: "code" },
       {
-        label: "Tipo",
-        accessor: "customerType",
-        render: (row) =>
-          row.customerType === "CLIENT" ? "Cliente" : "Fornecedor",
-      },
-      {
         label: "Ativo?",
         accessor: "isActive",
         render: (row) => (row.isActive ? "Sim" : "Não"),

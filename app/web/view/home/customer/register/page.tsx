@@ -12,32 +12,16 @@ import { Footer } from "@/app/web/components/footer/footer";
 import { Header } from "@/app/web/components/header/header";
 import Input, { InputType } from "@/app/web/components/input/input";
 import { Toggle } from "@/app/web/components/toggle/toggle";
-import { CustomerType } from "@/app/web/constants/enum";
-import { i18n } from "@/app/web/constants/i18n";
 import { Regex } from "@/app/web/constants/regex";
 import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { validateCustomerForm } from "@/app/web/utils/customer/customer";
 import { validateIsNan } from "@/app/web/utils/validateParameters";
-import { SelectComboboxProps } from "@/app/web/components/modal/upsert-customer/usert-customer";
 import React, { JSX, useState } from "react";
 import { toast } from "react-toastify";
 
-const customerTypeLabels: Record<CustomerType, string> = {
-  CLIENT: "Cliente",
-  SUPPLIER: "Fornecedor",
-};
-
-const options: SelectComboboxProps[] = (
-  Object.values(CustomerType) as CustomerType[]
-).map((type) => ({
-  value: type,
-  label: customerTypeLabels[type],
-}));
-
 const defaultCustomer = {
   code: "",
-  customerType: CustomerType.CLIENT,
   name: "",
   numberId: 0,
 };
@@ -48,7 +32,6 @@ const labelCPF = "Informe o CPF";
 export default function RegisterCustomer(): JSX.Element {
   const [status, setStatus] = useState(true);
   const [disable, setDisable] = useState(false);
-  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
   const [customer, setCustomer] = useState<CreateCustomerDto>(defaultCustomer);
 
   const { inputType, label, regex, maxLength } = {
@@ -65,7 +48,6 @@ export default function RegisterCustomer(): JSX.Element {
       await customerService.create(customer);
       toast.success("Cliente registrado com sucesso");
       setCustomer(defaultCustomer);
-      setSelected(null);
     } catch (error) {
       toast.error(`Houve um problema ao registrar o cliente: ${error}`);
     }
@@ -120,15 +102,6 @@ export default function RegisterCustomer(): JSX.Element {
           value={customer?.code}
           regexMessageError={"Por favor informar caracteres válidos"}
           onChange={(e) => handleSetCustomer({ code: e.target.value })}
-        />
-
-        <ComboBox<SelectComboboxProps>
-          options={options}
-          valueKey={"value"}
-          labelKey={"label"}
-          selected={selected}
-          onSelectOption={setSelected}
-          label={"Informe o tipo de cliente"}
         />
 
         <Footer>

@@ -8,8 +8,6 @@
 import { useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
-import ComboBox from "../../combobox/combobox";
-import { CustomerType } from "@/app/web/constants/enum";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 import {
@@ -19,23 +17,6 @@ import {
 import { validateIsNan } from "@/app/web/utils/validateParameters";
 import { validateCustomerForm } from "@/app/web/utils/customer/customer";
 import { Toggle } from "@/app/web/components/toggle/toggle";
-
-export type SelectComboboxProps = {
-  label: string;
-  value: CustomerType;
-};
-
-const customerTypeLabels: Record<CustomerType, string> = {
-  CLIENT: "Cliente",
-  SUPPLIER: "Fornecedor",
-};
-
-const options: SelectComboboxProps[] = (
-  Object.values(CustomerType) as CustomerType[]
-).map((type) => ({
-  value: type,
-  label: customerTypeLabels[type],
-}));
 
 type RegisterCustomerProps = {
   data?: UpdateCustomerDto;
@@ -58,7 +39,6 @@ export default function UpsertCustomerModal({
   const [status, setStatus] = useState(false);
   const [disable, setDisable] = useState(false);
   const [customer, setCustomer] = useState<UpdateCustomerDto>({ id: "" });
-  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
   const isRegister = !data;
 
@@ -84,17 +64,7 @@ export default function UpsertCustomerModal({
       name: data.name,
       code: data.code,
       numberId: data.numberId,
-      customerType: data.customerType,
     });
-
-    setSelected(
-      data.customerType
-        ? {
-            label: customerTypeLabels[data.customerType],
-            value: data.customerType,
-          }
-        : null,
-    );
   }, [data]);
 
   const handleUpsertCustomer = (): void => {
@@ -108,13 +78,7 @@ export default function UpsertCustomerModal({
         name: customer.name ?? "",
         code: customer?.code ?? "",
         numberId: customer.numberId ?? 0,
-        customerType: customer.customerType ?? CustomerType.CLIENT,
       });
-  };
-
-  const handleSelectOption = (data: SelectComboboxProps | null): void => {
-    setSelected(data);
-    handleSetCustomer({ customerType: data?.value });
   };
 
   const handleIsRegexError = (status: boolean) => setDisable(status);
@@ -163,14 +127,6 @@ export default function UpsertCustomerModal({
         onRegexError={handleIsRegexError}
         regexMessageError={"Por favor informar caracteres válidos"}
         onChange={(e) => handleSetCustomer({ code: e.target.value })}
-      />
-
-      <ComboBox<SelectComboboxProps>
-        options={options}
-        valueKey={"value"}
-        labelKey={"label"}
-        selected={selected}
-        onSelectOption={handleSelectOption}
       />
 
       <div className="mt-6 flex justify-end gap-4">

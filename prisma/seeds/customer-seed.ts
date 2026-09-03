@@ -1,4 +1,8 @@
-import { CustomerType } from "../../app/generated/prisma";
+// Copyright (c) 2026-09-03
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 import { readExcel } from "../../app/web/utils/readFileXLS";
 import { PrismaClient } from "@prisma/client";
 
@@ -27,7 +31,6 @@ export async function seedCustomers(prisma: PrismaClient) {
         name: match[2].trim(),
         numberId: Number(match[1]),
         code: String(customer.code ?? "").trim(),
-        customerType: CustomerType.CLIENT,
       };
     })
     .filter(Boolean);

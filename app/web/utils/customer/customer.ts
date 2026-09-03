@@ -18,7 +18,6 @@ export function validateCustomerForm({
     !!customer.numberId &&
     !!customer.name?.trim() &&
     !!customer.code?.trim() &&
-    !!customer.customerType &&
     customer?.code.length === maxLength
   );
 }

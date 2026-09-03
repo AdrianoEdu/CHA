@@ -3,13 +3,10 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Customer, CustomerType } from "@/app/generated/prisma";
-
 export type CreateCustomerDto = {
   name: string;
   code: string;
   numberId: number;
-  customerType: CustomerType;
 };
 
 export type UpdateCustomerDto = Partial<CreateCustomerDto> & {
@@ -23,7 +20,6 @@ export type GetCustomerDto = {
   createdAt: Date;
   numberId: number;
   isActive: boolean;
-  customerType: CustomerType;
 };
 
 export type GetCustomerDtoParams = {
