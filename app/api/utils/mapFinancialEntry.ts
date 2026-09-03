@@ -48,6 +48,6 @@ export function mapFinancialEntry<T extends FinancialEntryBase>(
       balance: Number(entry.currentAccount.balance),
     },
 
-    financalCategory: entry.financialCategory,
+    financialCategory: entry.financialCategory,
   }));
 }

@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { CurrentAccountType } from "@/app/web/constants/enum";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 
 export type CreateCurrentAccountDto = {
@@ -22,6 +23,7 @@ export type GetCurrentAccountDto = {
   balance: number;
   bank?: GetBankDto;
   accountNumber: string;
+  currentAccountType: CurrentAccountType;
 };
 
 export type GetCurrentAccountParamsDto = {

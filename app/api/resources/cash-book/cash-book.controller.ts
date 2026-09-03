@@ -6,6 +6,10 @@
 import { Prisma } from "@/app/generated/prisma";
 import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { cashBookService } from "./cash-book.service";
+import {
+  CreateCashBookDto,
+  UpdateCashBookDto,
+} from "../../dto/CashBook/CashBook";
 
 class CashBookController {
   private readonly cashBookService;

@@ -3,11 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import {
-  CreateBankStatementDto,
-  GetBankStatementDto,
-  UpdateBankStatementDto,
-} from "@/app/web/dto/bank-statemenrt-dto";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import { JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
@@ -16,38 +11,43 @@ import { SelectComboboxProps } from "../upsert-financial-category/upsert-financi
 import FileUpload from "../../uploadFile/uploadFile";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
+import {
+  CreateFinancialEntryDto,
+  GetFinancialEntryDto,
+  UpdateFinancialEntryDto,
+} from "@/app/web/dto/general.dto";
 
-export type UpsertBankStatementModalProps = {
+export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
-  data?: GetBankStatementDto;
-  onUpdate: (data: UpdateBankStatementDto) => void;
-  onRegister: (data: CreateBankStatementDto) => void;
+  data?: GetFinancialEntryDto;
+  onUpdate: (data: UpdateFinancialEntryDto) => void;
+  onRegister: (data: CreateFinancialEntryDto) => void;
 };
 
-type BankStatementForm = {
+type FinancialEntryForm = {
   id?: string;
   file: File | null;
   value: number;
   title: string;
   createdAt?: Date;
   description: string;
-  currentAccount?: GetBankStatementDto["currentAccount"];
-  financalCategory?: GetBankStatementDto["financialCategory"];
+  currentAccount?: GetFinancialEntryDto["currentAccount"];
+  financialCategory?: GetFinancialEntryDto["financialCategory"];
 };
 
-export function UpsertBankStatementModal({
+export function UpsertFinancialEntryModal({
   data,
   onClose,
   onUpdate,
   onRegister,
-}: UpsertBankStatementModalProps): JSX.Element {
+}: UpsertFinancialEntryModalProps): JSX.Element {
   const [options, setOptions] = useState<SelectComboboxProps[]>([]);
   const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
 
-  const [bankStatement, setBankStatement] = useState<BankStatementForm>(
-    (): BankStatementForm => {
+  const [financialEntry, setFinancialEntry] = useState<FinancialEntryForm>(
+    (): FinancialEntryForm => {
       if (!data) {
-        return {} as BankStatementForm;
+        return {} as FinancialEntryForm;
       }
 
       return {
@@ -59,7 +59,7 @@ export function UpsertBankStatementModal({
         createdAt: data.createdAt,
         description: data.description,
         currentAccount: data.currentAccount,
-        financalCategory: data.financialCategory,
+        financialCategory: data.financialCategory,
       };
     },
   );
@@ -71,7 +71,7 @@ export function UpsertBankStatementModal({
   }, [data]);
 
   const handleGetFinancialCategoryList = async (
-    bankStatementData?: GetBankStatementDto,
+    financialEntryData?: GetFinancialEntryDto,
   ): Promise<void> => {
     const { financialCategories } = await financialCategoryService.findAll({
       all: true,
@@ -83,9 +83,9 @@ export function UpsertBankStatementModal({
       value: item.financialFlowType,
     }));
 
-    if (bankStatementData) {
+    if (financialEntryData) {
       const firstItem = map.find(
-        (item) => item.id === bankStatementData.financialCategory.id,
+        (item) => item.id === financialEntryData.financialCategory.id,
       );
 
       if (firstItem) {
@@ -96,8 +96,8 @@ export function UpsertBankStatementModal({
     setOptions(map);
   };
 
-  const handleSetBankStatement = (data: Partial<BankStatementForm>): void => {
-    setBankStatement((prev) => ({
+  const handleSetFinancialEntry = (data: Partial<FinancialEntryForm>): void => {
+    setFinancialEntry((prev) => ({
       ...prev,
       ...data,
     }));
@@ -106,8 +106,8 @@ export function UpsertBankStatementModal({
   const handleSetSelectOption = (option: SelectComboboxProps | null): void => {
     if (!option) return;
 
-    handleSetBankStatement({
-      financalCategory: {
+    handleSetFinancialEntry({
+      financialCategory: {
         name: option.label,
         id: option.id ?? "",
         createdAt: new Date(),
@@ -118,17 +118,17 @@ export function UpsertBankStatementModal({
     setSelected(option);
   };
 
-  const handleUpsertBankStatement = (): void => {
+  const handleUpsertFinancialEntry = (): void => {
     const {
       id,
       value,
       title,
       description,
       currentAccount,
-      financalCategory,
+      financialCategory,
       file: formFile,
       ...formData
-    } = bankStatement;
+    } = financialEntry;
 
     if (id) {
       onUpdate({
@@ -139,7 +139,7 @@ export function UpsertBankStatementModal({
         description,
         file: formFile,
         currentAccountId: currentAccount?.id,
-        financialCategoryId: financalCategory?.id,
+        financialCategoryId: financialCategory?.id,
       });
 
       return;
@@ -152,7 +152,7 @@ export function UpsertBankStatementModal({
       description,
       file: formFile,
       currentAccountId: currentAccount?.id ?? "",
-      financialCategoryId: financalCategory?.id ?? "",
+      financialCategoryId: financialCategory?.id ?? "",
     });
   };
 
@@ -163,9 +163,9 @@ export function UpsertBankStatementModal({
           <Input
             className="flex-1"
             name="Descrição do extrato"
-            value={bankStatement.title}
+            value={financialEntry.title}
             onChange={(e) =>
-              handleSetBankStatement({
+              handleSetFinancialEntry({
                 title: e.target.value,
               })
             }
@@ -175,9 +175,9 @@ export function UpsertBankStatementModal({
             className="flex-1"
             name="Descrição do extrato"
             inputType={InputType.Annotation}
-            value={bankStatement.description}
+            value={financialEntry.description}
             onChange={(e) =>
-              handleSetBankStatement({
+              handleSetFinancialEntry({
                 description: e.target.value,
               })
             }
@@ -196,9 +196,9 @@ export function UpsertBankStatementModal({
             name="Valor"
             className="flex-1"
             inputType={InputType.Money}
-            value={bankStatement.value}
+            value={financialEntry.value}
             onChange={(e) =>
-              handleSetBankStatement({
+              handleSetFinancialEntry({
                 value: Number(
                   e.target.value
                     .replace(/\s/g, "")
@@ -214,8 +214,8 @@ export function UpsertBankStatementModal({
         <div className="flex flex-col justify-center items-center w-full">
           <FileUpload
             maxSizeInMB={10}
-            value={bankStatement.file}
-            onChange={(file) => handleSetBankStatement({ file })}
+            value={financialEntry.file}
+            onChange={(file) => handleSetFinancialEntry({ file })}
           />
         </div>
       </div>
@@ -230,7 +230,7 @@ export function UpsertBankStatementModal({
         <Button
           text={isRegister ? "Registrar" : "Atualizar"}
           status={ButtonStatusEnum.CONFIRM}
-          onPress={handleUpsertBankStatement}
+          onPress={handleUpsertFinancialEntry}
         />
       </div>
     </div>

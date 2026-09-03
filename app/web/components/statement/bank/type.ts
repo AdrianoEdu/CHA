@@ -1,13 +1,18 @@
-import { FinancialFlowType } from "@/app/web/constants/enum";
-import { GetBankStatementDto } from "@/app/web/dto/bank-statemenrt-dto"
+// Copyright (c) 2026-09-02
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
 
-export type BankStatementListProps = {
+import { FinancialFlowType } from "@/app/web/constants/enum";
+import { GetFinancialEntryDto } from "@/app/web/dto/general.dto";
+
+export type FinancialEntryListProps = {
   balanceAccount: number;
-  data: GetBankStatementDto[];
+  data: GetFinancialEntryDto[];
 
   onSelect: () => void;
-}
+};
 
 export type StyleComponentProps = {
   financialFlowType: FinancialFlowType;
-}
+};

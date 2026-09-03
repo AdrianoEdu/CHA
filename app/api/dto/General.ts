@@ -11,8 +11,8 @@ export type GetFinancialEntryDto = {
   value: number;
   title: string;
   createdAt: Date;
-  filePath: string;
+  filePath?: string;
   description: string;
   currentAccount: GetCurrentAccountDto;
-  financalCategory: GetFinancialCategoryDto;
+  financialCategory: GetFinancialCategoryDto;
 };

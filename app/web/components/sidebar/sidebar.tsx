@@ -150,35 +150,35 @@ export default function SideBar() {
           )}
         </div>
 
-        {/* Transações */}
+        {/* Movimentações */}
         <div className="bg-gray-800 rounded-lg overflow-hidden">
           <button
-            onClick={() => toggleMenu("transaction")}
+            onClick={() => toggleMenu("move")}
             className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
           >
             <span>Movimentações</span>
 
-            <span>{openMenu === "transaction" ? "−" : "+"}</span>
+            <span>{openMenu === "move" ? "−" : "+"}</span>
           </button>
 
-          {openMenu === "transaction" && (
+          {openMenu === "move" && (
             <div className="flex flex-col">
               <Link
-                href="/web/view/home/transaction"
+                href="/web/view/home/move/cash-book"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
                 Livro Caixa
               </Link>
 
               <Link
-                href="/web/view/home/transaction"
+                href="/web/view/home/move/check"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
                 Cheques pré-datados clientes
               </Link>
 
               <Link
-                href="/web/view/home/transaction"
+                href="/web/view/home/accounts-payable"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
                 Contas a pagar
@@ -198,7 +198,7 @@ export default function SideBar() {
             <span>{openMenu === "transaction" ? "−" : "+"}</span>
           </button>
 
-          {openMenu === "move" && (
+          {openMenu === "transaction" && (
             <div className="flex flex-col">
               <Link
                 href="/web/view/home/transaction"

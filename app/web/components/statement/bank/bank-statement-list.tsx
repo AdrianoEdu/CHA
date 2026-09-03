@@ -1,6 +1,6 @@
 import { JSX, memo } from "react";
 import { List } from "../list/statement-list";
-import { BankStatementListProps, StyleComponentProps } from "./type";
+import { FinancialEntryListProps, StyleComponentProps } from "./type";
 import { FinancialFlowType } from "@/app/web/constants/enum";
 import { IncomeIcon } from "@/app/web/icons/in-icon";
 import { ExpenseIcon } from "@/app/web/icons/out-icon";
@@ -29,18 +29,18 @@ const getStatusValue = (
 };
 
 const getCurrentValueByMovement = (value: number): string => {
-  const currentBankStatement = currentValueByMovement;
+  const currentFinancialEntryValue = currentValueByMovement;
 
-  currentValueByMovement = currentBankStatement - value;
+  currentValueByMovement = currentFinancialEntryValue - value;
 
-  return `R$ ${Math.abs(currentBankStatement).toFixed(2)}`;
+  return `R$ ${Math.abs(currentFinancialEntryValue).toFixed(2)}`;
 };
 
-const BankStatementComponent = ({
+const FinancialEntryComponent = ({
   data,
   balanceAccount,
   onSelect,
-}: BankStatementListProps): JSX.Element => {
+}: FinancialEntryListProps): JSX.Element => {
   currentValueByMovement = balanceAccount;
 
   return (
@@ -77,7 +77,7 @@ const BankStatementComponent = ({
                 className={`text-xl font-bold text-${getColor(financialCategory?.financialFlowType)}-600`}
               >
                 {getStatusValue(
-                  financialCategory?.financialFlowType,
+                  financialCategory.financialFlowType,
                   Math.abs(value).toFixed(2),
                 )}
               </p>
@@ -93,4 +93,4 @@ const BankStatementComponent = ({
   );
 };
 
-export const BankStatementList = memo(BankStatementComponent);
+export const FinancialEntryList = memo(FinancialEntryComponent);

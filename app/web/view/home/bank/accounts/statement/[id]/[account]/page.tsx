@@ -5,8 +5,8 @@
 
 "use client";
 
-import { UpsertBankStatementModal } from "@/app/web/components/modal/upsert-bank-statement/upsert-bank-statement";
-import { BankStatementList } from "@/app/web/components/statement/bank/bank-statement-list";
+import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-bank-statement/upsert-bank-statement";
+import { FinancialEntryList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
 import { FinancialFlowType } from "@/app/web/constants/enum";
@@ -29,129 +29,6 @@ import { toast } from "react-toastify";
 const takeBankStatement = 20;
 
 const { UpsertBankStatement } = i18n["Pt-Br"].Modal;
-
-const mockDataBankStatement = [
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Recebido",
-    id: "123",
-    value: 250,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.IN,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Enviado",
-    id: "123",
-    value: -180,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.OUT,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Enviado",
-    id: "123",
-    value: -180,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.OUT,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Enviado",
-    id: "123",
-    value: -180,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.OUT,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Enviado",
-    id: "123",
-    value: -180,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.OUT,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-  {
-    createdAt: new Date(),
-    description: "João da Silva",
-    title: "Pix Enviado",
-    id: "123",
-    value: -180,
-    currentAccount: {
-      accountNumber: "er2r",
-      balance: 343,
-      bank: {} as GetBankDto,
-      createdAt: new Date(),
-      id: "erdwqr",
-    },
-    financalCategory: {
-      financialFlowType: FinancialFlowType.OUT,
-      createdAt: new Date(),
-      id: "122323312",
-      name: "asndlk",
-    },
-  },
-];
 
 function FloatingButton({ onClick }: { onClick: () => void }) {
   return (
@@ -289,7 +166,7 @@ export default function StatementPage() {
     if (e) e.stopPropagation();
 
     openModal(
-      <UpsertBankStatementModal
+      <UpsertFinancialEntryModal
         data={data}
         onClose={closeModal}
         onUpdate={handleUpdateBankStatemen}
@@ -323,7 +200,7 @@ export default function StatementPage() {
 
         <SearchComponent onChange={setSearch} />
 
-        <BankStatementList
+        <FinancialEntryList
           data={list}
           onSelect={() => alert("xpto")}
           balanceAccount={currentAccount?.balance ?? 0}

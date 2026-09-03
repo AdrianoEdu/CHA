@@ -22,6 +22,10 @@ export const PtBr = {
       registerTitle: "Registrar extrato",
       updateTitle: "Atualizar extrato",
     },
+    UpsertCashBook: {
+      registerTitle: "Registrar livro caixa",
+      updateTitle: "Atualizar livro caixa",
+    },
     UpsertEmployee: {
       updateTitle: "Atualizar functionário",
       registerTitle: "Registrar funcionário",
