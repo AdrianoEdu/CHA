@@ -4,15 +4,15 @@
 // All rights reserved.
 
 type TextData = {
-    title: string;
-    description: string;
-}
+  title: string;
+  description: string;
+};
 
 export type HeaderStatementProps = {
-    headerTitle: string;
-    balanceData: number;
-    buttonTitle: string;
-    onClick: () => void;
-    primaryData: TextData;
-    secondData?: TextData;
-}
+  headerTitle: string;
+  balanceData: number;
+  buttonTitle: string;
+  onClick: () => void;
+  primaryData?: TextData;
+  secondData?: TextData;
+};

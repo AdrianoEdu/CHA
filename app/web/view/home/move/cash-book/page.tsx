@@ -179,17 +179,9 @@ export default function CashBookPage() {
       <div className="mx-auto max-w-6xl">
         <div ref={headerRef}>
           <Header
-            onClick={() => handleNewStatement()}
+            headerTitle="Livro Caixa"
             buttonTitle="Adicionar extrato"
-            headerTitle="Extrato bancário"
-            primaryData={{
-              title: "Banco",
-              description: currentAccount?.bank.name ?? "",
-            }}
-            secondData={{
-              title: "Conta",
-              description: currentAccount?.accountNumber ?? "",
-            }}
+            onClick={() => handleNewStatement()}
             balanceData={currentAccount?.balance ?? 0}
           />
         </div>

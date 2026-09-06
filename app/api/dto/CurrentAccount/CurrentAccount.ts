@@ -3,8 +3,8 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { CurrentAccountType } from "@/app/web/constants/enum";
-import { GetBankDto } from "@/app/web/dto/bank.dto";
+import { CurrentAccountType } from "@/app/generated/prisma";
+import { GetBankDto } from "../Bank/bank";
 
 export type CreateCurrentAccountDto = {
   createdAt: Date;

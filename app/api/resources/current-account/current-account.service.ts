@@ -75,6 +75,7 @@ class CurrentAccountService {
       createdAt: currentAccount.createdAt,
       balance: Number(currentAccount.balance),
       accountNumber: currentAccount.accountNumber,
+      currentAccountType: currentAccount.currentAccountType,
     }));
   }
 }

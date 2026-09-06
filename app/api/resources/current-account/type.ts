@@ -12,5 +12,6 @@ export type CurrentAccountWithRelations = Prisma.CurrentAccountGetPayload<{
     balance: true;
     createdAt: true;
     accountNumber: true;
+    currentAccountType: true;
   };
 }>;
