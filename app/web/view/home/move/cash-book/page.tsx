@@ -9,9 +9,9 @@ import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-ban
 import { FinancialEntryList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
-import { CurrentAccountType } from "@/app/web/constants/enum";
+import { AccountType } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
-import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
+import { GetAccountDto } from "@/app/web/dto/account.dto";
 import {
   CreateFinancialEntryDto,
   GetFinancialEntryDto,
@@ -19,7 +19,7 @@ import {
 } from "@/app/web/dto/general.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { cashBookService } from "@/app/web/services/cashBookService/cashBookService";
-import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
+import { accountService } from "@/app/web/services/accountService/acountService";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -57,8 +57,8 @@ function FloatingButton({ onClick }: { onClick: () => void }) {
 export default function CashBookPage() {
   const params = useParams();
   const [search, setSearch] = useState("");
+  const [account, setAccount] = useState<GetAccountDto>();
   const [list, setList] = useState<GetFinancialEntryDto[]>([]);
-  const [currentAccount, setCurrentAccount] = useState<GetCurrentAccountDto>();
 
   const { openModal, closeModal } = useModal();
 
@@ -93,14 +93,16 @@ export default function CashBookPage() {
   const handleGetBankAccount = async (): Promise<void> => {
     const id = params.id as string;
 
-    const { currentAccount } = await currentAccountService.findAll({
+    const { account } = await accountService.findAll({
       include: { bank: true },
-      where: { id, currentAccountType: CurrentAccountType.CASHBOOK },
+      where: { id, accountType: AccountType.CASHBOOK },
     });
 
-    const currentAccountItem = currentAccount[0];
+    alert(JSON.stringify(account));
 
-    setCurrentAccount(currentAccountItem);
+    const accountItem = account[0];
+
+    setAccount(accountItem);
   };
 
   useEffect(() => {
@@ -131,12 +133,12 @@ export default function CashBookPage() {
   const handleRegisterCashBook = async (
     data: CreateFinancialEntryDto,
   ): Promise<void> => {
-    if (!currentAccount) return;
+    if (!account) return;
 
     try {
       await cashBookService.create({
         ...data,
-        currentAccountId: currentAccount?.id,
+        accountId: account?.id,
       });
       toast.success("Extrato registrado com successo!");
       closeModal();
@@ -182,7 +184,7 @@ export default function CashBookPage() {
             headerTitle="Livro Caixa"
             buttonTitle="Adicionar extrato"
             onClick={() => handleNewStatement()}
-            balanceData={currentAccount?.balance ?? 0}
+            balanceData={account?.balance ?? 0}
           />
         </div>
 
@@ -191,7 +193,7 @@ export default function CashBookPage() {
         <FinancialEntryList
           data={list}
           onSelect={() => alert("xpto")}
-          balanceAccount={currentAccount?.balance ?? 0}
+          balanceAccount={account?.balance ?? 0}
         />
       </div>
 

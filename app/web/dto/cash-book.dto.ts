@@ -9,9 +9,9 @@ import { PaginationDto } from "./pagination.dto";
 export type CreateCashBookDto = {
   value: number;
   title: string;
+  accountId: string;
   file?: File | null;
   description: string;
-  currentAccountId: string;
   financialCategoryId: string;
 };
 

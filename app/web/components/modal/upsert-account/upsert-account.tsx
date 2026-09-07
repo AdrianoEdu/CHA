@@ -5,35 +5,32 @@
 
 "use client";
 
-import {
-  CreateCurrentAccountDto,
-  UpdateCurrentAccountDto,
-} from "@/app/web/dto/current-accont.dto";
+import { CreateAccountDto, UpdateAccountDto } from "@/app/web/dto/account.dto";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { useEffect, useState } from "react";
 import ComboBox from "../../combobox/combobox";
 import { bankService } from "@/app/web/services/bankService/bankService";
 import Input from "../../input/input";
 
-export type UpsertCurrentAccountModalProps = {
-  data?: UpdateCurrentAccountDto;
+export type UpsertAccountModalProps = {
+  data?: UpdateAccountDto;
   onClose: () => void;
-  onUpdated?: (data: UpdateCurrentAccountDto) => void;
-  onRegister?: (data: CreateCurrentAccountDto) => void;
+  onUpdated?: (data: UpdateAccountDto) => void;
+  onRegister?: (data: CreateAccountDto) => void;
 };
 
 type SelectOption = { id: string; name: string };
 
-export default function UpserCurrentAccountModal({
+export default function UpserAccountModal({
   data,
   onClose,
   onUpdated,
   onRegister,
-}: UpsertCurrentAccountModalProps) {
+}: UpsertAccountModalProps) {
   const isEdit = !!data;
-  const [currentData, setCurrentData] = useState<
-    UpdateCurrentAccountDto | undefined
-  >(data);
+  const [currentData, setCurrentData] = useState<UpdateAccountDto | undefined>(
+    data,
+  );
 
   const [listBankOptions, setListBank] = useState<SelectOption[]>([]);
   const [selectedBank, setSelectBank] = useState<SelectOption | null>(null);
@@ -74,7 +71,7 @@ export default function UpserCurrentAccountModal({
     setCurrentData((prev) => ({ ...prev!, bankId: option?.id }));
   };
 
-  const handleUpserData = (data: Partial<UpdateCurrentAccountDto>): void => {
+  const handleUpserData = (data: Partial<UpdateAccountDto>): void => {
     setCurrentData((prev) => ({ ...prev!, ...data }));
   };
 

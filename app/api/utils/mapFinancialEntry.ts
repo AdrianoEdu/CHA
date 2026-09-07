@@ -3,12 +3,9 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import {
-  CurrentAccountType,
-  FinancialFlowType,
-  Prisma,
-} from "@/app/generated/prisma";
+import { AccountType, FinancialFlowType, Prisma } from "@/app/generated/prisma";
 import { GetFinancialEntryDto } from "../dto/General";
+import { GetBankDto } from "../dto/Bank/bank";
 
 type FinancialEntryBase = {
   id: string;
@@ -18,14 +15,15 @@ type FinancialEntryBase = {
   description: string;
   filePath: string | null;
 
-  currentAccount: {
+  account: {
     id: string;
     createdAt: Date;
     updatedAt: Date;
-    bankId: string;
-    accountNumber: string;
+    bankId: string | null;
+    bank?: GetBankDto | null; // 👈 opcional
     balance: Prisma.Decimal;
-    currentAccountType: CurrentAccountType;
+    accountType: AccountType;
+    accountNumber: string | null;
   };
 
   financialCategory: {
@@ -47,10 +45,17 @@ export function mapFinancialEntry<T extends FinancialEntryBase>(
     createdAt: entry.createdAt,
     description: entry.description,
     filePath: entry.filePath ?? "",
-    currentAccount: {
-      ...entry.currentAccount,
-      balance: Number(entry.currentAccount.balance),
+
+    account: {
+      id: entry.account.id,
+      createdAt: entry.account.createdAt,
+      balance: Number(entry.account.balance),
+      accountType: entry.account.accountType,
+      accountNumber: entry.account.accountNumber,
+      bankId: entry.account.bankId,
+      bank: entry.account.bank ?? null,
     },
+
     financialCategory: entry.financialCategory,
   }));
 }

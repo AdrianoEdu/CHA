@@ -60,7 +60,7 @@ enum TransactionType {
   RECEIVABLE
 }
 
-enum CurrentAccountType {
+enum AccountType {
   BANK
   CASHBOOK
 }
@@ -146,7 +146,7 @@ model Bank {
   agencies           String[]
 
   receivedChecks     ReceivedCheck[]
-  currentAccount     CurrentAccount[]
+  account            Account[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -154,17 +154,17 @@ model Bank {
   @@map("banks")
 }
 
-model CurrentAccount {
-  id                 String @id @default(uuid())
-  balance            Decimal @db.Decimal(15,2)
-  accountNumber      String
-  currentAccountType CurrentAccountType @default(BANK)
+model Account {
+  id                 String   @id @default(uuid())
+  balance            Decimal  @db.Decimal(15,2)
+  accountNumber      String?
+  accountType        AccountType @default(BANK)
+
+  bankId             String?
+  bank               Bank? @relation(fields: [bankId], references: [id])
 
   bankStatement      BankStatement[]
   cashBook           CashBook[]
-
-  bankId             String
-  bank               Bank @relation(fields: [bankId], references: [id])
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
@@ -177,8 +177,8 @@ model BankStatement {
   description          String
 
   filePath             String?
-  currentAccountId     String
-  currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
+  accountId            String
+  account              Account @relation(fields: [accountId], references: [id])  
 
   financialCategoryId  String
   financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
@@ -195,8 +195,8 @@ model CashBook {
 
   filePath             String?
 
-  currentAccountId     String
-  currentAccount       CurrentAccount @relation(fields: [currentAccountId], references: [id])  
+  accountId            String
+  account              Account @relation(fields: [accountId], references: [id])  
 
   financialCategoryId  String
   financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])

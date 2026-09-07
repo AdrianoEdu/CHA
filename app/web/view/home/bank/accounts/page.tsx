@@ -6,40 +6,40 @@
 "use client";
 
 import Button from "@/app/web/components/button/button";
-import UpserCurrentAccountModal from "@/app/web/components/modal/upsert-current-account/upsert-current-account";
+import UpserAccountModal from "@/app/web/components/modal/upsert-account/upsert-account";
 import Table, { TableColumn } from "@/app/web/components/table/table";
-import { CurrentAccountType } from "@/app/web/constants/enum";
+import { AccountType } from "@/app/web/constants/enum";
 import {
-  CreateCurrentAccountDto,
-  GetCurrentAccountDto,
-  UpdateCurrentAccountDto,
-} from "@/app/web/dto/current-accont.dto";
+  CreateAccountDto,
+  GetAccountDto,
+  UpdateAccountDto,
+} from "@/app/web/dto/account.dto";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
-import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
+import { accountService } from "@/app/web/services/accountService/acountService";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-let countCurrentAccounts = 0;
-const takeCurrentAccounts = 20;
-let oldCurrentAccountList: GetCurrentAccountDto[] = [];
+let countAccounts = 0;
+const takeAccounts = 20;
+let oldAccountList: GetAccountDto[] = [];
 
 export default function AccountScreen() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const [list, setList] = useState<GetCurrentAccountDto[]>();
+  const [list, setList] = useState<GetAccountDto[]>();
 
   const { openModal, closeModal } = useModal();
 
   useEffect(() => {
-    handleFindCurrentAccounts(currentPage);
+    handleFindAccounts(currentPage);
   }, []);
 
-  const handleFindCurrentAccounts = async (page: number) => {
-    const currentSkip = (page - 1) * takeCurrentAccounts;
+  const handleFindAccounts = async (page: number) => {
+    const currentSkip = (page - 1) * takeAccounts;
 
-    const { count, currentAccount } = await currentAccountService.findAll({
+    const { count, account } = await accountService.findAll({
       all: true,
       skip: currentSkip,
       select: {
@@ -49,68 +49,66 @@ export default function AccountScreen() {
         createdAt: true,
         accountNumber: true,
       },
-      take: takeCurrentAccounts,
+      take: takeAccounts,
       orderBy: { createdAt: "desc" },
-      where: { currentAccountType: CurrentAccountType.BANK },
+      where: { accountType: AccountType.BANK },
     });
 
-    setList(currentAccount);
-    oldCurrentAccountList = currentAccount;
+    setList(account);
+    oldAccountList = account;
 
-    countCurrentAccounts = count;
+    countAccounts = count;
   };
 
-  const navigateBankStatement = (row: GetCurrentAccountDto): void => {
+  const navigateBankStatement = (row: GetAccountDto): void => {
     router.push(
       `/web/view/home/bank/accounts/statement/${row.id}/${row.accountNumber}`,
     );
   };
 
-  const handleRegisterCurrentAccount = async (
-    data: CreateCurrentAccountDto,
+  const handleRegisterAccount = async (
+    data: CreateAccountDto,
   ): Promise<void> => {
     try {
-      await currentAccountService.create(data);
-      toast.success("Conta corrente criada com sucesso");
+      await accountService.create(data);
+      toast.success("Conta criada com sucesso");
     } catch (error) {
-      toast.error("Não foi possivel criar conta corrente");
+      toast.error("Não foi possivel criar conta");
     } finally {
       closeModal();
-      await handleFindCurrentAccounts(1);
+      await handleFindAccounts(1);
     }
   };
 
-  const handleUpdateCurrentAccount = async (
-    data: UpdateCurrentAccountDto,
-  ): Promise<void> => {
+  const handleUpdateAccount = async (data: UpdateAccountDto): Promise<void> => {
     try {
-      await currentAccountService.update(data);
-      toast.success("Conta corrente atualizada com sucesso");
+      await accountService.update(data);
+      toast.success("Conta atualizada com sucesso");
     } catch (error) {
-      toast.error("Não foi possivel atualizar conta corrente");
+      toast.error("Não foi possivel atualizar conta");
     } finally {
       closeModal();
-      await handleFindCurrentAccounts(1);
+      await handleFindAccounts(1);
     }
   };
 
-  const handleOpenModalUpsertCurrentAccount = (
+  const handleOpenModalUpsertAccount = (
     mouseEvent?: React.MouseEvent<HTMLButtonElement>,
-    data?: UpdateCurrentAccountDto,
+    data?: UpdateAccountDto,
   ): void => {
     if (mouseEvent) mouseEvent.stopPropagation();
 
     openModal(
-      <UpserCurrentAccountModal
+      <UpserAccountModal
         data={data}
         onClose={closeModal}
-        onUpdated={handleUpdateCurrentAccount}
-        onRegister={handleRegisterCurrentAccount}
+        onUpdated={handleUpdateAccount}
+        onRegister={handleRegisterAccount}
       />,
     );
   };
 
-  const getColumns = (): TableColumn<GetCurrentAccountDto>[] => {
+  const getColumns = (): TableColumn<GetAccountDto>[] => {
     return [
       { label: "Registrado em", accessor: "createdAt" },
       { label: "Banco", accessor: "bank.name" },
@@ -123,7 +121,7 @@ export default function AccountScreen() {
             <Button
               icon={<EditIcon />}
               className="bg-green-500"
-              onClick={(e) => handleOpenModalUpsertCurrentAccount(e, row)}
+              onClick={(e) => handleOpenModalUpsertAccount(e, row)}
             />
           );
         },
@@ -139,7 +137,7 @@ export default function AccountScreen() {
         title={"Conta corrente"}
         currentPage={currentPage}
         onRowClick={navigateBankStatement}
-        onActionClicked={handleOpenModalUpsertCurrentAccount}
+        onActionClicked={handleOpenModalUpsertAccount}
       />
     </div>
   );

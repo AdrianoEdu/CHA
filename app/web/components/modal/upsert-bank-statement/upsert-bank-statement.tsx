@@ -31,7 +31,7 @@ type FinancialEntryForm = {
   title: string;
   createdAt?: Date;
   description: string;
-  currentAccount?: GetFinancialEntryDto["currentAccount"];
+  account?: GetFinancialEntryDto["account"];
   financialCategory?: GetFinancialEntryDto["financialCategory"];
 };
 
@@ -58,7 +58,7 @@ export function UpsertFinancialEntryModal({
         title: data.title,
         createdAt: data.createdAt,
         description: data.description,
-        currentAccount: data.currentAccount,
+        account: data.account,
         financialCategory: data.financialCategory,
       };
     },
@@ -123,8 +123,8 @@ export function UpsertFinancialEntryModal({
       id,
       value,
       title,
+      account,
       description,
-      currentAccount,
       financialCategory,
       file: formFile,
       ...formData
@@ -138,7 +138,7 @@ export function UpsertFinancialEntryModal({
         value,
         description,
         file: formFile,
-        currentAccountId: currentAccount?.id,
+        accountId: account?.id,
         financialCategoryId: financialCategory?.id,
       });
 
@@ -151,7 +151,7 @@ export function UpsertFinancialEntryModal({
       value,
       description,
       file: formFile,
-      currentAccountId: currentAccount?.id ?? "",
+      accountId: account?.id ?? "",
       financialCategoryId: financialCategory?.id ?? "",
     });
   };

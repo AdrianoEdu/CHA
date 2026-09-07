@@ -50,7 +50,7 @@ class BankStatementService {
             filePath: key ?? "",
           },
           include: {
-            currentAccount: true,
+            account: true,
             financialCategory: true,
           },
         });
@@ -60,17 +60,15 @@ class BankStatementService {
           FinancialFlowType.OUT;
 
         const currentValue = isOut
-          ? Number(bankStatement.currentAccount.balance) -
-            Number(bankStatement.value)
-          : Number(bankStatement.currentAccount.balance) +
-            Number(bankStatement.value);
+          ? Number(bankStatement.account.balance) - Number(bankStatement.value)
+          : Number(bankStatement.account.balance) + Number(bankStatement.value);
 
-        await tx.currentAccount.update({
+        await tx.account.update({
           data: {
             balance: currentValue,
           },
           where: {
-            id: bankStatement.currentAccountId,
+            id: bankStatement.accountId,
           },
         });
 
@@ -136,7 +134,7 @@ class BankStatementService {
             }),
           },
           include: {
-            currentAccount: true,
+            account: true,
             financialCategory: true,
           },
         });
@@ -219,7 +217,16 @@ class BankStatementService {
 
     const result = await this.databaseService.bankStatement.findMany({
       ...query,
-      include: { currentAccount: true, financialCategory: true },
+      include: {
+        account: {
+          include: {
+            bank: {
+              select: { id: true, name: true, agencies: true, createdAt: true },
+            },
+          },
+        },
+        financialCategory: true,
+      },
     });
 
     return mapFinancialEntry(result);

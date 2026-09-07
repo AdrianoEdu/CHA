@@ -6,13 +6,13 @@
 import { HttpException } from "../error/HttpException";
 import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
-import { currentAccountController } from "../resources/current-account/current-account.controller";
+import { accountController } from "../resources/account/account.controller";
 
 export async function GET(req: Request) {
   try {
     authGuard(req);
 
-    let result = await currentAccountController.findAll(req);
+    let result = await accountController.findAll(req);
 
     return new Response(JSON.stringify(result), { status: 200 });
   } catch (error) {
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     const decrypted = await decryptMiddleware(payload);
 
-    const result = await currentAccountController.create(decrypted);
+    const result = await accountController.create(decrypted);
     return Response.json(result);
   } catch (error) {
     if (error instanceof HttpException) {
@@ -59,7 +59,7 @@ export async function PUT(req: Request) {
 
     const decrypted = await decryptMiddleware(payload);
 
-    return await currentAccountController.update(decrypted);
+    return await accountController.update(decrypted);
   } catch (error) {
     if (error instanceof HttpException) {
       return Response.json(

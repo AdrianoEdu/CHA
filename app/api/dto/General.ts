@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { GetCurrentAccountDto } from "./CurrentAccount/CurrentAccount";
+import { GetAccountDto } from "./Account/Account";
 import { GetFinancialCategoryDto } from "./FinancialCategory/FinancialCategory";
 
 export type GetFinancialEntryDto = {
@@ -13,6 +13,6 @@ export type GetFinancialEntryDto = {
   createdAt: Date;
   filePath?: string;
   description: string;
-  currentAccount: GetCurrentAccountDto;
+  account: GetAccountDto;
   financialCategory: GetFinancialCategoryDto;
 };

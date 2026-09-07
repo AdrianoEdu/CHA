@@ -17,11 +17,10 @@ import {
   UpdateBankStatementDto,
 } from "@/app/web/dto/bank-statemenrt-dto";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
-import { GetCurrentAccountDto } from "@/app/web/dto/current-accont.dto";
+import { GetAccountDto } from "@/app/web/dto/account.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankStatementService } from "@/app/web/services/bankStatementService/bankStatementService";
-import { currentAccountService } from "@/app/web/services/currentAccountService/currentAcountService";
-import { errorToJSON } from "next/dist/server/render";
+import { accountService } from "@/app/web/services/accountService/acountService";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -59,8 +58,8 @@ function FloatingButton({ onClick }: { onClick: () => void }) {
 export default function StatementPage() {
   const params = useParams();
   const [search, setSearch] = useState("");
+  const [account, setAccount] = useState<GetAccountDto>();
   const [list, setList] = useState<GetBankStatementDto[]>([]);
-  const [currentAccount, setCurrentAccount] = useState<GetCurrentAccountDto>();
 
   const { openModal, closeModal } = useModal();
 
@@ -95,14 +94,14 @@ export default function StatementPage() {
   const handleGetBankAccount = async (): Promise<void> => {
     const id = params.id as string;
 
-    const { currentAccount } = await currentAccountService.findAll({
+    const { account } = await accountService.findAll({
       where: { id },
       include: { bank: true },
     });
 
-    const currentAccountItem = currentAccount[0];
+    const accountItem = account[0];
 
-    setCurrentAccount(currentAccountItem);
+    setAccount(accountItem);
   };
 
   useEffect(() => {
@@ -133,12 +132,12 @@ export default function StatementPage() {
   const handleRegisterBankStatemen = async (
     data: CreateBankStatementDto,
   ): Promise<void> => {
-    if (!currentAccount) return;
+    if (!account) return;
 
     try {
       await bankStatementService.create({
         ...data,
-        currentAccountId: currentAccount?.id,
+        accountId: account?.id,
       });
       toast.success("Extrato registrado com successo!");
       closeModal();
@@ -188,13 +187,13 @@ export default function StatementPage() {
             headerTitle="Extrato bancário"
             primaryData={{
               title: "Banco",
-              description: currentAccount?.bank.name ?? "",
+              description: account?.bank.name ?? "",
             }}
             secondData={{
               title: "Conta",
-              description: currentAccount?.accountNumber ?? "",
+              description: account?.accountNumber ?? "",
             }}
-            balanceData={currentAccount?.balance ?? 0}
+            balanceData={account?.balance ?? 0}
           />
         </div>
 
@@ -203,7 +202,7 @@ export default function StatementPage() {
         <FinancialEntryList
           data={list}
           onSelect={() => alert("xpto")}
-          balanceAccount={currentAccount?.balance ?? 0}
+          balanceAccount={account?.balance ?? 0}
         />
       </div>
 

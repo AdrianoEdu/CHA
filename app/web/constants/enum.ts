@@ -43,7 +43,7 @@ export enum TransactionStatus {
   FINALIZED = "FINALIZED",
 }
 
-export enum CurrentAccountType {
+export enum AccountType {
   BANK = "BANK",
   CASHBOOK = "CASHBOOK",
 }

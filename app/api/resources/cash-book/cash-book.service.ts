@@ -47,7 +47,7 @@ class CashBookService {
             filePath: key ?? "",
           },
           include: {
-            currentAccount: true,
+            account: { select: { balance: true } },
             financialCategory: true,
           },
         });
@@ -57,15 +57,15 @@ class CashBookService {
           FinancialFlowType.OUT;
 
         const currentValue = isOut
-          ? Number(cashBook.currentAccount.balance) - Number(cashBook.value)
-          : Number(cashBook.currentAccount.balance) + Number(cashBook.value);
+          ? Number(cashBook.account.balance) - Number(cashBook.value)
+          : Number(cashBook.account.balance) + Number(cashBook.value);
 
-        await tx.currentAccount.update({
+        await tx.account.update({
           data: {
             balance: currentValue,
           },
           where: {
-            id: cashBook.currentAccountId,
+            id: cashBook.accountId,
           },
         });
 
@@ -130,7 +130,7 @@ class CashBookService {
             }),
           },
           include: {
-            currentAccount: true,
+            account: true,
             financialCategory: true,
           },
         });
@@ -185,7 +185,7 @@ class CashBookService {
 
     const result = await this.databaseService.cashBook.findMany({
       ...query,
-      include: { currentAccount: true, financialCategory: true },
+      include: { account: true, financialCategory: true },
     });
 
     return mapFinancialEntry(result);

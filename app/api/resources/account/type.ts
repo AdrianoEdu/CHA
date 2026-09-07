@@ -5,13 +5,13 @@
 
 import { Prisma } from "@/app/generated/prisma";
 
-export type CurrentAccountWithRelations = Prisma.CurrentAccountGetPayload<{
+export type AccountWithRelations = Prisma.AccountGetPayload<{
   select: {
     id: true;
     bank: true;
     balance: true;
     createdAt: true;
+    accountType: true;
     accountNumber: true;
-    currentAccountType: true;
   };
 }>;

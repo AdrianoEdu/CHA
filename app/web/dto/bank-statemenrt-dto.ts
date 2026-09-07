@@ -3,16 +3,16 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { GetCurrentAccountDto } from "./current-accont.dto";
+import { GetAccountDto } from "./account.dto";
 import { GetFinancialCategoryDto } from "./financial.dto";
 import { PaginationDto } from "./pagination.dto";
 
 export type CreateBankStatementDto = {
   value: number;
   title: string;
+  accountId: string;
   file?: File | null;
   description: string;
-  currentAccountId: string;
   financialCategoryId: string;
 };
 
@@ -27,7 +27,7 @@ export type GetBankStatementDto = {
   title: string;
   createdAt: Date;
   description: string;
-  currentAccount: GetCurrentAccountDto;
+  account: GetAccountDto;
   financialCategory: GetFinancialCategoryDto;
 };
 

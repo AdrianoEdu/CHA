@@ -3,8 +3,6 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { GetCurrentAccountDto } from "../CurrentAccount/CurrentAccount";
-import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
 import { GetFinancialEntryDto } from "../General";
 
 export type CreateBankStatementDto = {
@@ -13,7 +11,7 @@ export type CreateBankStatementDto = {
   value: number;
   createdAt: Date;
   description: string;
-  currentAccountId: string;
+  accountId: string;
   financialCategoryId: string;
 };
 

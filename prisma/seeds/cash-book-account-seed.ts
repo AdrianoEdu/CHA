@@ -3,27 +3,25 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { CreateCurrentAccountDto } from "@/app/api/dto/CurrentAccount/CurrentAccount";
-import { CurrentAccountType } from "@/app/generated/prisma";
+import { CreateAccountDto } from "@/app/api/dto/Account/Account";
+import { AccountType } from "@/app/generated/prisma";
 import { PrismaClient } from "@prisma/client";
 
-const createCashBookAccount: CreateCurrentAccountDto = {
-  bankId: "",
+const createCashBookAccount: CreateAccountDto = {
   balance: 0,
   accountNumber: "",
   createdAt: new Date(),
 };
 
 export async function seedCashBookAccount(prisma: PrismaClient) {
-  const count = await prisma.bank.count();
+  const count = await prisma.account.count();
 
   if (count === 0) {
-    await prisma.currentAccount.create({
+    await prisma.account.create({
       data: {
         ...createCashBookAccount,
-        currentAccountType: CurrentAccountType.CASHBOOK,
+        accountType: AccountType.CASHBOOK,
       },
-      skipDuplicates: true,
     });
 
     console.log("📚  Livro caixa registrado");

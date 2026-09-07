@@ -10,7 +10,7 @@ export type CreateCashBookDto = {
   value: number;
   title: string;
   description: string;
-  currentAccountId: string;
+  accountId: string;
   financialCategoryId: string;
 };
 
