@@ -17,7 +17,6 @@ datasource db {
 
 enum ReceivedCheckStatus {
   RECEIVED    
-  IN_USE      
   FINALIZED   
   CANCELLED
 }
@@ -207,39 +206,24 @@ model CashBook {
 
 model ReceivedCheck {
   id            String @id @default(uuid())
+  checkNumber   Int
+  amount        Float
+  agency        String
+  goodForAt     DateTime?
+  notes         String?
+  paidAt        DateTime?
+  status        ReceivedCheckStatus @default(RECEIVED)
+
   customerId    String
   customer      Customer @relation(fields: [customerId], references: [id])
+
   bankId        String
   bank          Bank @relation(fields: [bankId], references: [id])
-  agency        String
-  checkNumber   String
-  totalAmount   Decimal @db.Decimal(15,2)
-  currentAmount Decimal @db.Decimal(15,2)
-  goodForAt     DateTime?
-  status        ReceivedCheckStatus @default(RECEIVED)
-  usages        CheckUsage[]
-  
-  createdAt     DateTime @default(now())
+
   updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now())
 
   @@map("received_checks")
-}
-
-model CheckUsage {
-  id              String @id @default(uuid())
-  receivedCheckId String
-  receivedCheck   ReceivedCheck @relation(fields: [receivedCheckId], references: [id])
-  usageType       CheckUsageType
-  usedAt          DateTime
-  amount          Decimal @db.Decimal(15,2)
-  notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  transactionId  String
-  transaction    Transaction @relation(fields: [transactionId], references: [id])
-
-  @@map("check_usages")
 }
 
 model FinancialCategory {
@@ -269,8 +253,6 @@ model Transaction {
   settledAt      DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  checkUsage CheckUsage[]
 
   @@map("transactions")
 }

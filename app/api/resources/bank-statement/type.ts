@@ -10,10 +10,10 @@ export type BankStatemenrtWithRelations = Prisma.BankStatementGetPayload<{
     id: true;
     value: true;
     title: true;
+    account: true;
     filePath: true;
     createdAt: true;
     description: true;
-    currentAccount: true;
     financialCategory: true;
   };
 }>;

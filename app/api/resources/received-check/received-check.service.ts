@@ -2,18 +2,8 @@
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
-// Copyright (c) 2026-03-12
-// Contabilidade H. Alvarenga LTDA
-// Developed by Adriano Trentin Jr.
-// All rights reserved.
 
-import {
-  Bank,
-  Customer,
-  Prisma,
-  ReceivedCheck,
-  ReceivedCheckStatus,
-} from "@/app/generated/prisma";
+import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
@@ -25,7 +15,6 @@ import {
   UpdateReceivedCheckDTO,
 } from "../../dto/ReceivedCheck/ReceivedCheck";
 import { receivedCheckSelect, ReceivedCheckWithRelations } from "./types";
-import { NotFoundException } from "../../error/NotFoundException";
 
 class ReceivedCheckService {
   private databaseService = databaseService;
@@ -33,34 +22,31 @@ class ReceivedCheckService {
   async create(data: CreateReceivedCheckDTO): Promise<void> {
     await databaseService.receivedCheck.create({
       data: {
-        bankId: data.bankId,
         agency: data.agency,
+        bankId: data.bankId,
+        amount: data.amount,
         goodForAt: data.goodForAt,
         customerId: data.customerId,
         checkNumber: data.checkNumber,
-        totalAmount: new Prisma.Decimal(data.totalAmount ?? 0),
-        currentAmount: new Prisma.Decimal(data.currentAmount ?? 0),
       },
     });
   }
 
   async update(data: UpdateReceivedCheckDTO): Promise<void> {
-    const { bankId, customerId, status, ...receivedUpdated } = data;
+    const result = await this.databaseService.receivedCheck.findFirst({
+      where: { id: data.id },
+    });
+
+    if (result?.status === ReceivedCheckStatus.FINALIZED) {
+      new HttpException(
+        "Não é possível atualizar um cheque que ja foi finalizado",
+        409,
+      );
+    }
 
     await this.databaseService.receivedCheck.update({
       where: { id: data.id },
-      data: {
-        ...receivedUpdated,
-        ...(status !== undefined && {
-          status: this.parseStatus(status),
-        }),
-        ...(bankId && {
-          bank: { connect: { id: bankId } },
-        }),
-        ...(customerId && {
-          customer: { connect: { id: customerId } },
-        }),
-      },
+      data: { ...data },
     });
   }
 
@@ -121,19 +107,16 @@ class ReceivedCheckService {
   async remove({ id }: RemoveReceivedCheckDto) {
     const check = await this.databaseService.receivedCheck.findUnique({
       where: { id },
-      include: {
-        usages: true,
-      },
     });
 
     if (!check) {
       throw new HttpException("Cheque não encontrado.", 404);
     }
 
-    if (check.usages.length > 0) {
+    if (check.status === ReceivedCheckStatus.FINALIZED) {
       throw new HttpException(
-        "Este cheque possui registros de uso e não pode ser removido.",
-        400,
+        "Não é possível remover um cheque utilizado.",
+        409,
       );
     }
 
@@ -160,14 +143,12 @@ class ReceivedCheckService {
 
   private mapperCheckUsage(item: ReceivedCheckWithRelations): ReceivedCheckDTO {
     return {
-      id: item.id,
       bank: {
         id: item.bank?.id,
         name: item.bank?.name ?? "",
         createdAt: item.bank?.createdAt,
-        agencies: item.bank?.agencies ?? [],
+        agencies: item.bank.agencies,
       },
-      agency: item.agency,
       customer: {
         id: item.customer?.id ?? "",
         name: item.customer?.name ?? "",
@@ -176,12 +157,16 @@ class ReceivedCheckService {
         numberId: item.customer?.numberId,
         createdAt: item.customer?.createdAt ?? new Date(),
       },
-      createdAt: item.createdAt,
-      checkNumber: item.checkNumber,
-      totalAmount: Number(item.totalAmount),
-      goodForAt: item.goodForAt ?? undefined,
-      currentAmount: Number(item.currentAmount),
+      id: item.id,
+      agency: item.agency,
+      notes: item.notes,
+      paidAt: item.paidAt,
       status: item.status,
+      updatedAt: item.updatedAt,
+      createdAt: item.createdAt,
+      goodForAt: item.goodForAt,
+      amount: Number(item.amount),
+      checkNumber: item.checkNumber,
     };
   }
 }

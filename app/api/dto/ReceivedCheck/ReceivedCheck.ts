@@ -9,13 +9,15 @@ import { GetCustomerDto } from "../Customer/Customer";
 
 export type ReceivedCheckDTO = {
   id: string;
-  bank: GetBankDto;
-  agency: string;
+  amount: number;
+  updatedAt: Date;
   createdAt: Date;
-  goodForAt?: Date;
-  checkNumber: string;
-  totalAmount: number;
-  currentAmount: number;
+  agency: string;
+  bank: GetBankDto;
+  checkNumber: number;
+  paidAt?: Date | null;
+  notes?: string | null;
+  goodForAt?: Date | null;
   customer: GetCustomerDto;
   status: ReceivedCheckStatus;
 };
@@ -23,23 +25,23 @@ export type ReceivedCheckDTO = {
 export type CreateReceivedCheckDTO = {
   bankId: string;
   agency: string;
-  customerId: string;
+  amount: number;
+  notes?: string;
   goodForAt?: Date;
-  checkNumber: string;
-  totalAmount: number;
-  currentAmount: number;
+  customerId: string;
+  checkNumber: number;
 };
 
 export type UpdateReceivedCheckDTO = {
   id: string;
+  paidAt?: Date;
+  amount: number;
+  notes?: string;
   bankId?: string;
-  agency?: string;
-  status?: string;
-  goodForAt?: string;
+  goodForAt?: Date;
   customerId?: string;
-  checkNumber?: string;
-  totalAmount?: number;
-  currentAmount?: number;
+  checkNumber?: number;
+  status?: ReceivedCheckStatus;
 };
 
 export type RemoveReceivedCheckDto = {

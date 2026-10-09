@@ -1,3 +1,8 @@
+// Copyright (c) 2026-10-09
+// Contabilidade H. Alvarenga LTDA
+// Developed by Adriano Trentin Jr.
+// All rights reserved.
+
 "use client";
 
 import Link from "next/link";
@@ -171,7 +176,7 @@ export default function SideBar() {
               </Link>
 
               <Link
-                href="/web/view/home/move/check"
+                href="/web/view/home/move/received-check"
                 className="px-8 py-3 hover:bg-gray-700 transition"
               >
                 Cheques pré-datados clientes

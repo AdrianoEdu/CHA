@@ -4,10 +4,6 @@
 // All rights reserved.
 import React, { ReactNode } from "react";
 
-export default function CurrentAccountLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function AccountLayout({ children }: { children: ReactNode }) {
   return <div className="flex flex-col flex-1 ">{children}</div>;
 }

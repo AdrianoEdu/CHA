@@ -61,7 +61,9 @@ export class ReceivedCheckController {
       const { searchParams } = new URL(req.url);
       const checkNumber = searchParams.get("checkNumber") ?? "";
 
-      return receivedCheckService.findByFilters({ checkNumber });
+      return receivedCheckService.findByFilters({
+        checkNumber: Number(checkNumber),
+      });
     } catch (error: any) {
       console.error("Erro ao buscar cheque recebido:", error);
       return Response.json({ error: error.message }, { status: 500 });

@@ -5,27 +5,22 @@
 
 "use client";
 
-import { JSX, useEffect, useState } from "react";
+import { ChangeEvent, JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import {
+  CreateReceivedCheckDTO,
   UpdateReceivedCheckDTO,
-  UpsertReceivedCheckDto,
 } from "@/app/web/dto/receive-check.dto";
 import { bankService } from "@/app/web/services/bankService/bankService";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import ComboBox from "../../combobox/combobox";
-import { ReceivedCheckStatus } from "@/app/web/constants/enum";
-import {
-  getListStatusReceiveCheck,
-  sortStringNumbers,
-} from "@/app/web/utils/conversionList";
 
 interface ReceivedCheckModalProps {
-  isEdit?: boolean;
+  data?: UpdateReceivedCheckDTO;
   onClose: () => void;
-  editData?: UpdateReceivedCheckDTO;
-  onSubmit: (data: UpsertReceivedCheckDto, isEdit?: boolean) => void;
+  onEdit: (data: UpdateReceivedCheckDTO) => void;
+  onRegister: (data: CreateReceivedCheckDTO) => void;
 }
 
 type SelectOption = { id: string; name: string; list?: string[] };
@@ -43,291 +38,242 @@ function parseMoneyToNumber(value: string): number {
   );
 }
 
+let loading = true;
+
 export default function UpsertReceivedCheckModal({
-  editData,
+  data,
+  onEdit,
   onClose,
-  onSubmit,
-  isEdit = false,
+  onRegister,
 }: ReceivedCheckModalProps): JSX.Element {
-  const [data, setData] = useState<UpsertReceivedCheckDto>({
+  const isEdit = !data;
+
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const [selectBank, setSelectedBank] = useState<SelectOption | null>(null);
+  const [selectAgency, setSelectedAgency] = useState<SelectOption | null>(null);
+  const [selectCustomer, setSelectedCustomer] = useState<SelectOption | null>(
+    null,
+  );
+
+  const [bankOptions, setBankOptions] = useState<SelectOption[]>([]);
+  const [agencyOptions, setAgencyOptions] = useState<SelectOption[]>([]);
+  const [customerOptions, setCustomerOptions] = useState<SelectOption[]>([]);
+  const [receivedCheck, setReveivedCheck] = useState<UpdateReceivedCheckDTO>({
     id: "",
-    bankId: "",
+    notes: "",
+    amount: 0,
     agency: "",
+    bankId: "",
+    checkNumber: 0,
     customerId: "",
-    bank: undefined,
-    customer: undefined,
-    totalAmount: 0,
-    checkNumber: "0",
-    currentAmount: 0,
+    paidAt: new Date(),
     goodForAt: new Date(),
   });
 
-  const [date, setDate] = useState("");
-  const [listBank, setListBank] = useState<SelectOption[]>([]);
-  const [statusList, setStatusList] = useState<SelectOption[]>([]);
-  const [customerList, setCustomerList] = useState<SelectOption[]>([]);
-
-  const [bankOption, setBankOption] = useState<SelectOption | null>(null);
-  const [customerOption, setCustomerOption] = useState<SelectOption | null>(
-    null,
-  );
-  const [agencieOption, setAgencieOption] = useState<SelectOption | null>(null);
-  const [statusOption, setStatusOption] = useState<SelectOption | null>(null);
-
   useEffect(() => {
-    handleFetchAllData();
+    handleGetAllBanks();
+    handleGetAllCustomers();
+
+    if (data) setReveivedCheck(data);
+
+    loading = false;
+
+    return () => {
+      loading = true;
+    };
   }, []);
 
-  const handleFetchAllData = async (): Promise<void> => {
-    try {
-      const [banks, customers] = await Promise.all([
-        bankService
-          .findAll({ all: true, orderBy: { createdAt: "desc" } })
-          .then(({ banks }) =>
-            banks.map((bank) => ({
-              id: String(bank.id),
-              name: bank.name,
-              list: sortStringNumbers(bank.agencies),
-            })),
-          ),
-        customerService.findAll({ all: true }).then((list) =>
-          Array.isArray(list)
-            ? list.map((c) => ({
-                id: String(c.id),
-                name: c.name,
-              }))
-            : [],
-        ),
-      ]);
-
-      setListBank(banks);
-      setCustomerList(customers);
-    } catch (err) {
-      console.error("Erro ao buscar dados:", err);
-    }
+  const handleSetReceivedCheck = (
+    data: Partial<UpdateReceivedCheckDTO>,
+  ): void => {
+    setReveivedCheck((prev) => ({ ...prev, ...data }));
   };
 
-  useEffect(() => {
-    if (!editData || listBank.length === 0 || customerList.length === 0) return;
+  const handleSetCheckNumber = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  ): void => {
+    const checkNumber = Number(e.target.value);
 
-    const statusList = getListStatusReceiveCheck();
-    setStatusList(statusList);
+    handleSetReceivedCheck({ checkNumber });
+  };
 
-    const currentStatus = statusList.find(
-      (status) => String(status.id) === String(editData.status),
-    );
+  const handlerSetGoodForAt = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  ): void => {
+    const goodForAt = new Date(e.target.value);
 
-    setStatusOption(currentStatus ?? null);
+    handleSetReceivedCheck({ goodForAt });
+  };
 
-    const bank = listBank.find(
-      (b) => String(b.id) === String(editData.bank?.id),
-    );
+  const handlerSetAmount = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  ): void => {
+    const amount = Number(parseMoneyToNumber(e.target.value));
 
-    const customer = customerList.find(
-      (c) => String(c.id) === String(editData.customer?.id),
-    );
+    handleSetReceivedCheck({ amount });
+  };
 
-    setData((prev) => ({
-      ...prev,
-      ...editData,
-    }));
+  const handlerSetNotes = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  ): void => {
+    handleSetReceivedCheck({ notes: e.target.value });
+  };
 
-    // ✅ CORREÇÃO AQUI
-    setBankOption(
-      bank
-        ? {
-            id: String(bank.id),
-            name: bank.name,
-            list: bank.list,
-          }
-        : null,
-    );
+  const handleSetBankWithAgencies = (item: SelectOption | null): void => {
+    setSelectedBank(item);
 
-    if (bank && editData.agency) {
-      const agency = bank.list?.find(
-        (a) => String(a) === String(editData.agency),
+    if (item?.list) setSelectedAgency(null);
+
+    const agenciesOptions = item?.list?.map((agency) => {
+      return { id: agency, name: agency };
+    });
+
+    setAgencyOptions(agenciesOptions!);
+  };
+
+  const handleGetAllCustomers = async (): Promise<void> => {
+    const { customers } = await customerService.findAll();
+
+    const optionsCustomers = customers.map(({ id, name }) => {
+      return { id, name };
+    });
+
+    setCustomerOptions(optionsCustomers);
+
+    if (data?.customerId) {
+      const [firstItem] = optionsCustomers.filter(
+        ({ id }) => id === data.customerId,
       );
 
-      setAgencieOption(
-        agency
-          ? {
-              id: agency,
-              name: agency,
-            }
-          : null,
-      );
+      setSelectedCustomer(firstItem);
+    }
+  };
+
+  const handleGetAllBanks = async (): Promise<void> => {
+    const { banks } = await bankService.findAll();
+
+    const optionsBanks = banks.map(({ id, name, agencies }) => {
+      return { id, name, list: agencies };
+    });
+
+    setBankOptions(optionsBanks);
+
+    if (data?.bankId) {
+      const [firstItem] = optionsBanks.filter(({ id }) => id === data.bankId);
+
+      setSelectedBank({
+        id: firstItem.id,
+        name: firstItem.name,
+        list: firstItem.list,
+      });
+    }
+  };
+
+  const handleUpsertReceivedCheck = (): void => {
+    const { id, ...data } = receivedCheck;
+
+    if (isEdit) {
+      onEdit({ id, ...data });
+      return;
     }
 
-    // ✅ CORREÇÃO AQUI
-    setCustomerOption(
-      customer
-        ? {
-            id: String(customer.id),
-            name: customer.name,
-          }
-        : null,
+    onRegister({
+      agency: selectAgency?.id,
+      notes: receivedCheck.notes,
+      bankId: selectBank?.id ?? "",
+      amount: receivedCheck.amount,
+      goodForAt: receivedCheck.goodForAt,
+      customerId: selectCustomer?.id ?? "",
+      checkNumber: receivedCheck.checkNumber ?? 0,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col flex-1 justify-center items-center">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p className="text-gray-700 font-medium">Carregando...</p>
+      </div>
     );
-
-    if (editData.goodForAt) {
-      const formatted = new Date(editData.goodForAt)
-        .toISOString()
-        .split("T")[0];
-
-      setDate(formatted);
-    }
-  }, [editData, listBank, customerList]);
-
-  const handleSelectBankOption = (option: SelectOption | null) => {
-    if (!option) return;
-
-    setBankOption(option);
-
-    setData((prev) => ({
-      ...prev,
-      bankId: option.id,
-      agency: "",
-    }));
-
-    setAgencieOption(null);
-  };
-
-  const handleSelectStatusOption = (option: SelectOption | null): void => {
-    setStatusOption(option);
-
-    setData((prev) => ({
-      ...prev,
-      status: option?.id as ReceivedCheckStatus,
-    }));
-  };
-
-  const handleSelectCustomerOption = (option: SelectOption | null): void => {
-    setCustomerOption(option);
-
-    setData((prev) => ({
-      ...prev,
-      customerId: option?.id ?? "",
-    }));
-  };
-
-  const handleSelectAgencieOption = (option: SelectOption | null) => {
-    setAgencieOption(option);
-
-    setData((prev) => ({
-      ...prev,
-      agency: option?.name ?? "",
-    }));
-  };
-
-  const handleSubmit = (): void => {
-    isEdit
-      ? onSubmit(
-          {
-            ...data,
-            id: editData?.id ?? "",
-            bankId: editData?.bank?.id ?? "",
-            customerId: editData?.customer?.id ?? "",
-          },
-          isEdit,
-        )
-      : onSubmit({
-          ...data,
-          bankId: bankOption?.id ?? "",
-          customerId: customerOption?.id ?? "",
-        });
-  };
+  }
 
   return (
-    <div className="flex flex-col p-6 space-y-2 gap-4">
+    <div
+      className={`flex flex-col p-6 space-y-2 gap-4 ${showCalendar ? "min-h-175" : ""}`}
+    >
       <h2 className="text-lg font-semibold">
-        {isEdit
-          ? "Editar Recebimento de cheque"
-          : "Registrar recebimento de cheque"}
+        {isEdit ? "Atualizar cheque recebido" : "Registrar cheque recebido"}
       </h2>
 
       <ComboBox
-        valueKey="id"
-        labelKey="name"
+        valueKey={"id"}
+        labelKey={"name"}
         disabled={isEdit}
-        options={customerList}
-        selected={customerOption}
-        label="Selecione o cliente"
-        onSelectOption={handleSelectCustomerOption}
+        selected={selectCustomer}
+        options={customerOptions}
+        onSelectOption={setSelectedCustomer}
+        placeholder={"Selecione o cliente..."}
       />
 
       <ComboBox
-        valueKey="id"
-        labelKey="name"
+        valueKey={"id"}
+        labelKey={"name"}
         disabled={isEdit}
-        options={listBank}
-        selected={bankOption}
-        label="Selecione a instituição financeira"
-        onSelectOption={handleSelectBankOption}
+        options={bankOptions}
+        selected={selectBank}
+        placeholder="Selecione o banco..."
+        onSelectOption={handleSetBankWithAgencies}
       />
 
-      {(bankOption?.list ?? []).length > 0 && (
+      {selectBank?.list?.length && (
         <ComboBox
-          valueKey="id"
-          labelKey="name"
-          options={(bankOption?.list ?? []).map((a) => ({
-            id: a,
-            name: a,
-          }))}
-          selected={agencieOption}
-          label="Selecione número da agência bancaria"
-          onSelectOption={handleSelectAgencieOption}
+          valueKey={"id"}
+          labelKey={"name"}
+          disabled={isEdit}
+          selected={selectAgency}
+          options={agencyOptions}
+          onSelectOption={setSelectedAgency}
+          placeholder="Selecione a agência..."
         />
       )}
 
       <Input
-        value={data.checkNumber}
+        type="number"
+        className="flex-1"
         inputType={InputType.Number}
-        name="Informe numero do cheque"
-        onChange={(e) =>
-          setData((prev) => ({
-            ...prev,
-            checkNumber: e.target.value,
-          }))
-        }
+        onChange={handleSetCheckNumber}
+        value={receivedCheck?.checkNumber}
+        name={"Insira o número do cheque"}
       />
 
       <Input
-        disabled={isEdit}
-        value={data.totalAmount}
-        inputType={InputType.Money}
-        name="Informe o valor do cheque"
-        onChange={(e) => {
-          setData((prev) => ({
-            ...prev,
-            totalAmount: parseMoneyToNumber(e.target.value),
-          }));
-        }}
-      />
-
-      <Input
+        className="flex-1"
         inputType={InputType.Date}
-        name="Data"
-        value={date}
-        onChange={(e) => {
-          const value = e.target.value;
-          setDate(value);
-
-          setData((prev) => ({
-            ...prev,
-            goodForAt: new Date(value),
-          }));
-        }}
+        showCalendar={showCalendar}
+        onChange={handlerSetGoodForAt}
+        value={receivedCheck.goodForAt}
+        name={"Selecione a data do bom para"}
+        onCalendarVisibilityChange={setShowCalendar}
       />
 
-      {isEdit && (
-        <ComboBox
-          valueKey="id"
-          labelKey="name"
-          options={statusList}
-          selected={statusOption}
-          label="Selecione o estado atual do cheque"
-          onSelectOption={handleSelectStatusOption}
-        />
-      )}
+      <Input
+        className="flex-1"
+        inputType={InputType.Money}
+        showCalendar={showCalendar}
+        onChange={handlerSetAmount}
+        value={receivedCheck.amount}
+        name={"Insira o valor do cheque"}
+        onCalendarVisibilityChange={setShowCalendar}
+      />
+
+      <Input
+        className="flex-1"
+        onChange={handlerSetNotes}
+        value={receivedCheck.notes}
+        name={"Anotação de recebimento de cheque"}
+        inputType={InputType.Annotation}
+      />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button
@@ -337,9 +283,9 @@ export default function UpsertReceivedCheckModal({
         />
 
         <Button
-          className="px-4 py-2"
-          onClick={handleSubmit}
-          text={isEdit ? "Atualizar" : "Criar"}
+          className={"px-4 py-2"}
+          onClick={handleUpsertReceivedCheck}
+          text={isEdit ? "Atualizar" : "Confirmar"}
           status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />
       </div>

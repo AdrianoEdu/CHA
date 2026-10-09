@@ -10,47 +10,44 @@ import { PaginationDto } from "./pagination.dto";
 
 export type ReceivedCheckDTO = {
   id: string;
-  agency: string;
+  amount: number;
+  paidAt?: Date;
+  notes?: string;
+  updatedAt: Date;
   createdAt: Date;
   bank: GetBankDto;
   goodForAt?: Date;
-  checkNumber: string;
-  totalAmount: number;
-  currentAmount: number;
+  checkNumber: number;
   customer: GetCustomerDto;
   status: ReceivedCheckStatus;
 };
 
 export type CreateReceivedCheckDTO = {
   bankId: string;
-  agency: string;
-  customerId: string;
+  amount: number;
+  notes?: string;
+  agency?: string;
   goodForAt?: Date;
-  checkNumber: string;
-  totalAmount: number;
-  currentAmount: number;
+  customerId: string;
+  checkNumber: number;
 };
 
 export type UpdateReceivedCheckDTO = {
   id: string;
-  bank?: GetBankDto;
-  bankId?: string;
+  paidAt?: Date;
+  amount: number;
+  notes?: string;
   agency?: string;
-  status?: string;
+  bankId?: string;
   goodForAt?: Date;
   customerId?: string;
-  checkNumber?: string;
-  totalAmount?: number;
-  currentAmount?: number;
-  customer?: GetCustomerDto;
+  checkNumber?: number;
+  status?: ReceivedCheckStatus;
 };
 
 export type RemoveReceivedCheckDto = {
   id: string;
 };
-
-export type UpsertReceivedCheckDto = CreateReceivedCheckDTO &
-  UpdateReceivedCheckDTO;
 
 export type ReceivedCheckWhere = Partial<ReceivedCheckDTO>;
 

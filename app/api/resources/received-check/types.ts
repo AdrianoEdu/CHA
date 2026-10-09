@@ -8,13 +8,15 @@ import { Prisma } from "@/app/generated/prisma";
 export type ReceivedCheckWithRelations = Prisma.ReceivedCheckGetPayload<{
   select: {
     id: true;
-    agency: true;
+    notes: true;
+    amount: true;
     status: true;
+    paidAt: true;
+    agency: true;
     createdAt: true;
     goodForAt: true;
+    updatedAt: true;
     checkNumber: true;
-    totalAmount: true;
-    currentAmount: true;
     customer: {
       select: {
         id: true;
@@ -40,13 +42,15 @@ export type ReceivedCheckWithRelations = Prisma.ReceivedCheckGetPayload<{
 
 export const receivedCheckSelect = {
   id: true,
-  agency: true,
+  notes: true,
   status: true,
+  amount: true,
+  paidAt: true,
+  agency: true,
   createdAt: true,
   goodForAt: true,
+  updatedAt: true,
   checkNumber: true,
-  totalAmount: true,
-  currentAmount: true,
   customer: {
     select: {
       id: true,

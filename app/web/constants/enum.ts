@@ -27,7 +27,6 @@ export enum FinancialFlowType {
 
 export enum ReceivedCheckStatus {
   RECEIVED = "RECEIVED",
-  IN_USE = "IN_USE",
   FINALIZED = "FINALIZED",
   CANCELLED = "CANCELLED",
 }
