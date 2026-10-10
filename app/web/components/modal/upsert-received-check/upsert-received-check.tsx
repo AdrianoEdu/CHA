@@ -46,7 +46,7 @@ export default function UpsertReceivedCheckModal({
   onClose,
   onRegister,
 }: ReceivedCheckModalProps): JSX.Element {
-  const isEdit = !data;
+  const isEdit = Boolean(data);
 
   const [showCalendar, setShowCalendar] = useState(false);
 
@@ -98,10 +98,8 @@ export default function UpsertReceivedCheckModal({
     handleSetReceivedCheck({ checkNumber });
   };
 
-  const handlerSetGoodForAt = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
-  ): void => {
-    const goodForAt = new Date(e.target.value);
+  const handlerSetGoodForAt = (date: any): void => {
+    const goodForAt = new Date(date);
 
     handleSetReceivedCheck({ goodForAt });
   };
@@ -153,20 +151,40 @@ export default function UpsertReceivedCheckModal({
   const handleGetAllBanks = async (): Promise<void> => {
     const { banks } = await bankService.findAll();
 
-    const optionsBanks = banks.map(({ id, name, agencies }) => {
-      return { id, name, list: agencies };
-    });
+    const optionsBanks = banks.map(({ id, name, agencies }) => ({
+      id,
+      name,
+      list: agencies,
+    }));
 
     setBankOptions(optionsBanks);
 
     if (data?.bankId) {
-      const [firstItem] = optionsBanks.filter(({ id }) => id === data.bankId);
+      const selectedBank = optionsBanks.find(({ id }) => id === data.bankId);
 
-      setSelectedBank({
-        id: firstItem.id,
-        name: firstItem.name,
-        list: firstItem.list,
-      });
+      if (selectedBank) {
+        setSelectedBank(selectedBank);
+
+        const optionsAgencies = (selectedBank.list ?? []).map((agency) => ({
+          id: agency,
+          name: agency,
+        }));
+
+        setAgencyOptions(optionsAgencies);
+
+        if (data.agency) {
+          const selectedAgency = optionsAgencies.find(
+            ({ id }) => id === data.agency,
+          );
+
+          setSelectedAgency(
+            selectedAgency ?? {
+              id: data.agency,
+              name: data.agency,
+            },
+          );
+        }
+      }
     }
   };
 
@@ -251,8 +269,8 @@ export default function UpsertReceivedCheckModal({
         className="flex-1"
         inputType={InputType.Date}
         showCalendar={showCalendar}
-        onChange={handlerSetGoodForAt}
         value={receivedCheck.goodForAt}
+        onValueChange={handlerSetGoodForAt}
         name={"Selecione a data do bom para"}
         onCalendarVisibilityChange={setShowCalendar}
       />
@@ -260,11 +278,9 @@ export default function UpsertReceivedCheckModal({
       <Input
         className="flex-1"
         inputType={InputType.Money}
-        showCalendar={showCalendar}
         onChange={handlerSetAmount}
         value={receivedCheck.amount}
         name={"Insira o valor do cheque"}
-        onCalendarVisibilityChange={setShowCalendar}
       />
 
       <Input

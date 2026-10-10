@@ -98,8 +98,6 @@ export default function CashBookPage() {
       where: { id, accountType: AccountType.CASHBOOK },
     });
 
-    alert(JSON.stringify(account));
-
     const accountItem = account[0];
 
     setAccount(accountItem);

@@ -65,12 +65,10 @@ export default function SystemConfigPage() {
     const hour = validateRunHour(config.runAtHour);
 
     if (!interval.valid) {
-      alert(interval.message);
       return;
     }
 
     if (!hour.valid) {
-      alert(hour.message);
       return;
     }
 

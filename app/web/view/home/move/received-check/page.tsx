@@ -36,7 +36,13 @@ const getColumns = ({
   { label: "Criado em", accessor: "createdAt" },
   { label: "Nome do cliente", accessor: "customer.name" },
   { label: "Banco", accessor: "bank.name" },
-  { label: "Agência", accessor: "agency" },
+  {
+    label: "Agência",
+    accessor: "agency",
+    render(row) {
+      return row.agency;
+    },
+  },
   { label: "Cheque", accessor: "checkNumber" },
   { label: "Bom para", accessor: "goodForAt" },
   {
@@ -116,7 +122,18 @@ export default function ReceiveCheck() {
   const handleOpenModal = (item?: ReceivedCheckDTO): void => {
     openModal(
       <UpsertReceivedCheckModal
-        data={item}
+        data={{
+          id: item?.id ?? "",
+          notes: item?.notes,
+          agency: item?.agency,
+          paidAt: item?.paidAt,
+          status: item?.status,
+          bankId: item?.bank.id,
+          amount: item?.amount ?? 0,
+          goodForAt: item?.goodForAt,
+          customerId: item?.customer.id,
+          checkNumber: item?.checkNumber,
+        }}
         onClose={closeModal}
         onEdit={handleOnUpdate}
         onRegister={handleOnRegister}
@@ -129,6 +146,7 @@ export default function ReceiveCheck() {
   ): Promise<void> => {
     try {
       await receiveCheckService.create(data);
+      await resetPagination();
       toast.success("Cheque registrado com sucesso");
     } catch (err) {
       toast.error("Error ao registar o cheque");
@@ -140,10 +158,17 @@ export default function ReceiveCheck() {
   ): Promise<void> => {
     try {
       await receiveCheckService.update(data);
+      await resetPagination();
       toast.success("Cheque atualizado com sucesso");
     } catch (err) {
       toast.error("Error ao atualizar o cheque");
     }
+  };
+
+  const resetPagination = async (): Promise<void> => {
+    closeModal();
+    setCurrentPage(1);
+    await handleGetAllReceivedChecks(1);
   };
 
   const handleFilterReceivedCheck = async (currentPage: number) => {
@@ -181,7 +206,22 @@ export default function ReceiveCheck() {
     }, 500);
   };
 
-  const handleGetAllReceivedChecks = (currentPage: number) => void {};
+  const handleGetAllReceivedChecks = async (
+    currentPage: number,
+  ): Promise<void> => {
+    const currentSkip = (currentPage - 1) * takeReceivedCheck;
+
+    const { count, receivedChecks } = await receiveCheckService.findAll({
+      all: true,
+      skip: currentSkip,
+      take: takeReceivedCheck,
+      orderBy: { name: "asc" },
+    });
+
+    countReceivedCheck = count;
+    setReceivedCheckList(receivedChecks);
+    oldReceiveChecks = receivedChecks;
+  };
 
   return (
     <div>

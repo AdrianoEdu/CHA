@@ -13,6 +13,7 @@ export type ReceivedCheckDTO = {
   amount: number;
   paidAt?: Date;
   notes?: string;
+  agency?: string;
   updatedAt: Date;
   createdAt: Date;
   bank: GetBankDto;
