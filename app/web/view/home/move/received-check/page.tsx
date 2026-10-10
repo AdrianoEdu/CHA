@@ -14,6 +14,7 @@ import {
   ReceivedCheckDTO,
   UpdateReceivedCheckDTO,
 } from "@/app/web/dto/receive-check.dto";
+import { DeleteIcon } from "@/app/web/icons";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { receiveCheckService } from "@/app/web/services/receiveCheckService/receiveCheckService";
@@ -27,11 +28,13 @@ let countReceivedCheck = 0;
 const takeReceivedCheck = 20;
 
 type GetColumnsProps = {
+  handleRemove: (id: string) => void;
   handleEdit: (row: ReceivedCheckDTO) => void;
 };
 
 const getColumns = ({
   handleEdit,
+  handleRemove,
 }: GetColumnsProps): TableColumn<ReceivedCheckDTO>[] => [
   { label: "Criado em", accessor: "createdAt" },
   { label: "Nome do cliente", accessor: "customer.name" },
@@ -83,13 +86,26 @@ const getColumns = ({
     render: (row) => {
       return (
         <div className="flex gap-2 justify-center">
-          <Button
-            icon={<EditIcon />}
-            status={ButtonStatusEnum.UPDATE}
-            onClick={(e) => {
-              (e.stopPropagation(), handleEdit(row));
-            }}
-          />
+          {row.status !== ReceivedCheckStatus.CANCELLED && (
+            <Button
+              icon={<EditIcon />}
+              status={ButtonStatusEnum.UPDATE}
+              onClick={(e) => {
+                (e.stopPropagation(), handleEdit(row));
+              }}
+            />
+          )}
+          {row.status !== ReceivedCheckStatus.CANCELLED &&
+            row.status !== ReceivedCheckStatus.FINALIZED && (
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(row.id);
+                }}
+                icon={<DeleteIcon />}
+                status={ButtonStatusEnum.CANCEL}
+              />
+            )}{" "}
         </div>
       );
     },
@@ -165,6 +181,18 @@ export default function ReceiveCheck() {
     }
   };
 
+  const handleOnRemove = async (id: string): Promise<void> => {
+    try {
+      await receiveCheckService.remove(id);
+
+      toast.success("Cheque recebido cancelado com sucesso");
+
+      resetPagination();
+    } catch (err) {
+      toast.error("Erro ao cancelar cheque");
+    }
+  };
+
   const resetPagination = async (): Promise<void> => {
     closeModal();
     setCurrentPage(1);
@@ -235,7 +263,10 @@ export default function ReceiveCheck() {
         onActionClicked={handleOpenModal}
         countRows={currentCountReceivedChecks}
         onFilterChange={handleFilterReceivedCheckTable}
-        columns={getColumns({ handleEdit: handleOpenModal })}
+        columns={getColumns({
+          handleEdit: handleOpenModal,
+          handleRemove: handleOnRemove,
+        })}
       />
     </div>
   );

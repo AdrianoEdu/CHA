@@ -120,8 +120,9 @@ class ReceivedCheckService {
       );
     }
 
-    await this.databaseService.receivedCheck.delete({
+    await this.databaseService.receivedCheck.update({
       where: { id: check.id },
+      data: { status: ReceivedCheckStatus.CANCELLED },
     });
   }
 

@@ -33,6 +33,10 @@ class ReceiveCheckService {
       GetReceivedCheckParamsDto
     >(this.url, data);
   }
+
+  remove(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const receiveCheckService = new ReceiveCheckService();
