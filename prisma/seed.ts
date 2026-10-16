@@ -9,6 +9,8 @@ import { seedSystemConfig } from "./seeds/config-system-seeds";
 import { seedCustomers } from "./seeds/customer-seed";
 import { seedBanks } from "./seeds/bank-seed";
 import { seedCashBookAccount } from "./seeds/cash-book-account-seed";
+import { seedEmployeePosition } from "./seeds/employee-position";
+import { seedEmployee } from "./seeds/employee";
 
 const prisma = new PrismaClient();
 
@@ -20,6 +22,8 @@ async function main() {
   await seedCustomers(prisma);
   await seedBanks(prisma);
   await seedCashBookAccount(prisma);
+  await seedEmployeePosition(prisma);
+  await seedEmployee(prisma);
 
   console.log("✅ Seeds finalizadas");
 }

@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
-import { EmployeeDto } from "../../dto/Employee/Employee";
+import { EmployeeDto, UpdateEmployeeDto } from "../../dto/Employee/Employee";
 import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { employeeService } from "./employee.service";
 
@@ -60,13 +60,15 @@ export class EmployeeController {
     document,
     isActive,
     dateOfBirth,
-  }: Partial<EmployeeDto>) {
+    employeePositionId,
+  }: Partial<UpdateEmployeeDto>) {
     await this.employeeService.updateStatusUser({
       id,
       name,
       document,
       isActive,
       dateOfBirth,
+      employeePositionId,
     });
   }
 

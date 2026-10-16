@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { EmployeePositionEnum } from "../constants/enum";
 import { PaginationDto } from "./pagination.dto";
 
 export interface EmployeeDto {
@@ -13,12 +14,28 @@ export interface EmployeeDto {
   updatedAt?: Date;
   dateOfBirth: Date;
   isActive?: boolean;
+  employeePosition: EmployeePoistionDto;
+}
+
+export interface EmployeePoistionDto {
+  id: string;
+  position: EmployeePositionEnum;
 }
 
 export interface CreateEmployeeDto {
   name: string;
   document: string;
   dateOfBirth: Date;
+  employeePositionId: string;
+}
+
+export interface UpdateEmployeeDto {
+  id: string;
+  name: string;
+  document: string;
+  dateOfBirth: Date;
+  isActive?: boolean;
+  employeePositionId: string;
 }
 
 export type EmployeeWhere = Partial<EmployeeDto>;

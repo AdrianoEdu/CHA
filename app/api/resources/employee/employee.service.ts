@@ -4,23 +4,38 @@
 // All rights reserved.
 
 import {
+  CreateEmployeeDto,
   EmployeeDto,
   GetEmployeeDtoParams,
+  UpdateEmployeeDto,
 } from "@/app/api/dto/Employee/Employee";
 import { databaseService } from "../../providers/database/DatabaseService";
-import { Employee, Prisma } from "@/app/generated/prisma";
+import { Employee, EmployeePositionEnum, Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { NotFoundException } from "../../error/NotFoundException";
 
 class EmployeeService {
   private databaseService = databaseService;
 
-  async create(employee: EmployeeDto): Promise<Employee> {
-    return this.databaseService.employee.create({ data: employee });
+  async create(employee: CreateEmployeeDto): Promise<Employee> {
+    const employeePosition = await databaseService.employeePosition.findFirst({
+      where: { position: employee.employeePositionId as EmployeePositionEnum },
+    });
+
+    return this.databaseService.employee.create({
+      data: { ...employee, employeePositionId: employeePosition?.id ?? "" },
+    });
   }
 
-  async update(id: string, data: Partial<EmployeeDto>): Promise<void> {
-    await this.databaseService.employee.update({ where: { id }, data });
+  async update(id: string, data: Partial<UpdateEmployeeDto>): Promise<void> {
+    const employeePosition = await databaseService.employeePosition.findFirst({
+      where: { position: data.employeePositionId as EmployeePositionEnum },
+    });
+
+    await this.databaseService.employee.update({
+      where: { id },
+      data: { ...data, employeePositionId: employeePosition?.id },
+    });
   }
 
   async findEmployee(
@@ -54,6 +69,7 @@ class EmployeeService {
   async findManyByFilters(baseQuery: Prisma.EmployeeFindManyArgs) {
     const result = await this.databaseService.employee.findMany({
       ...baseQuery,
+      include: { ...baseQuery.include, employeePosition: true },
     });
 
     return result;
@@ -62,7 +78,7 @@ class EmployeeService {
   async findAll(baseQuery: Prisma.EmployeeFindManyArgs) {
     return await this.databaseService.employee.findMany({
       ...baseQuery,
-      where: undefined,
+      include: { ...baseQuery.include, employeePosition: true },
     });
   }
 
@@ -72,11 +88,21 @@ class EmployeeService {
     document,
     isActive,
     dateOfBirth,
-  }: Partial<EmployeeDto>) {
-    console.log(`${id} ${name} ${document} ${isActive} ${dateOfBirth}`);
+    employeePositionId,
+  }: Partial<UpdateEmployeeDto>) {
+    const employeePosition = await databaseService.employeePosition.findFirst({
+      where: { position: employeePositionId as EmployeePositionEnum },
+    });
+
     await this.databaseService.employee.update({
       where: { id },
-      data: { isActive, dateOfBirth, document, name },
+      data: {
+        isActive,
+        dateOfBirth,
+        document,
+        name,
+        employeePositionId: employeePosition?.id,
+      },
     });
   }
 

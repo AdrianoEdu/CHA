@@ -10,18 +10,87 @@ import Button, { ButtonStatusEnum } from "../../button/button";
 import Input, { InputType } from "../../input/input";
 import { Regex } from "@/app/web/constants/regex";
 import { i18n } from "@/app/web/constants/i18n";
-import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";
-import { validateEmployeeForm } from "@/app/web/utils/employee/employee";
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+} from "@/app/web/dto/employee.dto";
+import {
+  GetEmployeePosition,
+  validateEmployeeForm,
+} from "@/app/web/utils/employee/employee";
+import ComboBox from "../../combobox/combobox";
+import { EmployeePositionEnum } from "@/app/web/constants/enum";
 
 const { cancelButton, UpsertEmployee, registerButton, updateButton } =
   i18n["Pt-Br"].Modal;
 
 const { inputNamePlaceholder } = UpsertEmployee;
 
+type SelectOption = { id: string; name: string };
+
+const employeePositionList: SelectOption[] = [
+  {
+    id: EmployeePositionEnum.ADMINISTRATIVE_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.ADMINISTRATIVE_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.CLEANING_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.CLEANING_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.MOTORBOY,
+    name: GetEmployeePosition[EmployeePositionEnum.MOTORBOY],
+  },
+  {
+    id: EmployeePositionEnum.OFFICE_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.OFFICE_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT,
+    name: GetEmployeePosition[
+      EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT
+    ],
+  },
+  {
+    id: EmployeePositionEnum.PERSONNEL_DEPARTMENT_MANAGER,
+    name: GetEmployeePosition[
+      EmployeePositionEnum.PERSONNEL_DEPARTMENT_MANAGER
+    ],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N1,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N1],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N2,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N2],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N3,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N3],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N4,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N4],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N5,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N5],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N6,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N6],
+  },
+  {
+    id: EmployeePositionEnum.TAX_DEPARTMENT_MANAGER,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_DEPARTMENT_MANAGER],
+  },
+];
+
 export type UpsertEmployeeProps = {
-  data?: EmployeeDto;
+  data?: UpdateEmployeeDto;
   onClose: () => void;
-  onUpdate?: (data: EmployeeDto) => Promise<void>;
+  onUpdate?: (data: UpdateEmployeeDto) => Promise<void>;
   onRegister?: (data: CreateEmployeeDto) => Promise<void>;
 };
 
@@ -36,18 +105,19 @@ export default function UspertEmployeeModal({
   const [disable, setDisable] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const [employee, setEmployee] = useState<EmployeeDto>({
-    ...(data ?? {}),
-    dateOfBirth: data?.dateOfBirth ?? new Date(),
-    document: data?.document ?? "",
+  const [employee, setEmployee] = useState<UpdateEmployeeDto>({
+    id: data?.id ?? "",
     name: data?.name ?? "",
+    document: data?.document ?? "",
+    dateOfBirth: data?.dateOfBirth ?? new Date(),
+    employeePositionId: data?.employeePositionId ?? "",
   });
 
   const isRegister = !data;
 
   const formStatus = validateEmployeeForm({
-    employee,
     maxLength: MAX_LENGTH_CPF,
+    employee: { ...employee, employeePositionId: employee.employeePositionId },
   });
 
   useEffect(() => {
@@ -67,6 +137,7 @@ export default function UspertEmployeeModal({
           name: employee.name,
           document: employee.document,
           dateOfBirth: employee.dateOfBirth,
+          employeePositionId: employee.employeePositionId,
         });
       }
 
@@ -79,11 +150,12 @@ export default function UspertEmployeeModal({
         name: employee.name,
         document: employee.document,
         dateOfBirth: employee.dateOfBirth,
+        employeePositionId: employee.employeePositionId,
       });
     }
   };
 
-  const handleSetEmployee = (data: Partial<EmployeeDto>) => {
+  const handleSetEmployee = (data: Partial<UpdateEmployeeDto>) => {
     setEmployee((prev) => ({
       ...prev,
       ...data,
@@ -139,6 +211,21 @@ export default function UspertEmployeeModal({
               document: e.target.value,
             })
           }
+        />
+
+        <ComboBox
+          valueKey="id"
+          labelKey="name"
+          selected={{
+            id: employee.employeePositionId,
+            name: GetEmployeePosition[
+              employee.employeePositionId as EmployeePositionEnum
+            ],
+          }}
+          options={employeePositionList}
+          onSelectOption={(data) => {
+            handleSetEmployee({ employeePositionId: data?.id });
+          }}
         />
       </div>
 

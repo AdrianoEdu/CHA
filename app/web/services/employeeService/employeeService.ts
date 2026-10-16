@@ -5,9 +5,11 @@
 
 import { requestService } from "../requestService/requestService";
 import {
+  CreateEmployeeDto,
   EmployeeDto,
   EmployeeParams,
   GetEmployeeDtoParams,
+  UpdateEmployeeDto,
 } from "../../dto/employee.dto";
 
 class EmployeeService {
@@ -17,7 +19,7 @@ class EmployeeService {
     this.url = "/employee";
   }
 
-  create(data: EmployeeDto) {
+  create(data: CreateEmployeeDto) {
     return requestService.post(this.url, data);
   }
 
@@ -28,13 +30,21 @@ class EmployeeService {
     );
   }
 
-  patch({ isActive, document, name, dateOfBirth, id }: Partial<EmployeeDto>) {
-    return requestService.patch<Partial<EmployeeDto>, void>(this.url, {
+  patch({
+    id,
+    name,
+    isActive,
+    document,
+    dateOfBirth,
+    employeePositionId,
+  }: Partial<UpdateEmployeeDto>) {
+    return requestService.patch<Partial<UpdateEmployeeDto>, void>(this.url, {
       id,
       name,
       document,
       isActive,
       dateOfBirth,
+      employeePositionId,
     });
   }
 

@@ -11,7 +11,9 @@ import RemoveModal from "@/app/web/components/modal/remove-employee/remove-emplo
 import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
 import UspertEmployeeModal from "@/app/web/components/modal/upsert-employee/upsert-employee";
 import Table, { TableColumn } from "@/app/web/components/table/table";
+import { EmployeePositionEnum } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
+import { UpdateAccountDto } from "@/app/web/dto/account.dto";
 import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";
 import { DeleteIcon, EnableIcon } from "@/app/web/icons";
 import DisableIcon from "@/app/web/icons/disable-icon";
@@ -19,6 +21,7 @@ import EditIcon from "@/app/web/icons/edit-icon";
 import { useAuth } from "@/app/web/providers/AuthProvider";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
+import { GetEmployeePosition } from "@/app/web/utils/employee/employee";
 import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -66,9 +69,15 @@ export default function EmployeeScreen() {
     name,
     document,
     dateOfBirth,
+    employeePositionId,
   }: CreateEmployeeDto): Promise<void> => {
     try {
-      await employeeService.create({ name, document, dateOfBirth });
+      await employeeService.create({
+        name,
+        document,
+        dateOfBirth,
+        employeePositionId,
+      });
       toast.success(UpsertEmployee.successRegisterEmployee);
       handleFindEmployees(currentPage);
       closeModal();
@@ -77,7 +86,9 @@ export default function EmployeeScreen() {
     }
   };
 
-  const handleUpdateEmployee = async (data: EmployeeDto): Promise<void> => {
+  const handleUpdateEmployee = async (
+    data: UpdateAccountDto,
+  ): Promise<void> => {
     try {
       await employeeService.patch(data);
       handleFindEmployees(currentPage);
@@ -117,9 +128,21 @@ export default function EmployeeScreen() {
   ): void => {
     if (e) e.stopPropagation();
 
+    const currentData = data
+      ? {
+          id: data?.id ?? "",
+          name: data?.name ?? "",
+          document: data?.document ?? "",
+          dateOfBirth: data?.dateOfBirth,
+          isActive: data?.isActive ?? false,
+          employeePositionId: data?.employeePosition
+            .position as EmployeePositionEnum,
+        }
+      : undefined;
+
     openModal(
       <UspertEmployeeModal
-        data={data}
+        data={currentData}
         onClose={closeModal}
         onUpdate={handleUpdateEmployee}
         onRegister={handleRegisterEmployee}
@@ -219,6 +242,10 @@ export default function EmployeeScreen() {
       {
         label: "Ativo",
         render: (row) => (row.isActive ? "Sim" : "Não"),
+      },
+      {
+        label: "Cargo",
+        render: (row) => GetEmployeePosition[row.employeePosition.position],
       },
     ];
 

@@ -53,6 +53,22 @@ enum AccountType {
   CASHBOOK
 }
 
+enum EmployeePositionEnum {
+  TAX_DEPARTMENT_MANAGER
+  PERSONNEL_DEPARTMENT_MANAGER
+  MOTORBOY
+  TAX_ASSISTANT_N5
+  PERSONNEL_DEPARTMENT_ASSISTANT
+  TAX_ASSISTANT_N3
+  TAX_ASSISTANT_N1
+  OFFICE_ASSISTANT
+  CLEANING_ASSISTANT
+  ADMINISTRATIVE_ASSISTANT
+  TAX_ASSISTANT_N6
+  TAX_ASSISTANT_N4
+  TAX_ASSISTANT_N2
+}
+
 model User {
   id        String @id @default(uuid())
 
@@ -73,17 +89,27 @@ model User {
 }
 
 model Employee {
-  id          String    @id @default(uuid())
-  name        String
-  document    String 
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime? @updatedAt
-  dateOfBirth DateTime
-  
-  advances  EmployeeAdvance[]
+  id                 String    @id @default(uuid())
+  name               String
+  document           String 
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime? @updatedAt
+  dateOfBirth        DateTime?
+
+  employeePositionId String
+  employeePosition   EmployeePosition @relation(fields: [employeePositionId], references: [id])
+
+  advances           EmployeeAdvance[]
 
   @@map("employees")
+}
+
+model EmployeePosition {
+  id          String @id @default(uuid())
+  position    EmployeePositionEnum
+
+  employee    Employee[]
 }
 
 model EmployeeAdvance {

@@ -7,19 +7,86 @@
 
 import { BodyPage } from "@/app/web/components/bodypage/bodypage";
 import Button from "@/app/web/components/button/button";
+import ComboBox from "@/app/web/components/combobox/combobox";
 import { Footer } from "@/app/web/components/footer/footer";
 import { Header } from "@/app/web/components/header/header";
 import Input, { InputType } from "@/app/web/components/input/input";
+import { EmployeePositionEnum } from "@/app/web/constants/enum";
 import { Regex } from "@/app/web/constants/regex";
 import { CreateEmployeeDto } from "@/app/web/dto/employee.dto";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
-import { validateEmployeeForm } from "@/app/web/utils/employee/employee";
+import {
+  GetEmployeePosition,
+  validateEmployeeForm,
+} from "@/app/web/utils/employee/employee";
 import { JSX, useState } from "react";
 import { toast } from "react-toastify";
 
-const defaultEmployee = {
+type SelectOption = { id: string; name: string };
+
+const employeePositionList: SelectOption[] = [
+  {
+    id: EmployeePositionEnum.ADMINISTRATIVE_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.ADMINISTRATIVE_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.CLEANING_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.CLEANING_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.MOTORBOY,
+    name: GetEmployeePosition[EmployeePositionEnum.MOTORBOY],
+  },
+  {
+    id: EmployeePositionEnum.OFFICE_ASSISTANT,
+    name: GetEmployeePosition[EmployeePositionEnum.OFFICE_ASSISTANT],
+  },
+  {
+    id: EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT,
+    name: GetEmployeePosition[
+      EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT
+    ],
+  },
+  {
+    id: EmployeePositionEnum.PERSONNEL_DEPARTMENT_MANAGER,
+    name: GetEmployeePosition[
+      EmployeePositionEnum.PERSONNEL_DEPARTMENT_MANAGER
+    ],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N1,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N1],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N2,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N2],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N3,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N3],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N4,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N4],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N5,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N5],
+  },
+  {
+    id: EmployeePositionEnum.TAX_ASSISTANT_N6,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_ASSISTANT_N6],
+  },
+  {
+    id: EmployeePositionEnum.TAX_DEPARTMENT_MANAGER,
+    name: GetEmployeePosition[EmployeePositionEnum.TAX_DEPARTMENT_MANAGER],
+  },
+];
+
+const defaultEmployee: CreateEmployeeDto = {
   name: "",
   document: "",
+  employeePositionId: "",
   dateOfBirth: new Date(),
 };
 
@@ -97,6 +164,22 @@ export default function RegisterEmployeeScreen(): JSX.Element {
               document: e.target.value,
             })
           }
+        />
+
+        <ComboBox
+          valueKey="id"
+          labelKey="name"
+          label="Cargo:"
+          selected={{
+            id: employee.employeePositionId,
+            name: GetEmployeePosition[
+              employee.employeePositionId as EmployeePositionEnum
+            ],
+          }}
+          options={employeePositionList}
+          onSelectOption={(data) => {
+            handleSetEmployee({ employeePositionId: data?.id });
+          }}
         />
 
         <Footer>
