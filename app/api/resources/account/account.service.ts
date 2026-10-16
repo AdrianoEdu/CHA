@@ -3,7 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma } from "@/app/generated/prisma";
+import { AccountType, Prisma } from "@/app/generated/prisma";
 import {
   CreateAccountDto,
   GetAccountDto,

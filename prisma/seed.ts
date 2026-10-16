@@ -11,6 +11,7 @@ import { seedBanks } from "./seeds/bank-seed";
 import { seedCashBookAccount } from "./seeds/cash-book-account-seed";
 import { seedEmployeePosition } from "./seeds/employee-position";
 import { seedEmployee } from "./seeds/employee";
+import { seedCurrentAccount } from "./seeds/current-account";
 
 const prisma = new PrismaClient();
 
@@ -22,6 +23,7 @@ async function main() {
   await seedCustomers(prisma);
   await seedBanks(prisma);
   await seedCashBookAccount(prisma);
+  await seedCurrentAccount(prisma);
   await seedEmployeePosition(prisma);
   await seedEmployee(prisma);
 
