@@ -131,7 +131,9 @@ export default function UpsertReceivedCheckModal({
   };
 
   const handleGetAllCustomers = async (): Promise<void> => {
-    const { customers } = await customerService.findAll();
+    const { customers } = await customerService.findAll({
+      orderBy: { name: "asc" },
+    });
 
     const optionsCustomers = customers.map(({ id, name }) => {
       return { id, name };
@@ -149,7 +151,9 @@ export default function UpsertReceivedCheckModal({
   };
 
   const handleGetAllBanks = async (): Promise<void> => {
-    const { banks } = await bankService.findAll();
+    const { banks } = await bankService.findAll({
+      orderBy: { name: "asc" },
+    });
 
     const optionsBanks = banks.map(({ id, name, agencies }) => ({
       id,
@@ -227,7 +231,6 @@ export default function UpsertReceivedCheckModal({
       <ComboBox
         valueKey={"id"}
         labelKey={"name"}
-        disabled={isEdit}
         selected={selectCustomer}
         options={customerOptions}
         onSelectOption={setSelectedCustomer}
@@ -237,7 +240,6 @@ export default function UpsertReceivedCheckModal({
       <ComboBox
         valueKey={"id"}
         labelKey={"name"}
-        disabled={isEdit}
         options={bankOptions}
         selected={selectBank}
         placeholder="Selecione o banco..."
@@ -248,7 +250,6 @@ export default function UpsertReceivedCheckModal({
         <ComboBox
           valueKey={"id"}
           labelKey={"name"}
-          disabled={isEdit}
           selected={selectAgency}
           options={agencyOptions}
           onSelectOption={setSelectedAgency}

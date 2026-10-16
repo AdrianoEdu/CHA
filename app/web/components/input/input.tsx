@@ -41,16 +41,18 @@ interface InputProps extends BaseInputProps {
   regexMessageError?: string;
   onRegexError?: (status: boolean) => void;
 
+  onlyDay?: boolean;
   showCalendar?: boolean;
   onCalendarVisibilityChange?: (visible: boolean) => void;
 }
 
 export default function Input({
   regex,
+  label,
+  onlyDay,
+  showCalendar,
   regexMessageError,
   inputType = InputType.Text,
-  label,
-  showCalendar,
   onChange,
   onValueChange,
   onRegexError,
@@ -83,6 +85,18 @@ export default function Input({
     }
 
     if (inputType === InputType.Date) {
+      if (onlyDay) {
+        if (rest.value instanceof Date) {
+          setDisplayValue(String(rest.value.getDate()));
+        } else if (typeof rest.value === "number" && rest.value > 31) {
+          setDisplayValue(String(new Date(rest.value).getDate()));
+        } else {
+          setDisplayValue(String(rest.value ?? ""));
+        }
+
+        return;
+      }
+
       if (rest.value instanceof Date) {
         setDisplayValue(rest.value.toLocaleDateString("pt-BR"));
       } else if (typeof rest.value === "string" && rest.value) {
@@ -211,13 +225,26 @@ export default function Input({
     handleCalendarVisibility(false);
   }
 
-  const calendarValue =
-    rest.value instanceof Date
+  const calendarValue = onlyDay
+    ? typeof rest.value === "number"
+      ? new Date(
+          new Date().getFullYear(),
+          new Date().getMonth(),
+          Math.min(
+            rest.value,
+            new Date(
+              new Date().getFullYear(),
+              new Date().getMonth() + 1,
+              0,
+            ).getDate(),
+          ),
+        )
+      : undefined
+    : rest.value instanceof Date
       ? rest.value
       : typeof rest.value === "string" && rest.value
         ? new Date(rest.value)
         : undefined;
-
   return (
     <div className="bg-transparent rounded-lg">
       <div className="relative w-full">

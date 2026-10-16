@@ -8,6 +8,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../../providers/AuthProvider";
+import SideBarAction from "../sidebarAction/sidebarAction";
 
 type MenuKey =
   | "bank"
@@ -15,7 +16,8 @@ type MenuKey =
   | "employee"
   | "customer"
   | "transaction"
-  | "move";
+  | "move"
+  | "payment";
 
 export default function SideBar() {
   const { user, logout } = useAuth();
@@ -42,203 +44,157 @@ export default function SideBar() {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
-        {/* Banco */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("bank")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+        <SideBarAction
+          title="Banco"
+          isOpen={openMenu === "bank"}
+          onToggle={() => toggleMenu("bank")}
+        >
+          <Link
+            href="/web/view/home/bank/register"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Banco</span>
+            Cadastro
+          </Link>
 
-            <span>{openMenu === "bank" ? "−" : "+"}</span>
-          </button>
-
-          {openMenu === "bank" && (
-            <div className="flex flex-col bg-gray-850">
-              <Link
-                href="/web/view/home/bank/register"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Cadastro
-              </Link>
-
-              <Link
-                href="/web/view/home/bank/accounts"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Contas Bancárias
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Financeiro */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("financial")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+          <Link
+            href="/web/view/home/bank/accounts"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Entrada e Saída</span>
+            Contas Bancárias
+          </Link>
+        </SideBarAction>
 
-            <span>{openMenu === "financial" ? "−" : "+"}</span>
-          </button>
-
-          {openMenu === "financial" && (
-            <div className="flex flex-col">
-              <Link
-                href="/web/view/home/financial"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Cadastrar
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Clientes */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("customer")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+        <SideBarAction
+          title="Entrada e Saída"
+          isOpen={openMenu === "financial"}
+          onToggle={() => toggleMenu("financial")}
+        >
+          <Link
+            href="/web/view/home/financial"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Clientes</span>
+            Cadastrar
+          </Link>
+        </SideBarAction>
 
-            <span>{openMenu === "customer" ? "−" : "+"}</span>
-          </button>
-
-          {openMenu === "customer" && (
-            <div className="flex flex-col">
-              <Link
-                href="/web/view/home/customer"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Listagem
-              </Link>
-
-              <Link
-                href="/web/view/home/customer/register"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Registrar
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Funcionários */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("employee")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+        <SideBarAction
+          title="Clientes"
+          isOpen={openMenu === "customer"}
+          onToggle={() => toggleMenu("customer")}
+        >
+          <Link
+            href="/web/view/home/customer"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Funcionários</span>
+            Listagem
+          </Link>
 
-            <span>{openMenu === "employee" ? "−" : "+"}</span>
-          </button>
-
-          {openMenu === "employee" && (
-            <div className="flex flex-col">
-              <Link
-                href="/web/view/home/employee"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Listagem
-              </Link>
-
-              <Link
-                href="/web/view/home/employee/register"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Registrar
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Movimentações */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("move")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+          <Link
+            href="/web/view/home/customer/register"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Movimentações</span>
+            Registrar
+          </Link>
+        </SideBarAction>
 
-            <span>{openMenu === "move" ? "−" : "+"}</span>
-          </button>
-
-          {openMenu === "move" && (
-            <div className="flex flex-col">
-              <Link
-                href="/web/view/home/move/cash-book"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Livro Caixa
-              </Link>
-
-              <Link
-                href="/web/view/home/move/received-check"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Cheques pré-datados clientes
-              </Link>
-
-              <Link
-                href="/web/view/home/accounts-payable"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Contas a pagar
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Transações */}
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
-          <button
-            onClick={() => toggleMenu("transaction")}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-700 transition"
+        <SideBarAction
+          title="Funcionários"
+          isOpen={openMenu === "employee"}
+          onToggle={() => toggleMenu("employee")}
+        >
+          <Link
+            href="/web/view/home/employee"
+            className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            <span>Relatórios</span>
+            Listagem
+          </Link>
 
-            <span>{openMenu === "transaction" ? "−" : "+"}</span>
-          </button>
+          <Link
+            href="/web/view/home/employee/register"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Registrar
+          </Link>
+        </SideBarAction>
 
-          {openMenu === "transaction" && (
-            <div className="flex flex-col">
-              <Link
-                href="/web/view/home/transaction"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Livro Caixa
-              </Link>
+        <SideBarAction
+          title="Movimentações"
+          isOpen={openMenu === "move"}
+          onToggle={() => toggleMenu("move")}
+        >
+          <Link
+            href="/web/view/home/move/cash-book"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Livro Caixa
+          </Link>
 
-              <Link
-                href="/web/view/home/transaction"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Cheques pré-datados clientes
-              </Link>
+          <Link
+            href="/web/view/home/move/received-check"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Cheques pré-datados clientes
+          </Link>
+        </SideBarAction>
 
-              <Link
-                href="/web/view/home/transaction"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Banco
-              </Link>
+        <SideBarAction
+          title="Pagamentos"
+          isOpen={openMenu === "payment"}
+          onToggle={() => toggleMenu("payment")}
+        >
+          <Link
+            href="/web/view/home/payment/register"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Registrar
+          </Link>
 
-              <Link
-                href="/web/view/home/transaction"
-                className="px-8 py-3 hover:bg-gray-700 transition"
-              >
-                Funcionario
-              </Link>
-            </div>
-          )}
-        </div>
+          <Link
+            href="/web/view/home/payment/recurring-payment"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Pagamentos programados
+          </Link>
+        </SideBarAction>
+
+        <SideBarAction
+          title="Relatórios"
+          isOpen={openMenu === "transaction"}
+          onToggle={() => toggleMenu("transaction")}
+        >
+          <Link
+            href="/web/view/home/transaction"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Livro Caixa
+          </Link>
+
+          <Link
+            href="/web/view/home/transaction"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Cheques pré-datados clientes
+          </Link>
+
+          <Link
+            href="/web/view/home/transaction"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Banco
+          </Link>
+
+          <Link
+            href="/web/view/home/transaction"
+            className="px-8 py-3 hover:bg-gray-700 transition"
+          >
+            Funcionário
+          </Link>
+        </SideBarAction>
       </nav>
 
       <div className="p-4 border-t border-gray-800">
         <button
+          type="button"
           onClick={logout}
           className="w-full px-3 py-2 bg-red-600 rounded hover:bg-red-500 transition text-white"
         >

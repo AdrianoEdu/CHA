@@ -87,7 +87,7 @@ export default function CashBookPage() {
 
     totalCount.current = count;
     setList((prev) => [...prev, ...(cashBook ?? [])]);
-    currentSkip.current += cashBook.length;
+    currentSkip.current += cashBook?.length;
   }, []);
 
   const handleGetBankAccount = async (): Promise<void> => {

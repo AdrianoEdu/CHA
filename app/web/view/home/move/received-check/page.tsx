@@ -136,20 +136,24 @@ export default function ReceiveCheck() {
   }, [countReceivedCheck]);
 
   const handleOpenModal = (item?: ReceivedCheckDTO): void => {
+    const data = item
+      ? {
+          id: item.id ?? "",
+          notes: item.notes,
+          agency: item.agency,
+          paidAt: item.paidAt,
+          status: item.status,
+          bankId: item.bank?.id,
+          amount: item.amount ?? 0,
+          goodForAt: item.goodForAt,
+          customerId: item.customer?.id,
+          checkNumber: item.checkNumber,
+        }
+      : undefined;
+
     openModal(
       <UpsertReceivedCheckModal
-        data={{
-          id: item?.id ?? "",
-          notes: item?.notes,
-          agency: item?.agency,
-          paidAt: item?.paidAt,
-          status: item?.status,
-          bankId: item?.bank.id,
-          amount: item?.amount ?? 0,
-          goodForAt: item?.goodForAt,
-          customerId: item?.customer.id,
-          checkNumber: item?.checkNumber,
-        }}
+        data={data}
         onClose={closeModal}
         onEdit={handleOnUpdate}
         onRegister={handleOnRegister}
@@ -260,7 +264,7 @@ export default function ReceiveCheck() {
         currentPage={currentPage}
         title={"Cheques recebidos"}
         onPageChange={setCurrentPage}
-        onActionClicked={handleOpenModal}
+        onActionClicked={() => handleOpenModal()}
         countRows={currentCountReceivedChecks}
         onFilterChange={handleFilterReceivedCheckTable}
         columns={getColumns({
