@@ -22,7 +22,7 @@ class AccountService {
   }
 
   async update(data: UpdateAccountDto): Promise<void> {
-    this.databaseService.account.update({
+    await this.databaseService.account.update({
       data: { ...data },
       where: { id: data.id },
     });

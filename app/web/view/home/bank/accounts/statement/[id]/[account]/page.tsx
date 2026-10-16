@@ -9,7 +9,6 @@ import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-ban
 import { FinancialEntryList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
-import { FinancialFlowType } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateBankStatementDto,
@@ -146,7 +145,7 @@ export default function StatementPage() {
     }
   };
 
-  const handleUpdateBankStatemen = async (
+  const handleUpdateBankStatement = async (
     data: UpdateBankStatementDto,
   ): Promise<void> => {
     try {
@@ -168,7 +167,7 @@ export default function StatementPage() {
       <UpsertFinancialEntryModal
         data={data}
         onClose={closeModal}
-        onUpdate={handleUpdateBankStatemen}
+        onUpdate={handleUpdateBankStatement}
         onRegister={handleRegisterBankStatemen}
       />,
       !data

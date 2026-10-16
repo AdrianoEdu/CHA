@@ -36,12 +36,9 @@ export default function UpserAccountModal({
   const [selectedBank, setSelectBank] = useState<SelectOption | null>(null);
 
   useEffect(() => {
-    if (isEdit) {
-      findBankById(data.bankId!);
-      return;
-    }
-
     handleFindBanks();
+
+    if (isEdit) findBankById(data.bankId!);
   }, []);
 
   const handleFindBanks = async () => {
@@ -59,11 +56,13 @@ export default function UpserAccountModal({
   };
 
   const findBankById = async (id: string): Promise<void> => {
-    const { banks } = await bankService.findAll({
+    const {
+      banks: [bank],
+    } = await bankService.findAll({
       where: { id },
     });
 
-    setSelectBank({ id: banks[0].id, name: banks[0].name });
+    setSelectBank({ id: bank.id, name: bank.name });
   };
 
   const handleSelectOption = (option: SelectOption | null): void => {
@@ -76,7 +75,10 @@ export default function UpserAccountModal({
   };
 
   const handleSubmit = (): void => {
-    if (isEdit && onUpdated) onUpdated({ ...currentData! });
+    if (isEdit && onUpdated) {
+      onUpdated({ ...currentData! });
+      return;
+    }
 
     if (onRegister)
       onRegister({

@@ -62,7 +62,7 @@ export default function AccountScreen() {
 
   const navigateBankStatement = (row: GetAccountDto): void => {
     router.push(
-      `/web/view/home/bank/accounts/statement/${row.id}/${row.accountNumber}`,
+      `/web/view/home/bank/accounts/statement/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
     );
   };
 
@@ -121,7 +121,15 @@ export default function AccountScreen() {
             <Button
               icon={<EditIcon />}
               className="bg-green-500"
-              onClick={(e) => handleOpenModalUpsertAccount(e, row)}
+              onClick={(e) =>
+                handleOpenModalUpsertAccount(e, {
+                  id: row.id,
+                  bankId: row.bank.id,
+                  balance: row.balance,
+                  createdAt: row.createdAt,
+                  accountNumber: row.accountNumber,
+                })
+              }
             />
           );
         },
