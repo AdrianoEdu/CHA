@@ -241,47 +241,60 @@ model ReceivedCheck {
 }
 
 model FinancialCategory {
-  id                String @id @default(uuid())
+  id                String            @id @default(uuid())
   name              String
   financialFlowType FinancialFlowType
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
 
-  bankStatement     BankStatement[]
+  payment           Payment[]
   cashBook          CashBook[]
+  bankStatement     BankStatement[]
+  recurringPayment  RecurringPayment[]
+
   @@map("financial_categories")
 }
 
-model RecurringPayment {
-  id             String    @id @default(uuid())
-  name           String
-  dueDay         Int
-  isMonthly      Boolean   @default(false)
-  isFixedAmount  Boolean   @default(false)
-  fixedAmount    Decimal?  @db.Decimal(12, 2)
-
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  payments       Payment[]
-
-  @@map("recurring-payment")
-}
 
 model Payment {
-  id                 String    @id @default(uuid())
-  name               String
-  amount             Decimal   @db.Decimal(12, 2)
-  dueDate            DateTime
-  paidAt             DateTime?
+  id                  String    @id @default(uuid())
+  name                String
+  amount              Decimal   @db.Decimal(12, 2)
+  dueDate             DateTime
+  paidAt              DateTime?
 
-  recurringPaymentId String?
-  recurringPayment   RecurringPayment? @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
+  recurringPaymentId  String?
+  recurringPayment    RecurringPayment? @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
 
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  financialCategoryId String
+  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
 
+  referenceMonth      DateTime? @db.Date
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@unique([recurringPaymentId, referenceMonth])
   @@map("payments")
+}
+
+model RecurringPayment {
+  id                  String   @id @default(uuid())
+  name                String
+  dueDay              Int
+  isMonthly           Boolean  @default(false)
+  isFixedAmount       Boolean  @default(false)
+  fixedAmount         Decimal? @db.Decimal(12, 2)
+
+  financialCategoryId String
+  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+
+  payments            Payment[]
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("recurring-payment")
 }
 
 model SystemConfig {

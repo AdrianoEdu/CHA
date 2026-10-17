@@ -247,31 +247,34 @@ export default function Input({
       : typeof rest.value === "string" && rest.value
         ? new Date(rest.value)
         : undefined;
+
   return (
-    <div className="bg-transparent rounded-lg">
+    <div className="w-full bg-transparent">
       <div className="relative w-full">
         {label && (
-          <span className="block mb-1 text-2xl font-medium text-gray-700">
+          <span className="mb-1.5 block text-sm font-medium text-gray-700">
             {label}
           </span>
         )}
 
         {inputType === InputType.Annotation ? (
           <textarea
+            {...(rest as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
             id={rest.name}
-            placeholder=" "
+            placeholder={rest.placeholder ?? " "}
             disabled={rest.disabled}
             onChange={handleOnPress}
             value={displayValue}
             rows={4}
-            className={`peer bg-white w-full min-h-25 rounded-lg text-black px-2 py-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none resize-none ${
+            className={`peer min-h-25 w-full resize-none rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm outline-none transition-colors placeholder:text-gray-400 hover:border-gray-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${
               rest.className ?? ""
             }`}
           />
         ) : (
           <input
+            {...rest}
             id={rest.name}
-            placeholder=" "
+            placeholder={rest.placeholder ?? " "}
             disabled={rest.disabled}
             onChange={handleOnPress}
             onClick={() => {
@@ -281,7 +284,7 @@ export default function Input({
             }}
             type={resolveHtmlType(inputType)}
             value={displayValue}
-            className={`peer bg-white h-10 w-full rounded-lg text-black px-2 ring-2 ring-gray-500 focus:ring-sky-600 focus:outline-none ${
+            className={`peer h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm outline-none transition-colors placeholder:text-gray-400 hover:border-gray-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500 ${
               rest.className ?? ""
             }`}
           />
@@ -299,25 +302,24 @@ export default function Input({
 
         <label
           htmlFor={rest.name}
-          className="
-            absolute left-2
-            bg-white px-1
-            text-gray-500 text-sm
-            transition-all
-            top-2
-            peer-focus:-top-3
-            peer-focus:text-sky-600
-            peer-focus:text-xs
-            peer-not-placeholder-shown:-top-3
-            peer-not-placeholder-shown:text-xs
-            pointer-events-none
-          "
+          className={`
+          pointer-events-none absolute left-2.5
+          bg-white px-1 text-sm text-gray-500
+          transition-all duration-150
+          peer-placeholder-shown:top-3
+          peer-placeholder-shown:text-sm
+          peer-focus:-top-2
+          peer-focus:text-xs
+          peer-focus:text-sky-600
+          peer-not-placeholder-shown:-top-2
+          peer-not-placeholder-shown:text-xs
+        `}
         >
           {rest.name}
         </label>
 
         {showErrorRegex && (
-          <span className="text-red-500 text-xs mt-1 block">
+          <span className="mt-1.5 block text-xs text-red-600">
             {messageErrorRegex}
           </span>
         )}

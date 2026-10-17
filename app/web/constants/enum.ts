@@ -62,3 +62,8 @@ export enum EmployeePositionEnum {
   TAX_ASSISTANT_N4 = "TAX_ASSISTANT_N4",
   TAX_ASSISTANT_N2 = "TAX_ASSISTANT_N2",
 }
+
+export enum RecipientTypeEnum {
+  EMPLOYEE = "EMPLOYEE",
+  CUSTOMER = "CUSTOMER",
+}

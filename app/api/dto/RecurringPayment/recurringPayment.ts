@@ -3,12 +3,19 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { GetCustomerDto } from "../Customer/Customer";
+import { EmployeeDto } from "../Employee/Employee";
+import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
+
 export type CreateRecurringPaymentDto = {
   name: string;
   dueDay: number;
   isMonthly: boolean;
+  customerId?: string;
+  employeeId?: string;
   fixedAmount?: number;
   isFixedAmount: boolean;
+  financialCategoryId: string;
 };
 
 export type UpdateRecurringPaymentDto = Partial<CreateRecurringPaymentDto> & {
@@ -24,6 +31,9 @@ export type GetRecurringPaymentDto = {
   isMonthly: boolean;
   fixedAmount?: number;
   isFixedAmount: boolean;
+  customer?: GetCustomerDto;
+  employee?: EmployeeDto;
+  financialCategory: GetFinancialCategoryDto;
 };
 
 export type GetRecurringPaymentDtoParams = {
