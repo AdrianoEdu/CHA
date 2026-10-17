@@ -25,8 +25,8 @@ class RecurringPaymentService {
     });
   }
 
-  async update(data: UpdateRecurringPaymentDto): Promise<void> {
-    await this.databaseService.bank.update({
+  async update(data: UpdateRecurringPaymentDto) {
+    return await this.databaseService.recurringPayment.update({
       where: { id: data.id },
       data,
     });

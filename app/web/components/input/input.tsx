@@ -214,11 +214,13 @@ export default function Input({
   }
 
   function handleCalendarChange(date: Date) {
-    setDisplayValue(date.toLocaleDateString("pt-BR"));
+    setDisplayValue(
+      onlyDay ? String(date.getDate()) : date.toLocaleDateString("pt-BR"),
+    );
 
     handleCalendarVisibility(false);
 
-    onValueChange?.(date);
+    onValueChange?.(onlyDay ? date.getDate() : date);
   }
 
   function handleCalendarClose() {

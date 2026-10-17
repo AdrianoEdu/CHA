@@ -20,8 +20,9 @@ export async function POST(req: Request) {
 
     const decrypted = await decryptMiddleware(payload);
 
-    const result = await recurringPaymentController.create(decrypted);
-    return Response.json(result);
+    await recurringPaymentController.create(decrypted);
+
+    return Response.json({ status: 200 });
   } catch (error) {
     if (error instanceof HttpException) {
       return Response.json(
@@ -45,9 +46,9 @@ export async function PUT(req: Request) {
 
     const decrypted = await decryptMiddleware(payload);
 
-    await recurringPaymentController.update(decrypted);
+    const result = await recurringPaymentController.update(decrypted);
 
-    return Response.json({ success: true });
+    return Response.json(result, { status: 200 });
   } catch (error) {
     if (error instanceof HttpException) {
       return Response.json(

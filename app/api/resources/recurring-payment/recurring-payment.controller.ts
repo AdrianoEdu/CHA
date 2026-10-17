@@ -19,7 +19,7 @@ class RecurringPaymentController {
   }
 
   async create(data: CreateRecurringPaymentDto) {
-    return this.recurringPaymentService.create(data);
+    await this.recurringPaymentService.create(data);
   }
 
   async update(data: UpdateRecurringPaymentDto) {
