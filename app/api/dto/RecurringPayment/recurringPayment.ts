@@ -31,8 +31,8 @@ export type GetRecurringPaymentDto = {
   isMonthly: boolean;
   fixedAmount?: number;
   isFixedAmount: boolean;
-  customer?: GetCustomerDto;
   employee?: EmployeeDto;
+  customer?: GetCustomerDto;
   financialCategory: GetFinancialCategoryDto;
 };
 

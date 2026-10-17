@@ -172,6 +172,8 @@ class RecurringPaymentService {
               dueDate,
               referenceMonth,
               recurringPaymentId: recurringPayment.id,
+              customerId: recurringPayment.customerId,
+              employeeId: recurringPayment.employeeId,
               financialCategoryId: recurringPayment.financialCategoryId,
             },
           ],

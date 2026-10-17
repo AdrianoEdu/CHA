@@ -100,7 +100,9 @@ model Employee {
   employeePositionId String
   employeePosition   EmployeePosition @relation(fields: [employeePositionId], references: [id])
 
+  payment            Payment[]
   advances           EmployeeAdvance[]
+  recurringPayment   RecurringPayment[]
 
   @@map("employees")
 }
@@ -149,6 +151,9 @@ model Customer {
 
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+
+  payment            Payment[] 
+  recurringPayment   RecurringPayment[]
 
   @@map("customers")
 } 
@@ -269,6 +274,12 @@ model Payment {
   financialCategoryId String
   financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
 
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
   referenceMonth      DateTime? @db.Date
 
   createdAt           DateTime  @default(now())
@@ -285,6 +296,12 @@ model RecurringPayment {
   isMonthly           Boolean  @default(false)
   isFixedAmount       Boolean  @default(false)
   fixedAmount         Decimal? @db.Decimal(12, 2)
+
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
 
   financialCategoryId String
   financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])

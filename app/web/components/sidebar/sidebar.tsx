@@ -15,7 +15,7 @@ type MenuKey =
   | "financial"
   | "employee"
   | "customer"
-  | "transaction"
+  | "report"
   | "move"
   | "payment";
 
@@ -159,32 +159,25 @@ export default function SideBar() {
 
         <SideBarAction
           title="Relatórios"
-          isOpen={openMenu === "transaction"}
-          onToggle={() => toggleMenu("transaction")}
+          isOpen={openMenu === "report"}
+          onToggle={() => toggleMenu("report")}
         >
           <Link
-            href="/web/view/home/transaction"
+            href="/web/view/home/report/cash-book"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
             Livro Caixa
           </Link>
 
           <Link
-            href="/web/view/home/transaction"
+            href="/web/view/home/report/received-check"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
             Cheques pré-datados clientes
           </Link>
 
           <Link
-            href="/web/view/home/transaction"
-            className="px-8 py-3 hover:bg-gray-700 transition"
-          >
-            Banco
-          </Link>
-
-          <Link
-            href="/web/view/home/transaction"
+            href="/web/view/home/report/employee"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
             Funcionário

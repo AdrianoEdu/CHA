@@ -88,19 +88,6 @@ class FinancialCategoryService {
   }
 
   async delete({ id }: RemoveFinancialCategoryDto) {
-    const [countReceived, countPayable] = await Promise.all([
-      this.databaseService.transaction.count({
-        where: { categoryId: id },
-      }),
-      this.databaseService.transaction.count({ where: { categoryId: id } }),
-    ]);
-
-    if (countPayable > 0 || countReceived > 0)
-      throw new HttpException(
-        "Já existem registros de categoria financeira associados.",
-        400,
-      );
-
     const removedFinancialCategory =
       await this.databaseService.financialCategory.findFirst({ where: { id } });
 
