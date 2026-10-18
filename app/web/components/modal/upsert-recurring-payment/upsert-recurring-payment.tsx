@@ -70,9 +70,6 @@ export default function UpsertRecurringPaymentkModal({
 
   const [loading, setLoading] = useState(true);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
-    null,
-  );
 
   const [recipientType, setRecipientType] = useState<RecipientTypeEnum>(
     RecipientTypeEnum.EMPLOYEE,
@@ -124,14 +121,6 @@ export default function UpsertRecurringPaymentkModal({
       id: item.id,
       name: item.name,
     }));
-
-    if (recurringPayment.financialCategoryId) {
-      const [{ id, name }] = financialCategories.filter(
-        (item) => item.id === recurringPayment.financialCategoryId,
-      );
-
-      setSelectedOption({ id, name });
-    }
 
     setOptionsFinancialCategory(options);
   };
@@ -211,8 +200,6 @@ export default function UpsertRecurringPaymentkModal({
       ...recurringPayment,
       financialCategoryId: data?.id,
     });
-
-    setSelectedOption(data);
   };
 
   const hadleSelectOptionsCustomer = (data: SelectOption | null): void => {
@@ -220,8 +207,6 @@ export default function UpsertRecurringPaymentkModal({
       ...recurringPayment,
       customerId: data?.id,
     });
-
-    setSelectedOption(data);
   };
 
   const hadleSelectOptionsEmployee = (data: SelectOption | null): void => {
@@ -229,8 +214,6 @@ export default function UpsertRecurringPaymentkModal({
       ...recurringPayment,
       employeeId: data?.id,
     });
-
-    setSelectedOption(data);
   };
 
   const handleUpsertReceivedCheck = (): void => {

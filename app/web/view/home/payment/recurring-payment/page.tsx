@@ -57,6 +57,13 @@ const getColumns = ({
     render: (row) => `R$ ${row.fixedAmount?.toFixed(2) ?? 0}`,
   },
   {
+    label: "Destinatário",
+    render: (row) => {
+      if (row.employee) return row.employee.name ?? "";
+      if (row.customer) return row.customer.name ?? "";
+    },
+  },
+  {
     label: "Ações",
     isAction: true,
     render: (row) => {

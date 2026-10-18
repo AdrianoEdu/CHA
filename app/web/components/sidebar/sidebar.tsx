@@ -143,10 +143,10 @@ export default function SideBar() {
           onToggle={() => toggleMenu("payment")}
         >
           <Link
-            href="/web/view/home/payment/register"
+            href="/web/view/home/payment/list"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            Registrar
+            Listagem
           </Link>
 
           <Link

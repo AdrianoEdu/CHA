@@ -11,7 +11,7 @@ import {
 } from "../../dto/recurring-payment";
 import { requestService } from "../requestService/requestService";
 
-class ReceiveCheckService {
+class RecurringPaymentService {
   private readonly url: string;
 
   constructor() {
@@ -38,4 +38,4 @@ class ReceiveCheckService {
   }
 }
 
-export const recurringPaymentService = new ReceiveCheckService();
+export const recurringPaymentService = new RecurringPaymentService();
