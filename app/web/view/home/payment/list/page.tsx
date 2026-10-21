@@ -17,7 +17,6 @@ import { DeleteIcon } from "@/app/web/icons";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { paymentService } from "@/app/web/services/paymentService/paymentService";
-import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 

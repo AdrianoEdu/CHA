@@ -67,3 +67,9 @@ export enum RecipientTypeEnum {
   EMPLOYEE = "EMPLOYEE",
   CUSTOMER = "CUSTOMER",
 }
+
+export enum TokenExpirationUnit {
+  MINUTES = "MINUTES",
+  HOURS = "HOURS",
+  DAYS = "DAYS",
+}

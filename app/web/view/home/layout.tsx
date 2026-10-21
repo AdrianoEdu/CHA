@@ -1,19 +1,15 @@
 "use client";
 
-import { toast } from "react-toastify";
 import SideBar from "../../components/sidebar/sidebar";
-import { authService } from "../../services/authService/authService";
-import { useRouter } from "next/navigation";
+
 export default function Home({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
   return (
-    <div className="flex h-screen bg-off-white">
-      <div className="w-80 bg-gray-800 text-white">
+    <div className="min-h-screen bg-off-white">
+      <aside className="fixed inset-y-0 left-0 h-screen w-80 bg-gray-800 text-white">
         <SideBar />
-      </div>
+      </aside>
 
-      <div className="flex-1 bg-off-white p-6">{children}</div>
+      <main className="ml-80 min-h-screen bg-off-white p-6">{children}</main>
     </div>
   );
 }

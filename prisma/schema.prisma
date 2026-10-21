@@ -69,7 +69,13 @@ enum EmployeePositionEnum {
   TAX_ASSISTANT_N2
 }
 
-model User {
+enum TokenExpirationUnit {
+  MINUTES
+  HOURS
+  DAYS
+}
+
+model User {0
   id        String @id @default(uuid())
 
   login     String @unique
@@ -315,14 +321,16 @@ model RecurringPayment {
 }
 
 model SystemConfig {
-  id            String   @id @default(uuid())
-  enabled       Boolean  @default(true)
-  intervalHours Int?     
-  runAtHour     Int?     
-  lastBackupAt  DateTime?
+  id                     String               @id @default(uuid())
+  enabled                Boolean              @default(true)
+  intervalHours          Int?
+  runAtHour              Int?
+  tokenExpirationValue   Int                  @default(2)
+  tokenExpirationUnit    TokenExpirationUnit  @default(HOURS)
+  lastBackupAt           DateTime?
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
 
   @@map("system_configs")
 }

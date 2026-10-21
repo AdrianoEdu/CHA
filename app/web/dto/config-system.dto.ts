@@ -3,10 +3,14 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { TokenExpirationUnit } from "../constants/enum";
+
 export type SystemConfigDto = {
   id?: string;
   enabled: boolean;
-  intervalHours?: number;
   runAtHour?: number;
   lastBackupAt?: string;
+  intervalHours?: number;
+  tokenExpirationValue: number;
+  tokenExpirationUnit: TokenExpirationUnit;
 };

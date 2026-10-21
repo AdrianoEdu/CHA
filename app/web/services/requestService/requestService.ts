@@ -132,6 +132,30 @@ class RequestService {
       body: { id },
     });
   }
+
+  async download(url: string): Promise<Blob> {
+    const response = await fetch(`${this.baseUrl}${url}`, {
+      method: "POST",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const contentType = response.headers.get("Content-Type");
+      let message = `Erro na requisição: ${response.status}`;
+
+      if (contentType?.includes("application/json")) {
+        const data = await response.json().catch(() => null);
+        message = data?.error ?? data?.message ?? message;
+      } else {
+        const text = await response.text().catch(() => "");
+        if (text) message = text;
+      }
+
+      throw new Error(message);
+    }
+
+    return response.blob();
+  }
 }
 
 export const requestService = new RequestService();
