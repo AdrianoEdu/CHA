@@ -54,7 +54,7 @@ export default function SideBar() {
             href="/web/view/home/bank/register"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            Cadastro
+            Cadastro Banco
           </Link>
 
           <Link
@@ -94,7 +94,7 @@ export default function SideBar() {
             href="/web/view/home/customer/register"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            Registrar
+            Cadastro
           </Link>
         </SideBarAction>
 
@@ -139,7 +139,7 @@ export default function SideBar() {
         </SideBarAction>
 
         <SideBarAction
-          title="Pagamentos"
+          title="Contas a pagar"
           isOpen={openMenu === "payment"}
           onToggle={() => toggleMenu("payment")}
         >
@@ -154,7 +154,7 @@ export default function SideBar() {
             href="/web/view/home/payment/recurring-payment"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            Pagamentos programados
+            Contas programados
           </Link>
         </SideBarAction>
 

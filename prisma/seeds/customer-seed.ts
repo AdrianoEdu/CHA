@@ -28,6 +28,9 @@ export async function seedCustomers(prisma: PrismaClient) {
       }
 
       return {
+        phone: "",
+        email: "",
+        address: "",
         name: match[2].trim(),
         numberId: Number(match[1]),
         code: String(customer.code ?? "").trim(),

@@ -150,8 +150,11 @@ model Customer {
   id                 String @id @default(uuid())
   name               String
   code               String
-  numberId           Int @unique
-  isActive  Boolean   @default(true)
+  numberId           Int    @unique
+  phone              String
+  email              String
+  address            String
+  isActive  Boolean  @default(true)
 
   receivedChecks     ReceivedCheck[]
 
@@ -162,7 +165,7 @@ model Customer {
   recurringPayment   RecurringPayment[]
 
   @@map("customers")
-} 
+}
 
 model Bank {
   id                 String @id @default(uuid())

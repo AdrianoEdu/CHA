@@ -22,6 +22,48 @@ export function formatCPF(value: string) {
   };
 }
 
+export function formatPhone(value: string): {
+  raw: string;
+  formatted: string;
+} {
+  const digits = value.replace(/\D/g, "");
+
+  if (!digits) {
+    return { raw: "", formatted: "" };
+  }
+
+  const ddd = digits.slice(0, 2);
+  const isMobile = digits.length > 2 && digits[2] === "9";
+  const maxLength = isMobile ? 11 : 10;
+  const raw = digits.slice(0, maxLength);
+
+  if (raw.length <= 2) {
+    return {
+      raw,
+      formatted: `(${raw}`,
+    };
+  }
+
+  const phoneNumber = raw.slice(2);
+  const mobile = phoneNumber.startsWith("9");
+
+  if (mobile) {
+    return {
+      raw,
+      formatted: `(${ddd}) ${phoneNumber.slice(0, 5)}${
+        phoneNumber.length > 5 ? `-${phoneNumber.slice(5, 9)}` : ""
+      }`,
+    };
+  }
+
+  return {
+    raw,
+    formatted: `(${ddd}) ${phoneNumber.slice(0, 4)}${
+      phoneNumber.length > 4 ? `-${phoneNumber.slice(4, 8)}` : ""
+    }`,
+  };
+}
+
 export function formatCNPJ(value: string) {
   const raw = value.replace(/\D/g, "");
 

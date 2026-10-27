@@ -86,8 +86,6 @@ export async function PATCH(req: Request) {
       throw new HttpException("Arquivo de backup não enviado", 400);
     }
 
-    const decrypted = await decryptMiddleware(JSON.parse(payload));
-
     return await configSystemController.restoreBackup(file);
   } catch (error: unknown) {
     if (error instanceof HttpException) {

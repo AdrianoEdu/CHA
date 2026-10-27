@@ -24,6 +24,7 @@ import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import EditIcon from "@/app/web/icons/edit-icon";
+import { maskPhone } from "@/app/web/utils/customer/customer";
 
 let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
@@ -180,8 +181,11 @@ export default function Customer() {
   const getColumns = (): TableColumn<GetCustomerDto>[] => {
     const columns: TableColumn<GetCustomerDto>[] = [
       { label: "Identificação", accessor: "numberId" },
-      { label: "Criado em", accessor: "createdAt" },
+      { label: "Registrado em", accessor: "createdAt" },
       { label: "Nome do cliente", accessor: "name" },
+      { label: "Telefone", render: (row) => maskPhone(row.phone ?? "") },
+      { label: "Endereço", accessor: "address" },
+      { label: "Email", accessor: "email" },
       { label: "CNPJ", accessor: "code" },
       {
         label: "Ativo?",

@@ -6,7 +6,12 @@
 "use client";
 
 import { InputHTMLAttributes, useEffect, useState } from "react";
-import { formatCNPJ, formatCPF, formatMoney } from "../../utils/inputFormatter";
+import {
+  formatCNPJ,
+  formatCPF,
+  formatMoney,
+  formatPhone,
+} from "../../utils/inputFormatter";
 import Calendar from "../calendar/calendar";
 
 export enum InputType {
@@ -14,6 +19,8 @@ export enum InputType {
   Text = "text",
   Date = "date",
   Cnpj = "Cnpj",
+  Email = "email",
+  Phone = "phone",
   Money = "money",
   Number = "number",
   Password = "password",
@@ -69,6 +76,7 @@ export default function Input({
     [InputType.Money]: formatMoney,
     [InputType.Cnpj]: formatCNPJ,
     [InputType.CPF]: formatCPF,
+    [InputType.Phone]: formatPhone,
   };
 
   useEffect(() => {
@@ -126,6 +134,7 @@ export default function Input({
   function resolveHtmlType(type: InputType) {
     if (type === InputType.Number) return "number";
     if (type === InputType.Password) return "password";
+    if (type === InputType.Email) return "email";
 
     return "text";
   }
@@ -303,17 +312,17 @@ export default function Input({
         <label
           htmlFor={rest.name}
           className={`
-          pointer-events-none absolute left-2.5
-          bg-white px-1 text-sm text-gray-500
-          transition-all duration-150
-          peer-placeholder-shown:top-3
-          peer-placeholder-shown:text-sm
-          peer-focus:-top-2
-          peer-focus:text-xs
-          peer-focus:text-sky-600
-          peer-not-placeholder-shown:-top-2
-          peer-not-placeholder-shown:text-xs
-        `}
+            pointer-events-none absolute left-2.5
+            bg-white px-1 text-sm text-gray-500
+            transition-all duration-150
+            peer-placeholder-shown:top-3
+            peer-placeholder-shown:text-sm
+            peer-focus:-top-2
+            peer-focus:text-xs
+            peer-focus:text-sky-600
+            peer-not-placeholder-shown:-top-2
+            peer-not-placeholder-shown:text-xs
+          `}
         >
           {rest.name}
         </label>

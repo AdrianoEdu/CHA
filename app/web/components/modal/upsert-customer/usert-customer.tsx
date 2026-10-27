@@ -77,6 +77,9 @@ export default function UpsertCustomerModal({
       onRegister({
         name: customer.name ?? "",
         code: customer?.code ?? "",
+        email: customer.email ?? "",
+        phone: customer.phone ?? "",
+        address: customer.address ?? "",
         numberId: customer.numberId ?? 0,
       });
   };
@@ -127,6 +130,33 @@ export default function UpsertCustomerModal({
         onRegexError={handleIsRegexError}
         regexMessageError={"Por favor informar caracteres válidos"}
         onChange={(e) => handleSetCustomer({ code: e.target.value })}
+      />
+
+      <Input
+        name="Telefone"
+        value={customer.phone}
+        regex={Regex.onlyNumbers}
+        inputType={InputType.Phone}
+        regexMessageError="Informe número válido."
+        onRegexError={handleIsRegexError}
+        onValueChange={(value: any) => handleSetCustomer({ phone: value })}
+      />
+
+      <Input
+        name="E-mail"
+        value={customer.email}
+        regex={Regex.onlyEmail}
+        inputType={InputType.Email}
+        regexMessageError="Informe um e-mail válido."
+        onRegexError={handleIsRegexError}
+        onValueChange={(value: any) => handleSetCustomer({ email: value })}
+      />
+
+      <Input
+        className="flex-1"
+        value={customer.address}
+        name={"Informe o endereço"}
+        onChange={(e) => handleSetCustomer({ address: e.target.value })}
       />
 
       <div className="mt-6 flex justify-end gap-4">

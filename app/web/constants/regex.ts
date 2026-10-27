@@ -6,6 +6,7 @@
 export const Regex = {
   onlyNumbers: new RegExp("^\\d+$"),
   onlyText: new RegExp("^[A-Za-zÀ-ÿ\\s]+$"),
+  onlyEmail: new RegExp(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
   onlyCPF: new RegExp("^\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}$"),
   onlyCNPJ: new RegExp("^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$"),
 };

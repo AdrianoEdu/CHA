@@ -8,6 +8,9 @@ import { PaginationDto } from "./pagination.dto";
 export type CreateCustomerDto = {
   name: string;
   code: string;
+  phone: string;
+  email: string;
+  address: string;
   numberId: number;
 };
 
@@ -19,7 +22,10 @@ export type GetCustomerDto = {
   id: string;
   name: string;
   code: string;
+  phone: string;
+  email: string;
   createdAt: Date;
+  address: string;
   numberId: number;
   isActive: boolean;
 };

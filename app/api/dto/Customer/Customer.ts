@@ -6,6 +6,9 @@
 export type CreateCustomerDto = {
   name: string;
   code: string;
+  phone: string;
+  email: string;
+  address: string;
   numberId: number;
 };
 
@@ -17,6 +20,9 @@ export type GetCustomerDto = {
   id: string;
   name: string;
   code: string;
+  email: string;
+  phone: string;
+  address: string;
   createdAt: Date;
   numberId: number;
   isActive: boolean;

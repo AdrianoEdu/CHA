@@ -11,6 +11,8 @@ type BodyPageProps = {
 
 export function BodyPage({ children }: Readonly<BodyPageProps>): JSX.Element {
   return (
-    <div className="p-5 gap-8 mt-10 bg-gray-200 rounded-2xl">{children}</div>
+    <div className="flex flex-col p-5 gap-2 mt-10 bg-gray-200 rounded-2xl">
+      {children}
+    </div>
   );
 }

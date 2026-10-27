@@ -7,7 +7,6 @@
 
 import { BodyPage } from "@/app/web/components/bodypage/bodypage";
 import Button from "@/app/web/components/button/button";
-import ComboBox from "@/app/web/components/combobox/combobox";
 import { Footer } from "@/app/web/components/footer/footer";
 import { Header } from "@/app/web/components/header/header";
 import Input, { InputType } from "@/app/web/components/input/input";
@@ -17,12 +16,15 @@ import { CreateCustomerDto } from "@/app/web/dto/customer.dto";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { validateCustomerForm } from "@/app/web/utils/customer/customer";
 import { validateIsNan } from "@/app/web/utils/validateParameters";
-import React, { JSX, useState } from "react";
+import { JSX, useState } from "react";
 import { toast } from "react-toastify";
 
 const defaultCustomer = {
   code: "",
   name: "",
+  phone: "",
+  email: "",
+  address: "",
   numberId: 0,
 };
 
@@ -102,6 +104,33 @@ export default function RegisterCustomer(): JSX.Element {
           value={customer?.code}
           regexMessageError={"Por favor informar caracteres válidos"}
           onChange={(e) => handleSetCustomer({ code: e.target.value })}
+        />
+
+        <Input
+          label={"Inserir telefone"}
+          value={customer.phone}
+          regex={Regex.onlyNumbers}
+          inputType={InputType.Phone}
+          regexMessageError="Informe número válido."
+          onRegexError={handleIsRegexError}
+          onValueChange={(value: any) => handleSetCustomer({ phone: value })}
+        />
+
+        <Input
+          value={customer.email}
+          regex={Regex.onlyEmail}
+          label={"Inserir o email"}
+          inputType={InputType.Email}
+          onRegexError={handleIsRegexError}
+          regexMessageError="Informe um e-mail válido."
+          onValueChange={(value: any) => handleSetCustomer({ email: value })}
+        />
+
+        <Input
+          className="flex-1"
+          value={customer.address}
+          label={"Inserir endereço:"}
+          onChange={(e) => handleSetCustomer({ address: e.target.value })}
         />
 
         <Footer>
