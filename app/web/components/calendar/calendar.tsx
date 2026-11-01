@@ -15,20 +15,62 @@ interface CalendarProps {
   onClose?: () => void;
 }
 
+const MONTHS = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+
+const WEEKDAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
 function parseDate(value?: Date | string): Date {
-  if (value instanceof Date) {
-    return new Date(value);
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 
   if (typeof value === "string" && value) {
-    const [year, month, day] = value.split("-").map(Number);
+    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
 
-    if (year && month && day) {
-      return new Date(year, month - 1, day);
+    if (match) {
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      const day = Number(match[3]);
+      const date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+      ) {
+        return date;
+      }
+    }
+
+    const date = new Date(value);
+
+    if (!Number.isNaN(date.getTime())) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
     }
   }
 
   return new Date();
+}
+
+function sameDay(first: Date, second: Date): boolean {
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
 }
 
 export default function Calendar({
@@ -39,8 +81,10 @@ export default function Calendar({
   onClose,
 }: Readonly<CalendarProps>) {
   const [currentDate, setCurrentDate] = useState(() => parseDate(value));
-
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const selectedDate = value ? parseDate(value) : null;
+  const today = new Date();
 
   useEffect(() => {
     if (value) {
@@ -49,7 +93,9 @@ export default function Calendar({
   }, [value]);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    if (!open) return;
+
+    function handlePointerDown(event: PointerEvent) {
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target as Node)
@@ -58,96 +104,159 @@ export default function Calendar({
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onClose]);
+  }, [open, onClose]);
 
-  if (!open) {
-    return null;
-  }
+  if (!open) return null;
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const previousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
+  const calendarDays = Array.from(
+    { length: firstDayOfMonth + daysInMonth },
+    (_, index) => {
+      if (index < firstDayOfMonth) return null;
+      return index - firstDayOfMonth + 1;
+    },
+  );
 
-  const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
+  function changeMonth(offset: number) {
+    setCurrentDate(new Date(year, month + offset, 1));
+  }
 
-  const selectDay = (day: number) => {
-    const selectedDate = new Date(year, month, day);
+  function changeYear(nextYear: number) {
+    setCurrentDate(new Date(nextYear, month, 1));
+  }
 
-    onChange?.(selectedDate);
+  function changeMonthSelection(nextMonth: number) {
+    setCurrentDate(new Date(year, nextMonth, 1));
+  }
+
+  function selectDay(day: number) {
+    onChange?.(new Date(year, month, day));
     onClose?.();
-  };
+  }
 
-  const monthName = currentDate.toLocaleDateString("pt-BR", {
-    month: "long",
-    year: "numeric",
-  });
+  function goToToday() {
+    setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+  }
 
-  const days = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+  const yearOptions = Array.from(
+    { length: 201 },
+    (_, index) => today.getFullYear() - 100 + index,
+  );
 
   return (
     <div
       ref={containerRef}
-      className="absolute left-0 top-full z-50 mt-2 w-full min-w-72 rounded-lg bg-white p-4 shadow-xl ring-1 ring-gray-200"
+      role="dialog"
+      aria-label="Selecionar data"
+      className="absolute left-0 top-full z-50 mt-2 w-[360px] max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 bg-white p-4 shadow-xl"
     >
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <button
           type="button"
           disabled={disabled}
-          onClick={previousMonth}
-          className="rounded-md px-3 py-1 text-gray-700 hover:bg-gray-100"
+          onClick={() => changeMonth(-1)}
+          aria-label="Mês anterior"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          ‹
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
         </button>
 
-        <span className="font-semibold capitalize text-gray-800">
-          {monthName}
-        </span>
+        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_88px] gap-2">
+          <select
+            aria-label="Mês"
+            value={month}
+            disabled={disabled}
+            onChange={(event) =>
+              changeMonthSelection(Number(event.target.value))
+            }
+            className="h-9 min-w-0 rounded-lg border border-gray-200 bg-white px-2 text-sm font-semibold text-gray-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 disabled:opacity-50"
+          >
+            {MONTHS.map((monthName, index) => (
+              <option key={monthName} value={index}>
+                {monthName}
+              </option>
+            ))}
+          </select>
+
+          <select
+            aria-label="Ano"
+            value={year}
+            disabled={disabled}
+            onChange={(event) => changeYear(Number(event.target.value))}
+            className="h-9 min-w-0 rounded-lg border border-gray-200 bg-white px-2 text-sm font-semibold text-gray-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100 disabled:opacity-50"
+          >
+            {yearOptions.map((yearOption) => (
+              <option key={yearOption} value={yearOption}>
+                {yearOption}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <button
           type="button"
           disabled={disabled}
-          onClick={nextMonth}
-          className="rounded-md px-3 py-1 text-gray-700 hover:bg-gray-100"
+          onClick={() => changeMonth(1)}
+          aria-label="Próximo mês"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          ›
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-4 w-4"
+            aria-hidden="true"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-gray-500">
-        <span>Dom</span>
-        <span>Seg</span>
-        <span>Ter</span>
-        <span>Qua</span>
-        <span>Qui</span>
-        <span>Sex</span>
-        <span>Sáb</span>
-      </div>
-
-      <div className="mt-2 grid grid-cols-7 gap-1">
-        {Array.from({ length: firstDayOfMonth }).map((_, index) => (
-          <span key={`empty-${index}`} />
+      <div className="grid grid-cols-7 gap-1">
+        {WEEKDAYS.map((weekday) => (
+          <div
+            key={weekday}
+            className="flex h-8 items-center justify-center text-xs font-semibold text-gray-500"
+          >
+            {weekday}
+          </div>
         ))}
 
-        {days.map((day) => {
-          const selectedDate = parseDate(value);
+        {calendarDays.map((day, index) => {
+          if (day === null) {
+            return <div key={`empty-${index}`} className="h-9" />;
+          }
 
-          const isSelected =
-            selectedDate.getFullYear() === year &&
-            selectedDate.getMonth() === month &&
-            selectedDate.getDate() === day;
+          const date = new Date(year, month, day);
+          const isSelected = selectedDate ? sameDay(date, selectedDate) : false;
+          const isToday = sameDay(date, today);
 
           return (
             <button
@@ -155,16 +264,43 @@ export default function Calendar({
               type="button"
               disabled={disabled}
               onClick={() => selectDay(day)}
-              className={`h-9 rounded-md text-sm transition ${
+              aria-label={`${day} de ${MONTHS[month]} de ${year}`}
+              aria-pressed={isSelected}
+              className={`relative flex h-9 items-center justify-center rounded-lg text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:cursor-not-allowed disabled:opacity-40 ${
                 isSelected
-                  ? "bg-sky-600 text-white"
-                  : "text-gray-700 hover:bg-sky-100"
+                  ? "bg-sky-600 font-semibold text-white shadow-sm hover:bg-sky-700"
+                  : isToday
+                    ? "border border-sky-500 font-semibold text-sky-700 hover:bg-sky-50"
+                    : "text-gray-700 hover:bg-gray-100"
               }`}
             >
               {day}
+              {isToday && !isSelected && (
+                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-sky-600" />
+              )}
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={goToToday}
+          className="rounded-lg px-3 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 disabled:opacity-40"
+        >
+          Hoje
+        </button>
+
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onClose}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-40"
+        >
+          Fechar
+        </button>
       </div>
     </div>
   );

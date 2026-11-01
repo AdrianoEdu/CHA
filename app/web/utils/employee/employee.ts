@@ -7,7 +7,7 @@ import { EmployeePositionEnum } from "../../constants/enum";
 import { CreateEmployeeDto } from "../../dto/employee.dto";
 
 type ValidateEmployeeFormProps = {
-  employee: CreateEmployeeDto;
+  employee: Partial<CreateEmployeeDto>;
   maxLength: number;
 };
 

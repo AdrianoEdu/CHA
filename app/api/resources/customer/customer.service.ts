@@ -84,7 +84,7 @@ class CustomerService {
 
     await this.databaseService.customer.update({
       where: { id: customer.id },
-      data: { isActive: false },
+      data: { isActive: !customer.isActive },
     });
   }
 }

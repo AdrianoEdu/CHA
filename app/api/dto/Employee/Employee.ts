@@ -8,22 +8,22 @@ import { EmployeePositionEnum } from "@/app/generated/prisma";
 export interface CreateEmployeeDto {
   id?: string;
   name: string;
+  salary: number;
   document: string;
-  createdAt?: Date;
   dateOfBirth: Date;
   isActive?: boolean;
-  updatedAt?: Date | null;
   employeePositionId: string;
 }
 
 export interface EmployeeDto {
   id: string;
   name: string;
-  document: string;
+  salary: number;
   createdAt: Date;
-  dateOfBirth: Date | null;
+  document: string;
   isActive: boolean;
   updatedAt?: Date | null;
+  dateOfBirth: Date | null;
   employeePosition: EmployeePositionDto;
 }
 

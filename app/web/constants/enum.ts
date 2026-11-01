@@ -73,3 +73,8 @@ export enum TokenExpirationUnit {
   HOURS = "HOURS",
   DAYS = "DAYS",
 }
+
+export enum EntityProp {
+  Employee = "employee",
+  Customer = "customer",
+}

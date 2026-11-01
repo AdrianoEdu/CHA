@@ -8,10 +8,10 @@
 import { UserRole } from "@/app/generated/prisma";
 import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
-import UpdateStatusEmployeeModal from "@/app/web/components/modal/update-status-employee/update-status-employee";
+import UpdateStatusEntityModal from "@/app/web/components/modal/update-status-entity/update-status-entity";
 import UspertEmployeeModal from "@/app/web/components/modal/upsert-employee/upsert-employee";
 import Table, { TableColumn } from "@/app/web/components/table/table";
-import { EmployeePositionEnum } from "@/app/web/constants/enum";
+import { EmployeePositionEnum, EntityProp } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { UpdateAccountDto } from "@/app/web/dto/account.dto";
 import { CreateEmployeeDto, EmployeeDto } from "@/app/web/dto/employee.dto";
@@ -27,11 +27,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const { UpsertEmployee, UpdateStatusEmployee, RemoveEmployee } =
-  i18n["Pt-Br"].Modal;
+const { UpsertEmployee, DeactiveEntity, RemoveEmployee } = i18n["Pt-Br"].Modal;
 
 let countEmployee = 0;
 let oldEmployeeList: EmployeeDto[] = [];
+
+const { successActive, successDeactive, activateTitle, deactivateTitle } =
+  DeactiveEntity.employee;
 
 const takeEmployee = 20;
 
@@ -65,19 +67,11 @@ export default function EmployeeScreen() {
     router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
   };
 
-  const handleRegisterEmployee = async ({
-    name,
-    document,
-    dateOfBirth,
-    employeePositionId,
-  }: CreateEmployeeDto): Promise<void> => {
+  const handleRegisterEmployee = async (
+    data: CreateEmployeeDto,
+  ): Promise<void> => {
     try {
-      await employeeService.create({
-        name,
-        document,
-        dateOfBirth,
-        employeePositionId,
-      });
+      await employeeService.create({ ...data });
       toast.success(UpsertEmployee.successRegisterEmployee);
       handleFindEmployees(currentPage);
       closeModal();
@@ -104,11 +98,7 @@ export default function EmployeeScreen() {
     employeeId?: string,
   ): Promise<void> => {
     employeeService.patch({ isActive: !status, id: employeeId }).then(() => {
-      toast.success(
-        status
-          ? UpdateStatusEmployee.successDeactiveEmployee
-          : UpdateStatusEmployee.successActiveEmployee,
-      );
+      toast.success(status ? successDeactive : successActive);
       handleFindEmployees(currentPage);
       closeModal();
     });
@@ -174,14 +164,13 @@ export default function EmployeeScreen() {
   ): void => {
     e.stopPropagation();
     openModal(
-      <UpdateStatusEmployeeModal
+      <UpdateStatusEntityModal
         isActive={status}
         onCancel={closeModal}
+        entity={EntityProp.Employee}
         onConfirm={() => handleUpdateStatusEmployee(status, employeeId)}
       />,
-      status
-        ? UpdateStatusEmployee.deactivateTitle
-        : UpdateStatusEmployee.activateTitle,
+      status ? deactivateTitle : activateTitle,
     );
   };
 
@@ -235,7 +224,7 @@ export default function EmployeeScreen() {
 
   const getColumns = (): TableColumn<EmployeeDto>[] => {
     const columns: TableColumn<EmployeeDto>[] = [
-      { label: "Criado em", accessor: "createdAt" },
+      { label: "Data de admissão", accessor: "createdAt" },
       { label: "Nome", accessor: "name" },
       { label: "Documento", accessor: "document" },
       { label: "Data de nascimento", accessor: "dateOfBirth" },

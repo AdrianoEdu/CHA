@@ -1,37 +1,35 @@
-// Copyright (c) 2026-03-11
+/// Copyright (c) 2026-03-11
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
 "use client";
 
+import { EntityProp, RecipientTypeEnum } from "@/app/web/constants/enum";
 import Button from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { cancelButton, registerButton, UpdateStatusEmployee } =
-  i18n["Pt-Br"].Modal;
+const { cancelButton, registerButton, DeactiveEntity } = i18n["Pt-Br"].Modal;
 
-const {
-  activateTitle,
-  deactivateTitle,
-  activateDescription,
-  deactivateDescription,
-  confirmActivateButton,
-  confirmDeactivateButton,
-} = UpdateStatusEmployee;
-
-export type ToggleEmployeeStatusModalProps = {
+export type UpdateStatusEntityModalProps = {
+  entity: EntityProp;
   isActive?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
-export default function UpdateStatusEmployeeModal({
+export default function UpdateStatusEntityModal({
+  entity,
+  isActive = false,
   onCancel,
   onConfirm,
-  isActive = false,
-}: Readonly<ToggleEmployeeStatusModalProps>) {
-  const title = isActive ? deactivateTitle : activateTitle;
+}: Readonly<UpdateStatusEntityModalProps>) {
+  const {
+    activateDescription,
+    deactivateDescription,
+    confirmActivateButton,
+    confirmDeactivateButton,
+  } = DeactiveEntity[entity];
 
   const description = isActive ? deactivateDescription : activateDescription;
 

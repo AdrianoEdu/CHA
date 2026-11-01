@@ -25,9 +25,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { maskPhone } from "@/app/web/utils/customer/customer";
+import UpdateStatusEntityModal from "@/app/web/components/modal/update-status-entity/update-status-entity";
+import { EntityProp } from "@/app/web/constants/enum";
+import { i18n } from "@/app/web/constants/i18n";
 
 let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
+
+const { DeactiveEntity } = i18n["Pt-Br"].Modal;
+
+const { activateTitle, deactivateTitle, successActive, successDeactive } =
+  DeactiveEntity.customer;
 
 const takeCustomers = 20;
 
@@ -162,20 +170,29 @@ export default function Customer() {
   const handleRemoveCustomer = (customerId: string): void => {
     customerService.delete(customerId).then(() => {
       closeModal();
-      toast.success("Cliente removido com sucesso");
       handleGetAllCustomers(currentPage);
+      toast.success(status ? activateTitle : deactivateTitle);
     });
   };
 
   const handleOpenModalRemove = (
     e: React.MouseEvent,
-    customerId: string,
+    status: boolean,
+    employeeId: string,
   ): void => {
     e.stopPropagation();
 
-    const remove = (): void => handleRemoveCustomer(customerId);
+    const remove = (): void => handleRemoveCustomer(employeeId);
 
-    openModal(<RemoveModal onClose={closeModal} onConfirm={remove} />);
+    openModal(
+      <UpdateStatusEntityModal
+        onConfirm={remove}
+        isActive={status}
+        onCancel={closeModal}
+        entity={EntityProp.Customer}
+      />,
+      status ? deactivateTitle : activateTitle,
+    );
   };
 
   const getColumns = (): TableColumn<GetCustomerDto>[] => {
@@ -201,9 +218,9 @@ export default function Customer() {
           return (
             <div className="flex gap-2 justify-center">
               <Button
-                onClick={(e) => handleOpenModalRemove(e, row.id)}
                 icon={row.isActive ? <DisabledIcon /> : <EnableIcon />}
                 className={row.isActive ? "bg-red-500" : "bg-green-500"}
+                onClick={(e) => handleOpenModalRemove(e, row.isActive, row.id)}
               />
 
               {row.isActive && (

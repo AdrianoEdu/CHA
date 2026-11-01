@@ -85,7 +85,9 @@ const employeePositionList: SelectOption[] = [
 
 const defaultEmployee: CreateEmployeeDto = {
   name: "",
+  salary: 0,
   document: "",
+  isActive: true,
   employeePositionId: "",
   dateOfBirth: new Date(),
 };
@@ -93,7 +95,6 @@ const defaultEmployee: CreateEmployeeDto = {
 const MAX_LENGTH_CPF = 14;
 
 export default function RegisterEmployeeScreen(): JSX.Element {
-  const [status, setStatus] = useState(true);
   const [disable, setDisable] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [employee, setEmployee] = useState<CreateEmployeeDto>(defaultEmployee);
@@ -162,6 +163,26 @@ export default function RegisterEmployeeScreen(): JSX.Element {
           onChange={(e) =>
             handleSetEmployee({
               document: e.target.value,
+            })
+          }
+        />
+
+        <Input
+          label="Salário:"
+          className="flex-1"
+          value={employee.salary}
+          regex={Regex.onlyNumbers}
+          inputType={InputType.Money}
+          onRegexError={handleIsRegexError}
+          onChange={(e) =>
+            handleSetEmployee({
+              salary: Number(
+                e.target.value
+                  .replace(/\s/g, "")
+                  .replace("R$", "")
+                  .replace(/\./g, "")
+                  .replace(",", "."),
+              ),
             })
           }
         />

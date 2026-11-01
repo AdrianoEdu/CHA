@@ -9,6 +9,7 @@ import { PaginationDto } from "./pagination.dto";
 export interface EmployeeDto {
   id?: string;
   name: string;
+  salary: number;
   document: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -24,19 +25,16 @@ export interface EmployeePoistionDto {
 
 export interface CreateEmployeeDto {
   name: string;
-  document: string;
-  dateOfBirth: Date;
-  employeePositionId: string;
-}
-
-export interface UpdateEmployeeDto {
-  id: string;
-  name: string;
+  salary: number;
   document: string;
   dateOfBirth: Date;
   isActive?: boolean;
   employeePositionId: string;
 }
+
+export type UpdateEmployeeDto = Partial<CreateEmployeeDto> & {
+  id: string;
+};
 
 export type EmployeeWhere = Partial<EmployeeDto>;
 

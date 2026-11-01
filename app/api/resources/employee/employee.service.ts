@@ -5,7 +5,6 @@
 
 import {
   CreateEmployeeDto,
-  EmployeeDto,
   GetEmployeeDtoParams,
   UpdateEmployeeDto,
 } from "@/app/api/dto/Employee/Employee";
@@ -13,6 +12,7 @@ import { databaseService } from "../../providers/database/DatabaseService";
 import { Employee, EmployeePositionEnum, Prisma } from "@/app/generated/prisma";
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { NotFoundException } from "../../error/NotFoundException";
+import { EmployeeWithRelations } from "./type";
 
 class EmployeeService {
   private databaseService = databaseService;
@@ -23,7 +23,10 @@ class EmployeeService {
     });
 
     return this.databaseService.employee.create({
-      data: { ...employee, employeePositionId: employeePosition?.id ?? "" },
+      data: {
+        ...employee,
+        employeePositionId: employeePosition?.id ?? "",
+      },
     });
   }
 
@@ -72,14 +75,16 @@ class EmployeeService {
       include: { ...baseQuery.include, employeePosition: true },
     });
 
-    return result;
+    return this.mapEmployee(result);
   }
 
   async findAll(baseQuery: Prisma.EmployeeFindManyArgs) {
-    return await this.databaseService.employee.findMany({
+    const result = await this.databaseService.employee.findMany({
       ...baseQuery,
       include: { ...baseQuery.include, employeePosition: true },
     });
+
+    return this.mapEmployee(result);
   }
 
   async updateStatusUser({
@@ -114,6 +119,20 @@ class EmployeeService {
     if (!employee) throw new NotFoundException();
 
     await this.databaseService.employee.delete({ where: { id } });
+  }
+
+  private async mapEmployee(data: EmployeeWithRelations[]) {
+    return data.map((item) => ({
+      id: item.id,
+      name: item.name,
+      isActive: item.isActive,
+      document: item.document,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      salary: Number(item.salary),
+      dateOfBirth: item.dateOfBirth,
+      employeePosition: item.employeePosition,
+    }));
   }
 }
 

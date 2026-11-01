@@ -117,7 +117,7 @@ export default function UspertEmployeeModal({
 
   const formStatus = validateEmployeeForm({
     maxLength: MAX_LENGTH_CPF,
-    employee: { ...employee, employeePositionId: employee.employeePositionId },
+    employee: { ...employee },
   });
 
   useEffect(() => {
@@ -134,10 +134,11 @@ export default function UspertEmployeeModal({
     if (isRegister) {
       if (onRegister) {
         await onRegister({
-          name: employee.name,
-          document: employee.document,
-          dateOfBirth: employee.dateOfBirth,
-          employeePositionId: employee.employeePositionId,
+          name: employee.name ?? "",
+          salary: employee.salary ?? 0,
+          document: employee.document ?? "",
+          dateOfBirth: employee.dateOfBirth ?? new Date(),
+          employeePositionId: employee.employeePositionId ?? "",
         });
       }
 
@@ -226,6 +227,26 @@ export default function UspertEmployeeModal({
           onSelectOption={(data) => {
             handleSetEmployee({ employeePositionId: data?.id });
           }}
+        />
+
+        <Input
+          name="Salário:"
+          className="flex-1"
+          value={employee.salary}
+          regex={Regex.onlyNumbers}
+          inputType={InputType.Money}
+          onRegexError={handleIsRegexError}
+          onChange={(e) =>
+            handleSetEmployee({
+              salary: Number(
+                e.target.value
+                  .replace(/\s/g, "")
+                  .replace("R$", "")
+                  .replace(/\./g, "")
+                  .replace(",", "."),
+              ),
+            })
+          }
         />
       </div>
 

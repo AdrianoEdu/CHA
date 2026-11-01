@@ -44,17 +44,31 @@ export const PtBr = {
         "Por favor, insira somente caracteres válidos (apenas letras).",
       successRegisterEmployeeAdvance: "Adiantamento registrado com sucesso!",
     },
-    UpdateStatusEmployee: {
-      activateTitle: "Habilitar Funcionáio",
-      deactivateTitle: "Desativar Funcionário",
-      activateDescription:
-        "Tem certeza que deseja ativar este funcionário? Ele poderá acessar o sistema novamente.",
-      deactivateDescription:
-        "Tem certeza que deseja desativar este funcionário? Ele não poderá acessar o sistema enquanto estiver desativado.",
-      confirmActivateButton: "Ativar",
-      confirmDeactivateButton: "Desativar",
-      successActiveEmployee: "O funcionário foi ativado com sucesso.",
-      successDeactiveEmployee: "O funcionário foi desativado com sucesso.",
+    DeactiveEntity: {
+      employee: {
+        activateTitle: "Habilitar funcionário",
+        deactivateTitle: "Desativar funcionário",
+        activateDescription:
+          "Tem certeza que deseja ativar este funcionário? Ele poderá acessar o sistema novamente.",
+        deactivateDescription:
+          "Tem certeza que deseja desativar este funcionário? Ele não poderá acessar o sistema enquanto estiver desativado.",
+        confirmActivateButton: "Ativar",
+        confirmDeactivateButton: "Desativar",
+        successActive: "O funcionário foi ativado com sucesso.",
+        successDeactive: "O funcionário foi desativado com sucesso.",
+      },
+      customer: {
+        activateTitle: "Habilitar cliente",
+        deactivateTitle: "Desativar cliente",
+        activateDescription:
+          "Tem certeza que deseja ativar este cliente? Ele poderá acessar o sistema novamente.",
+        deactivateDescription:
+          "Tem certeza que deseja desativar este cliente? Ele não poderá acessar o sistema enquanto estiver desativado.",
+        confirmActivateButton: "Ativar",
+        confirmDeactivateButton: "Desativar",
+        successActive: "O cliente foi ativado com sucesso.",
+        successDeactive: "O cliente foi desativado com sucesso.",
+      },
     },
     RemoveEmployee: {
       title: "Remoção de funcionário",
