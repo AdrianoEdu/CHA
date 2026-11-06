@@ -122,7 +122,9 @@ model EmployeeVacation {
   employeeId       String
   acquisitionStart DateTime @db.Date
   acquisitionEnd   DateTime @db.Date
-  periods          Json     @default("[]")
+  remainingDays    Int?      @default(30)
+  lastCalculationDate DateTime? @db.Date
+  periods          Json?    @default("[]")
 
   employee         Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
 

@@ -18,15 +18,36 @@ class EmployeeService {
   private databaseService = databaseService;
 
   async create(employee: CreateEmployeeDto): Promise<Employee> {
-    const employeePosition = await databaseService.employeePosition.findFirst({
-      where: { position: employee.employeePositionId as EmployeePositionEnum },
-    });
+    const employeePosition =
+      await this.databaseService.employeePosition.findFirst({
+        where: {
+          position: employee.employeePositionId as EmployeePositionEnum,
+        },
+      });
 
-    return this.databaseService.employee.create({
-      data: {
-        ...employee,
-        employeePositionId: employeePosition?.id ?? "",
-      },
+    return this.databaseService.$transaction(async (tx) => {
+      const createdEmployee = await tx.employee.create({
+        data: {
+          ...employee,
+          employeePositionId: employeePosition?.id ?? "",
+        },
+      });
+
+      const acquisitionStart = createdEmployee.createdAt;
+      const acquisitionEnd = new Date(acquisitionStart);
+
+      acquisitionEnd.setFullYear(acquisitionEnd.getFullYear() + 1);
+      acquisitionEnd.setDate(acquisitionEnd.getDate() - 1);
+
+      await tx.employeeVacation.create({
+        data: {
+          employeeId: createdEmployee.id,
+          acquisitionStart,
+          acquisitionEnd,
+        },
+      });
+
+      return createdEmployee;
     });
   }
 

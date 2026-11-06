@@ -103,9 +103,13 @@ class RequestService {
     return this.request<TResponse>(`${url}`, { method: "GET" });
   }
 
-  getByFilters<TBody, TResponse>(url: string, filters: TBody) {
-    const query = filters ? `?${new URLSearchParams(filters).toString()}` : "";
-    return this.request<TResponse>(`${url}`, { method: "GET" });
+  getByFilters<TBody extends Record<string, string>, TResponse>(
+    url: string,
+    filters: TBody,
+  ) {
+    const query = new URLSearchParams(filters).toString();
+
+    return this.request<TResponse>(`${url}?${query}`, { method: "GET" });
   }
 
   post<TBody, TResponse>(url: string, data?: TBody) {

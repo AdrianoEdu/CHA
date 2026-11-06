@@ -289,8 +289,6 @@ export default function SystemConfigPage() {
       }));
       toast.success("Backup gerado e salvo com sucesso!");
     } catch (error) {
-      alert(error);
-
       if (error instanceof DOMException && error.name === "AbortError") {
         return;
       }
