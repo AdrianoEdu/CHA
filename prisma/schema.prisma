@@ -291,8 +291,8 @@ model Payment {
 
 enum RecurringPaymentDateType {
   FIXED_DAY
+  BIWEEKLY
   FIFTH_BUSINESS_DAY
-  EMPLOYEE_SALARY
 }
 
 enum BusinessDayAdjustment {

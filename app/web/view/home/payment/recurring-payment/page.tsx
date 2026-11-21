@@ -38,29 +38,9 @@ const getColumns = ({
   { label: "Criado em", accessor: "createdAt" },
   { label: "Nome", accessor: "name" },
   {
-    label: "Pagamento recorretne?",
-    accessor: "isFixedAmount",
-    render(row) {
-      return row.isMonthly ? "Sim" : "Não";
-    },
-  },
-  {
-    label: "Valor Fixo?",
-    accessor: "isFixedAmount",
-    render(row) {
-      return row.isFixedAmount ? "Sim" : "Não";
-    },
-  },
-  {
-    label: "Valor",
-    accessor: "fixedAmount",
-    render: (row) => `R$ ${row.fixedAmount?.toFixed(2) ?? 0}`,
-  },
-  {
     label: "Destinatário",
     render: (row) => {
-      if (row.employee) return row.employee.name ?? "";
-      if (row.customer) return row.customer.name ?? "";
+      return row?.employee?.name ?? "";
     },
   },
   {
@@ -114,21 +94,9 @@ export default function ReceiveCheck() {
   }, [countRecurringPayment]);
 
   const handleOpenModal = (item?: GetRecurringPaymentDto): void => {
-    const data = item
-      ? {
-          id: item.id ?? "",
-          createdAt: item.createdAt,
-          fixedAmount: item.fixedAmount,
-          isFixedAmount: item.isFixedAmount,
-          isMonthly: item.isMonthly,
-          name: item.name,
-          updatedAt: item.updatedAt,
-        }
-      : undefined;
-
     openModal(
       <UpsertRecurringPaymentkModal
-        data={data}
+        data={item}
         onClose={closeModal}
         onEdit={handleOnUpdate}
         onRegister={handleOnRegister}

@@ -15,9 +15,8 @@ async function processRecurringPayments(): Promise<void> {
   running = true;
 
   try {
-    const result = await recurringPaymentService.generateMonthlyPayments();
-
-    console.log(`[Recurring Payment Cron] Pagamentos gerados: ${result.count}`);
+    // const result = await recurringPaymentService.generateMonthlyPayments();
+    // console.log(`[Recurring Payment Cron] Pagamentos gerados: ${result.count}`);
   } catch (error) {
     console.error("[Recurring Payment Cron] Erro ao gerar pagamentos:", error);
   } finally {

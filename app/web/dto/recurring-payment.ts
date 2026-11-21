@@ -11,9 +11,9 @@ import { EmployeeDto } from "./employee.dto";
 
 export type CreateRecurringPaymentDto = {
   name: string;
-  dueDay: number;
+  dueDay?: number;
   employeeId?: string;
-  adjustment: BusinessDayAdjustment;
+  adjustment?: BusinessDayAdjustment;
   dueDateType: RecurringPaymentDateType;
 };
 
