@@ -47,6 +47,17 @@ export enum AccountType {
   CASHBOOK = "CASHBOOK",
 }
 
+export enum RecurringPaymentDateType {
+  FIXED_DAY = "FIXED_DAY",
+  FIFTH_BUSINESS_DAY = "FIFTH_BUSINESS_DAY",
+  EMPLOYEE_SALARY = "EMPLOYEE_SALARY",
+}
+
+export enum BusinessDayAdjustment {
+  PREVIOUS = "PREVIOUS",
+  NEXT = "NEXT",
+}
+
 export enum EmployeePositionEnum {
   TAX_DEPARTMENT_MANAGER = "TAX_DEPARTMENT_MANAGER",
   PERSONNEL_DEPARTMENT_MANAGER = "PERSONNEL_DEPARTMENT_MANAGER",

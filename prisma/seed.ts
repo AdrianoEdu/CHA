@@ -12,6 +12,7 @@ import { seedCashBookAccount } from "./seeds/cash-book-account-seed";
 import { seedEmployeePosition } from "./seeds/employee-position";
 import { seedEmployee } from "./seeds/employee";
 import { seedCurrentAccount } from "./seeds/current-account";
+import { seedFinancialCategory } from "./seeds/financial-cateogry-seed";
 
 const prisma = new PrismaClient();
 
@@ -26,6 +27,7 @@ async function main() {
   await seedCurrentAccount(prisma);
   await seedEmployeePosition(prisma);
   await seedEmployee(prisma);
+  await seedFinancialCategory(prisma);
 
   console.log("✅ Seeds finalizadas");
 }

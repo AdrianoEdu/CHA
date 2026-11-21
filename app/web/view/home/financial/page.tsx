@@ -10,6 +10,7 @@ import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpsertFinancialCategory from "@/app/web/components/modal/upsert-financial-category/upsert-financial-category";
 import Table, { TableColumn } from "@/app/web/components/table/table";
+import { AccountType } from "@/app/web/constants/enum";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
@@ -136,12 +137,13 @@ export default function FinancialCategory() {
           name: { contains: value, mode: "insensitive" },
         } as Partial<GetFinancialCategoryDto>;
 
-        const { count, financialCategories } = await financialCategoryService.findAll({
-          all: true,
-          skip: currentSkip,
-          take: takeFinancial,
-          where: filteredFields,
-        });
+        const { count, financialCategories } =
+          await financialCategoryService.findAll({
+            all: true,
+            skip: currentSkip,
+            take: takeFinancial,
+            where: filteredFields,
+          });
 
         countFinancial = count;
 
@@ -175,6 +177,12 @@ export default function FinancialCategory() {
     const columns: TableColumn<GetFinancialCategoryDto>[] = [
       { label: "Criado em", accessor: "createdAt" },
       { label: "Nome", accessor: "name" },
+      {
+        label: "Referente",
+        render(row) {
+          return row.accountType === AccountType.BANK ? "Banco" : "Livro Caixa";
+        },
+      },
       {
         label: "Tipo",
         accessor: "financialFlowType",

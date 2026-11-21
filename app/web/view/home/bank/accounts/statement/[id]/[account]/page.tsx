@@ -23,6 +23,7 @@ import { accountService } from "@/app/web/services/accountService/acountService"
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { AccountType } from "@/app/web/constants/enum";
 
 const takeBankStatement = 20;
 
@@ -167,6 +168,7 @@ export default function StatementPage() {
       <UpsertFinancialEntryModal
         data={data}
         onClose={closeModal}
+        accountType={AccountType.BANK}
         onUpdate={handleUpdateBankStatement}
         onRegister={handleRegisterBankStatemen}
       />,
@@ -205,7 +207,11 @@ export default function StatementPage() {
         />
       </div>
 
-      <FloatingButton onClick={handleNewStatement} />
+      <FloatingButton
+        onClick={() => {
+          handleNewStatement();
+        }}
+      />
 
       <div ref={loadMoreRef} style={{ height: 1 }} />
     </div>

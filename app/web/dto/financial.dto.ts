@@ -3,22 +3,25 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ActionEnum, FinancialFlowType } from "../constants/enum";
+import { AccountType, ActionEnum, FinancialFlowType } from "../constants/enum";
 import { PaginationDto } from "./pagination.dto";
 
 export type CreateFinancialCategoryDto = {
   name: string;
+  accountType: AccountType;
   financialFlowType: FinancialFlowType;
 };
 
 export type UpdateFinancialCategoryDto = Partial<CreateFinancialCategoryDto> & {
   id: string;
+  accountType?: AccountType;
 };
 
 export type GetFinancialCategoryDto = {
   id: string;
   name: string;
   createdAt: Date;
+  accountType: AccountType;
   financialFlowType: FinancialFlowType;
 };
 

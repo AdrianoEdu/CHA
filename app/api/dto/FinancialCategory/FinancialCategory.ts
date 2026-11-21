@@ -3,21 +3,24 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { FinancialFlowType } from "@/app/generated/prisma";
+import { AccountType, FinancialFlowType } from "@/app/generated/prisma";
 
 export type CreateFinancialCategoryDto = {
   name: string;
+  accountType: AccountType;
   financialFlowType: FinancialFlowType;
 };
 
 export type UpdateFinancialCategoryDto = Partial<CreateFinancialCategoryDto> & {
   id: string;
+  accountType?: AccountType;
 };
 
 export type GetFinancialCategoryDto = {
   id: string;
   name: string;
   createdAt: Date;
+  accountType: AccountType;
   financialFlowType: FinancialFlowType;
 };
 

@@ -154,7 +154,7 @@ export default function SideBar() {
             href="/web/view/home/payment/recurring-payment"
             className="px-8 py-3 hover:bg-gray-700 transition"
           >
-            Contas programados
+            Contas programadas
           </Link>
         </SideBarAction>
 

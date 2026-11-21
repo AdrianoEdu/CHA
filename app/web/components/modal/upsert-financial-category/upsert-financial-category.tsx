@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 import Input from "../../input/input";
 import ComboBox from "../../combobox/combobox";
-import { FinancialFlowType } from "@/app/web/constants/enum";
+import { AccountType, FinancialFlowType } from "@/app/web/constants/enum";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 import {
@@ -16,10 +16,16 @@ import {
   UpdateFinancialCategoryDto,
 } from "@/app/web/dto/financial.dto";
 
-export type SelectComboboxProps = {
+export type SelectComboboxFinancialFlowTypeProps = {
   id?: string;
   label: string;
   value: FinancialFlowType;
+};
+
+export type SelectComboboxAccountTypeProps = {
+  id?: string;
+  label: string;
+  value: AccountType;
 };
 
 const financialCategoryTypeLabels: Record<FinancialFlowType, string> = {
@@ -27,7 +33,7 @@ const financialCategoryTypeLabels: Record<FinancialFlowType, string> = {
   OUT: "Saída",
 };
 
-const options: SelectComboboxProps[] = (
+const options: SelectComboboxFinancialFlowTypeProps[] = (
   Object.values(FinancialFlowType) as FinancialFlowType[]
 ).map((type) => ({
   value: type,
@@ -50,7 +56,10 @@ export default function UpsertFinancialCategory({
   onRegister,
 }: Readonly<FinancialCategoryProps>) {
   const [name, setName] = useState("");
-  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
+  const [selected, setSelected] =
+    useState<SelectComboboxFinancialFlowTypeProps | null>(null);
+  const [accountTypeSelect, setAccountTypeSelect] =
+    useState<SelectComboboxAccountTypeProps | null>(null);
 
   useEffect(() => {
     if (!data) return;
@@ -68,11 +77,21 @@ export default function UpsertFinancialCategory({
 
   const handleUpsertFinancialCategory = (): void => {
     if (onUpdated) {
-      onUpdated({ id: data?.id!, name, financialFlowType: selected?.value });
+      onUpdated({
+        id: data?.id!,
+        name,
+        financialFlowType: selected?.value,
+        accountType: accountTypeSelect?.value,
+      });
       return;
     }
 
-    if (onRegister) onRegister({ name, financialFlowType: selected?.value! });
+    if (onRegister)
+      onRegister({
+        name,
+        financialFlowType: selected?.value!,
+        accountType: accountTypeSelect?.value!,
+      });
   };
 
   return (
@@ -84,12 +103,23 @@ export default function UpsertFinancialCategory({
         onChange={(e) => setName(e.target.value)}
       />
 
-      <ComboBox<SelectComboboxProps>
+      <ComboBox<SelectComboboxFinancialFlowTypeProps>
         options={options}
         valueKey={"value"}
         labelKey={"label"}
         selected={selected}
         onSelectOption={setSelected}
+      />
+
+      <ComboBox<SelectComboboxAccountTypeProps>
+        options={[
+          { label: "Banco", value: AccountType.BANK },
+          { label: "Livro Caixa", value: AccountType.CASHBOOK },
+        ]}
+        valueKey={"value"}
+        labelKey={"label"}
+        selected={accountTypeSelect}
+        onSelectOption={setAccountTypeSelect}
       />
 
       <div className="mt-6 flex justify-end gap-4">

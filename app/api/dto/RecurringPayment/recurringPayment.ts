@@ -3,6 +3,10 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import {
+  BusinessDayAdjustment,
+  RecurringPaymentDateType,
+} from "@/app/generated/prisma";
 import { GetCustomerDto } from "../Customer/Customer";
 import { EmployeeDto } from "../Employee/Employee";
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
@@ -10,12 +14,9 @@ import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory"
 export type CreateRecurringPaymentDto = {
   name: string;
   dueDay: number;
-  isMonthly: boolean;
-  customerId?: string;
   employeeId?: string;
-  fixedAmount?: number;
-  isFixedAmount: boolean;
-  financialCategoryId: string;
+  adjustment: BusinessDayAdjustment;
+  dueDateType: RecurringPaymentDateType;
 };
 
 export type UpdateRecurringPaymentDto = Partial<CreateRecurringPaymentDto> & {
@@ -28,12 +29,9 @@ export type GetRecurringPaymentDto = {
   dueDay: number;
   createdAt: Date;
   updatedAt: Date;
-  isMonthly: boolean;
-  fixedAmount?: number;
-  isFixedAmount: boolean;
   employee?: EmployeeDto;
-  customer?: GetCustomerDto;
-  financialCategory: GetFinancialCategoryDto;
+  adjustment: BusinessDayAdjustment;
+  dueDateType: RecurringPaymentDateType;
 };
 
 export type GetRecurringPaymentDtoParams = {

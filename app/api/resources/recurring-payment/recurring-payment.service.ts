@@ -1,4 +1,4 @@
-// Copyright (c) 2026-03-12
+// Copyright (c) 2026-11-07
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -14,7 +14,6 @@ import {
   RemoverRecurringPaymentDto,
   UpdateRecurringPaymentDto,
 } from "../../dto/RecurringPayment/recurringPayment";
-import { RecurrentPaymentWithRelations } from "./type";
 
 class RecurringPaymentService {
   private databaseService = databaseService;
@@ -25,10 +24,12 @@ class RecurringPaymentService {
     });
   }
 
-  async update(data: UpdateRecurringPaymentDto) {
-    return await this.databaseService.recurringPayment.update({
-      where: { id: data.id },
-      data,
+  async update(data: UpdateRecurringPaymentDto): Promise<void> {
+    const { id, ...updateData } = data;
+
+    await this.databaseService.recurringPayment.update({
+      where: { id },
+      data: updateData,
     });
   }
 
@@ -54,13 +55,15 @@ class RecurringPaymentService {
       where: baseQuery.where,
     });
 
-    if (params.where)
-      return {
-        count,
-        recurringPayment: await this.findManyByFilters(baseQuery),
-      };
+    const recurringPayment =
+      await this.databaseService.recurringPayment.findMany({
+        ...baseQuery,
+      });
 
-    return { count, recurringPayment: await this.findMany(baseQuery) };
+    return {
+      count,
+      recurringPayment: recurringPayment as GetRecurringPaymentDto[],
+    };
   }
 
   async findMany(
@@ -68,10 +71,9 @@ class RecurringPaymentService {
   ): Promise<GetRecurringPaymentDto[]> {
     const result = await this.databaseService.recurringPayment.findMany({
       ...baseQuery,
-      include: { ...baseQuery.include, financialCategory: true },
     });
 
-    return this.mapperRecurringPayment(result);
+    return result as GetRecurringPaymentDto[];
   }
 
   async findManyByFilters(
@@ -79,26 +81,12 @@ class RecurringPaymentService {
   ): Promise<GetRecurringPaymentDto[]> {
     const result = await this.databaseService.recurringPayment.findMany({
       ...baseQuery,
-      include: { ...baseQuery.include, financialCategory: true },
     });
 
-    return this.mapperRecurringPayment(result);
+    return result as GetRecurringPaymentDto[];
   }
 
-  async remove({ id }: RemoverRecurringPaymentDto) {
-    const count = await this.databaseService.payment.count({
-      where: {
-        recurringPaymentId: id,
-      },
-    });
-
-    if (count > 0) {
-      throw new HttpException(
-        "Não é possível excluir este pagamento recorrente, pois existem pagamentos associados a ele.",
-        400,
-      );
-    }
-
+  async remove({ id }: RemoverRecurringPaymentDto): Promise<void> {
     const recurringPayment =
       await this.databaseService.recurringPayment.findUnique({
         where: { id },
@@ -108,83 +96,20 @@ class RecurringPaymentService {
       throw new HttpException("Pagamento recorrente não encontrado.", 404);
     }
 
+    const count = await this.databaseService.payment.count({
+      where: { recurringPaymentId: id },
+    });
+
+    if (count > 0) {
+      throw new HttpException(
+        "Não é possível excluir este pagamento recorrente, pois existem pagamentos associados a ele.",
+        400,
+      );
+    }
+
     await this.databaseService.recurringPayment.delete({
       where: { id },
     });
-  }
-
-  private mapperRecurringPayment(
-    data: RecurrentPaymentWithRelations[],
-  ): GetRecurringPaymentDto[] {
-    return data.map((item) => ({
-      ...item,
-      fixedAmount: Number(item.fixedAmount),
-      financialCategory: item.financialCategory,
-    }));
-  }
-
-  async generateMonthlyPayments(): Promise<{ count: number }> {
-    const recurringPayments = await databaseService.recurringPayment.findMany({
-      where: {
-        isMonthly: true,
-      },
-    });
-
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    let count = 0;
-
-    for (const recurringPayment of recurringPayments) {
-      const createdAt = recurringPayment.createdAt;
-
-      const startYear = createdAt.getFullYear();
-      const startMonth = createdAt.getMonth();
-
-      for (
-        let year = startYear, month = startMonth;
-        year < currentYear || (year === currentYear && month <= currentMonth);
-        month++
-      ) {
-        if (month > 11) {
-          month = 0;
-          year++;
-        }
-
-        const referenceMonth = new Date(Date.UTC(year, month, 1, 12));
-
-        const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-
-        const dueDay = Math.min(recurringPayment.dueDay, lastDay);
-
-        const dueDate = new Date(Date.UTC(year, month, dueDay, 12));
-
-        const amount = recurringPayment.isFixedAmount
-          ? (recurringPayment.fixedAmount ?? new Prisma.Decimal(0))
-          : new Prisma.Decimal(0);
-
-        const result = await databaseService.payment.createMany({
-          data: [
-            {
-              name: recurringPayment.name,
-              amount,
-              dueDate,
-              referenceMonth,
-              recurringPaymentId: recurringPayment.id,
-              customerId: recurringPayment.customerId,
-              employeeId: recurringPayment.employeeId,
-              financialCategoryId: recurringPayment.financialCategoryId,
-            },
-          ],
-          skipDuplicates: true,
-        });
-
-        count += result.count;
-      }
-    }
-
-    return { count };
   }
 }
 

@@ -1,22 +1,20 @@
-// Copyright (c) 2026-10-15
+// Copyright (c) 2026-10-13
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { GetCustomerDto } from "./customer.dto";
+import {
+  BusinessDayAdjustment,
+  RecurringPaymentDateType,
+} from "../constants/enum";
 import { EmployeeDto } from "./employee.dto";
-import { GetFinancialCategoryDto } from "./financial.dto";
-import { PaginationDto } from "./pagination.dto";
 
 export type CreateRecurringPaymentDto = {
   name: string;
   dueDay: number;
-  isMonthly: boolean;
   employeeId?: string;
-  customerId?: string;
-  fixedAmount?: number;
-  isFixedAmount: boolean;
-  financialCategoryId: string;
+  adjustment: BusinessDayAdjustment;
+  dueDateType: RecurringPaymentDateType;
 };
 
 export type UpdateRecurringPaymentDto = Partial<CreateRecurringPaymentDto> & {
@@ -29,22 +27,10 @@ export type GetRecurringPaymentDto = {
   dueDay: number;
   createdAt: Date;
   updatedAt: Date;
-  isMonthly: boolean;
-  fixedAmount?: number;
-  isFixedAmount: boolean;
   employee?: EmployeeDto;
-  customer?: GetCustomerDto;
-  financialCategory: GetFinancialCategoryDto;
+  adjustment: BusinessDayAdjustment;
+  dueDateType: RecurringPaymentDateType;
 };
-
-export type RecurringPaymentWhere = Partial<GetRecurringPaymentDto>;
-
-export type RecurringPaymentParams = PaginationDto<
-  RecurringPaymentWhere,
-  any,
-  any,
-  any
->;
 
 export type GetRecurringPaymentDtoParams = {
   count: number;

@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../app/generated/prisma" // opcional, você pode omitir para gerar em node_modules
+  provider      = "prisma-client-js"
+  output        = "../app/generated/prisma"
   binaryTargets = ["native", "linux-musl"]
 }
 
@@ -16,14 +16,14 @@ datasource db {
 }
 
 enum ReceivedCheckStatus {
-  RECEIVED    
-  FINALIZED   
+  RECEIVED
+  FINALIZED
   CANCELLED
 }
 
 enum CheckUsageType {
-  DEPOSIT    
-  PAYABLE    
+  DEPOSIT
+  PAYABLE
 }
 
 enum FinancialFlowType {
@@ -33,7 +33,7 @@ enum FinancialFlowType {
 
 enum FinancialStatus {
   OPEN
-  PAID        
+  PAID
   CANCELLED
 }
 
@@ -75,59 +75,50 @@ enum TokenExpirationUnit {
   DAYS
 }
 
-model User {0
-  id        String @id @default(uuid())
-
-  login     String @unique
-  password  String 
-
+model User {
+  id        String     @id @default(uuid())
+  login     String     @unique
+  password  String
   name      String
   lastName  String
-
-  role      UserRole @default(USER)
-
+  role      UserRole   @default(USER)
   status    UserStatus @default(ACTIVE)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@map("users")
 }
 
 model Employee {
-  id                  String    @id @default(uuid())
-  name                String
-  document            String 
-  isActive            Boolean   @default(true)
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime? @updatedAt
-  dateOfBirth         DateTime?
+  id                 String    @id @default(uuid())
+  name               String
+  document           String
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime? @updatedAt
+  dateOfBirth        DateTime?
 
-  salary              Decimal   @db.Decimal(12, 2)
+  employeePositionId String
 
-  employeePositionId  String
-  employeePosition    EmployeePosition @relation(fields: [employeePositionId], references: [id])
-
-  payment             Payment[]
-  advances            EmployeeAdvance[]
-  recurringPayment    RecurringPayment[]
-  employeeVacations   EmployeeVacation[]
+  employeePosition  EmployeePosition   @relation(fields: [employeePositionId], references: [id])
+  payment           Payment[]
+  advances          EmployeeAdvance[]
+  recurringPayment  RecurringPayment[]
+  employeeVacations EmployeeVacation[]
 
   @@map("employees")
 }
 
 model EmployeeVacation {
-  id               String   @id @default(uuid())
-
-  employeeId       String
-  acquisitionStart DateTime @db.Date
-  acquisitionEnd   DateTime @db.Date
-  remainingDays    Int?      @default(30)
+  id                  String    @id @default(uuid())
+  employeeId          String
+  acquisitionStart    DateTime  @db.Date
+  acquisitionEnd      DateTime  @db.Date
   lastCalculationDate DateTime? @db.Date
-  periods          Json?    @default("[]")
+  remainingDays       Int?      @default(30)
+  periods             Json?     @default("[]")
 
-  employee         Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
-
+  employee  Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -136,17 +127,16 @@ model EmployeeVacation {
 }
 
 model EmployeePosition {
-  id          String @id @default(uuid())
-  position    EmployeePositionEnum
-
-  employee    Employee[]
+  id       String               @id @default(uuid())
+  position EmployeePositionEnum
+  employee Employee[]
 }
 
 model EmployeeAdvance {
-  id         String   @id @default(uuid())
-  amount     Decimal  @db.Decimal(15,2)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  amount    Decimal  @db.Decimal(15, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
@@ -163,39 +153,37 @@ model AdvanceReason {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  advances  EmployeeAdvance[]
+  advances EmployeeAdvance[]
 
   @@map("advance_reasons")
 }
 
 model Customer {
-  id                 String @id @default(uuid())
-  name               String
-  code               String
-  numberId           Int    @unique
-  phone              String
-  email              String
-  address            String
-  isActive  Boolean  @default(true)
+  id       String  @id @default(uuid())
+  name     String
+  code     String
+  numberId Int     @unique
+  phone    String
+  email    String
+  address  String
+  isActive Boolean @default(true)
 
-  receivedChecks     ReceivedCheck[]
+  receivedChecks ReceivedCheck[]
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  payment            Payment[] 
-  recurringPayment   RecurringPayment[]
 
   @@map("customers")
 }
 
 model Bank {
-  id                 String @id @default(uuid())
-  name               String
-  agencies           String[]
+  id       String   @id @default(uuid())
+  name     String
+  agencies String[]
 
-  receivedChecks     ReceivedCheck[]
-  account            Account[]
+  receivedChecks ReceivedCheck[]
+  account        Account[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -204,74 +192,65 @@ model Bank {
 }
 
 model Account {
-  id                 String   @id @default(uuid())
-  balance            Decimal  @db.Decimal(15,2)
-  accountNumber      String?
-  accountType        AccountType @default(BANK)
+  id            String      @id @default(uuid())
+  balance       Decimal     @db.Decimal(15, 2)
+  accountNumber String?
+  accountType   AccountType @default(BANK)
+  bankId        String?
+  bank          Bank?       @relation(fields: [bankId], references: [id])
 
-  bankId             String?
-  bank               Bank? @relation(fields: [bankId], references: [id])
+  bankStatement BankStatement[]
+  cashBook      CashBook[]
 
-  bankStatement      BankStatement[]
-  cashBook           CashBook[]
-
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BankStatement {
-  id                   String @id @default(uuid())
-  value                Float
-  title                String
-  description          String
-
-  filePath             String?
-  accountId            String
-  account              Account @relation(fields: [accountId], references: [id])  
-
-  financialCategoryId  String
-  financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  id                  String            @id @default(uuid())
+  value               Float
+  title               String
+  description         String
+  filePath            String?
+  accountId           String
+  account             Account           @relation(fields: [accountId], references: [id])
+  financialCategoryId String
+  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model CashBook {
-  id                   String @id @default(uuid())
-  value                Float
-  title                String
-  description          String
-
-  filePath             String?
-
-  accountId            String
-  account              Account @relation(fields: [accountId], references: [id])  
-
-  financialCategoryId  String
-  financialCategory    FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  id                  String            @id @default(uuid())
+  value               Float
+  title               String
+  description         String
+  filePath            String?
+  accountId           String
+  account             Account           @relation(fields: [accountId], references: [id])
+  financialCategoryId String
+  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model ReceivedCheck {
-  id            String @id @default(uuid())
-  checkNumber   Int
-  amount        Float
-  agency        String
-  goodForAt     DateTime?
-  notes         String?
-  paidAt        DateTime?
-  status        ReceivedCheckStatus @default(RECEIVED)
-
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
-
-  bankId        String
-  bank          Bank @relation(fields: [bankId], references: [id])
-
-  updatedAt     DateTime @updatedAt
-  createdAt     DateTime @default(now())
+  id          String              @id @default(uuid())
+  checkNumber Int
+  amount      Float
+  agency      String
+  goodForAt   DateTime?
+  notes       String?
+  paidAt      DateTime?
+  status      ReceivedCheckStatus @default(RECEIVED)
+  customerId  String
+  customer    Customer            @relation(fields: [customerId], references: [id])
+  bankId      String
+  bank        Bank                @relation(fields: [bankId], references: [id])
+  updatedAt   DateTime            @updatedAt
+  createdAt   DateTime            @default(now())
 
   @@map("received_checks")
 }
@@ -280,81 +259,75 @@ model FinancialCategory {
   id                String            @id @default(uuid())
   name              String
   financialFlowType FinancialFlowType
+  accountType       AccountType
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
-  payment           Payment[]
-  cashBook          CashBook[]
-  bankStatement     BankStatement[]
-  recurringPayment  RecurringPayment[]
+  payment          Payment[]
+  cashBook         CashBook[]
+  bankStatement    BankStatement[]
 
   @@map("financial_categories")
 }
 
 model Payment {
-  id                  String    @id @default(uuid())
+  id                  String            @id @default(uuid())
   name                String
-  amount              Decimal   @db.Decimal(12, 2)
+  amount              Decimal           @db.Decimal(12, 2)
   dueDate             DateTime
   paidAt              DateTime?
-
   recurringPaymentId  String?
   recurringPayment    RecurringPayment? @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
+  financialCategoryId String?
+  financialCategory   FinancialCategory? @relation(fields: [financialCategoryId], references: [id])
+  employeeId          String?
+  employee            Employee?         @relation(fields: [employeeId], references: [id])
 
-  financialCategoryId String
-  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id])
-
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
-
-  referenceMonth      DateTime? @db.Date
-
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-
-  @@unique([recurringPaymentId, referenceMonth])
   @@map("payments")
 }
 
+enum RecurringPaymentDateType {
+  FIXED_DAY
+  FIFTH_BUSINESS_DAY
+  EMPLOYEE_SALARY
+}
+
+enum BusinessDayAdjustment {
+  PREVIOUS
+  NEXT
+}
+
 model RecurringPayment {
-  id                  String   @id @default(uuid())
+  id                  String                    @id @default(uuid())
   name                String
-  dueDay              Int
-  isMonthly           Boolean  @default(false)
-  isFixedAmount       Boolean  @default(false)
-  fixedAmount         Decimal? @db.Decimal(12, 2)
-
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id])
-
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
-
-  financialCategoryId String
-  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  dueDateType         RecurringPaymentDateType
+  dueDay              Int?
+  adjustment          BusinessDayAdjustment?
+  employeeId          String?
+  employee            Employee?                 @relation(fields: [employeeId], references: [id])
 
   payments            Payment[]
 
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
 
   @@map("recurring-payment")
 }
 
 model SystemConfig {
-  id                     String               @id @default(uuid())
-  enabled                Boolean              @default(true)
-  intervalHours          Int?
-  runAtHour              Int?
-  tokenExpirationValue   Int                  @default(2)
-  tokenExpirationUnit    TokenExpirationUnit  @default(HOURS)
-  lastBackupAt           DateTime?
+  id                   String              @id @default(uuid())
+  enabled              Boolean             @default(true)
+  intervalHours        Int?
+  runAtHour            Int?
+  tokenExpirationValue Int                 @default(2)
+  tokenExpirationUnit  TokenExpirationUnit @default(HOURS)
+  lastBackupAt         DateTime?
 
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("system_configs")
 }

@@ -3,11 +3,11 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { FinancialFlowType } from "@/app/web/constants/enum";
+import { AccountType, FinancialFlowType } from "@/app/web/constants/enum";
 import { JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
 import ComboBox from "../../combobox/combobox";
-import { SelectComboboxProps } from "../upsert-financial-category/upsert-financial-category";
+import { SelectComboboxFinancialFlowTypeProps } from "../upsert-financial-category/upsert-financial-category";
 import FileUpload from "../../uploadFile/uploadFile";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
@@ -19,6 +19,7 @@ import {
 
 export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
+  accountType: AccountType;
   data?: GetFinancialEntryDto;
   onUpdate: (data: UpdateFinancialEntryDto) => void;
   onRegister: (data: CreateFinancialEntryDto) => void;
@@ -37,12 +38,16 @@ type FinancialEntryForm = {
 
 export function UpsertFinancialEntryModal({
   data,
+  accountType,
   onClose,
   onUpdate,
   onRegister,
 }: UpsertFinancialEntryModalProps): JSX.Element {
-  const [options, setOptions] = useState<SelectComboboxProps[]>([]);
-  const [selected, setSelected] = useState<SelectComboboxProps | null>(null);
+  const [options, setOptions] = useState<
+    SelectComboboxFinancialFlowTypeProps[]
+  >([]);
+  const [selected, setSelected] =
+    useState<SelectComboboxFinancialFlowTypeProps | null>(null);
 
   const [financialEntry, setFinancialEntry] = useState<FinancialEntryForm>(
     (): FinancialEntryForm => {
@@ -75,13 +80,16 @@ export function UpsertFinancialEntryModal({
   ): Promise<void> => {
     const { financialCategories } = await financialCategoryService.findAll({
       all: true,
+      where: { accountType },
     });
 
-    const map: SelectComboboxProps[] = financialCategories.map((item) => ({
-      id: item.id,
-      label: item.name,
-      value: item.financialFlowType,
-    }));
+    const map: SelectComboboxFinancialFlowTypeProps[] = financialCategories.map(
+      (item) => ({
+        id: item.id,
+        label: item.name,
+        value: item.financialFlowType,
+      }),
+    );
 
     if (financialEntryData) {
       const firstItem = map.find(
@@ -103,10 +111,13 @@ export function UpsertFinancialEntryModal({
     }));
   };
 
-  const handleSetSelectOption = (option: SelectComboboxProps | null): void => {
+  const handleSetSelectOption = (
+    option: SelectComboboxFinancialFlowTypeProps | null,
+  ): void => {
     if (!option) return;
 
     handleSetFinancialEntry({
+      //@ts-ignore
       financialCategory: {
         name: option.label,
         id: option.id ?? "",
@@ -183,7 +194,7 @@ export function UpsertFinancialEntryModal({
             }
           />
 
-          <ComboBox<SelectComboboxProps>
+          <ComboBox<SelectComboboxFinancialFlowTypeProps>
             options={options}
             valueKey="value"
             labelKey="label"

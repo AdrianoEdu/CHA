@@ -168,6 +168,7 @@ export default function CashBookPage() {
         data={data}
         onClose={closeModal}
         onUpdate={handleUpdateCashBook}
+        accountType={AccountType.CASHBOOK}
         onRegister={handleRegisterCashBook}
       />,
       !data ? UpsertCashBook.registerTitle : UpsertCashBook.updateTitle,
@@ -195,7 +196,11 @@ export default function CashBookPage() {
         />
       </div>
 
-      <FloatingButton onClick={handleNewStatement} />
+      <FloatingButton
+        onClick={() => {
+          handleNewStatement();
+        }}
+      />
 
       <div ref={loadMoreRef} style={{ height: 1 }} />
     </div>
