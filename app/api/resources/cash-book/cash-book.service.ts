@@ -11,7 +11,6 @@ import {
 import { databaseService } from "../../providers/database/DatabaseService";
 import { storageSrevice } from "../../providers/storage/storage.service";
 import { GetFinancialEntryDto } from "../../dto/General";
-import { mapFinancialEntry } from "../../utils/mapFinancialEntry";
 
 class CashBookService {
   private storageService = storageSrevice;
@@ -166,30 +165,6 @@ class CashBookService {
     }
   }
 
-  async findCashBook({
-    include,
-    orderBy,
-    select,
-    skip,
-    take,
-    where,
-  }: Prisma.CashBookFindManyArgs): Promise<GetFinancialEntryDto[]> {
-    const query: Prisma.CashBookFindManyArgs = {
-      skip,
-      where,
-      take,
-      select,
-      include,
-      orderBy,
-    };
-
-    const result = await this.databaseService.cashBook.findMany({
-      ...query,
-      include: { account: true, financialCategory: true },
-    });
-
-    return mapFinancialEntry(result);
-  }
 }
 
 export const cashBookService = new CashBookService();

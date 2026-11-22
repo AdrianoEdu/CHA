@@ -1,25 +1,27 @@
-// Copyright (c) 2026-10-17
+
+ // Copyright (c) 2026-10-17
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
 "use client";
 
+import { ChangeEvent, JSX, useEffect, useState } from "react";
 import { FinancialFlowType, RecipientTypeEnum } from "@/app/web/constants/enum";
 import { CreatePaymentDto, UpdatePaymentDto } from "@/app/web/dto/payment";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
-import { ChangeEvent, JSX, useEffect, useState } from "react";
 import Input, { InputType } from "../../input/input";
 import ComboBox from "../../combobox/combobox";
-import ComboBoxIcon, {
-  ComboBoxIconOption,
-} from "../../comboboxIcon/ComboboxIcon";
 import { UsersIcon } from "@/app/web/icons";
 import Button, { ButtonStatusEnum } from "../../button/button";
+import ComboBoxIcon, { ComboBoxIconOption } from "../../ComboboxIcon/ComboboxIcon";
 
-type SelectOption = { id: string; name: string };
+type SelectOption = {
+  id: string;
+  name: string;
+};
 
 interface PaymentModalProps {
   data?: UpdatePaymentDto;
@@ -46,14 +48,16 @@ const recipientOptions: ComboBoxIconOption[] = [
 function parseMoneyToNumber(value: string): number {
   if (!value) return 0;
 
-  return Number(
-    value
-      .replace(/\s/g, "")
-      .replace("R$", "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-      .trim(),
-  );
+  const normalizedValue = value
+    .replace(/\s/g, "")
+    .replace("R$", "")
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .trim();
+
+  const amount = Number(normalizedValue);
+
+  return Number.isFinite(amount) ? amount : 0;
 }
 
 export default function UpsertPaymentModal({
@@ -68,146 +72,162 @@ export default function UpsertPaymentModal({
   const [showCalendar, setShowCalendar] = useState(false);
 
   const [recipientType, setRecipientType] = useState<RecipientTypeEnum>(
-    RecipientTypeEnum.EMPLOYEE,
+    () =>
+      data?.customerId
+        ? RecipientTypeEnum.CUSTOMER
+        : RecipientTypeEnum.EMPLOYEE,
   );
 
   const [optionCustomer, setOptionCustomer] = useState<SelectOption[]>([]);
-
   const [optionEmployee, setOptionEmployee] = useState<SelectOption[]>([]);
-
   const [optionsFinancialCategory, setOptionsFinancialCategory] = useState<
     SelectOption[]
   >([]);
 
   const [paymentList, setPaymentList] = useState<UpdatePaymentDto>({
-    id: "",
-    name: "",
-    amount: 0,
-    customerId: "",
-    employeeId: "",
-    paidAt: undefined,
-    dueDate: undefined,
-    financialCategoryId: "",
+    id: data?.id ?? "",
+    name: data?.name ?? "",
+    amount: data?.amount ?? 0,
+    customerId: data?.customerId ?? "",
+    employeeId: data?.employeeId ?? "",
+    paidAt: data?.paidAt,
+    dueDate: data?.dueDate,
+    financialCategoryId: data?.financialCategoryId ?? "",
+    referenceMonth: data?.referenceMonth,
+    recurringPaymentId: data?.recurringPaymentId,
   });
 
   useEffect(() => {
-    if (data) setPaymentList(data);
+    const handleGetFinancialCategory = async (): Promise<void> => {
+      const { financialCategories } =
+        await financialCategoryService.findAll({
+          orderBy: { name: "asc" },
+          where: { financialFlowType: FinancialFlowType.OUT },
+        });
+
+      setOptionsFinancialCategory(
+        financialCategories.map((item) => ({
+          id: item.id,
+          name: item.name,
+        })),
+      );
+    };
 
     handleGetFinancialCategory();
-
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    let isMounted = true;
 
-    if (recipientType === RecipientTypeEnum.EMPLOYEE) handleGetEmployee();
+    const handleGetRecipients = async (): Promise<void> => {
+      setLoading(true);
 
-    if (recipientType === RecipientTypeEnum.CUSTOMER) handleGetCustomer();
+      try {
+        if (recipientType === RecipientTypeEnum.EMPLOYEE) {
+          const { employee } = await employeeService.findAll({
+            orderBy: { name: "asc" },
+          });
 
-    setLoading(false);
+          if (!isMounted) return;
+
+          setOptionEmployee(
+            employee.map((item) => ({
+              id: item.id ?? "",
+              name: item.name,
+            })),
+          );
+        }
+
+        if (recipientType === RecipientTypeEnum.CUSTOMER) {
+          const { customers } = await customerService.findAll({
+            orderBy: { name: "asc" },
+          });
+
+          if (!isMounted) return;
+
+          setOptionCustomer(
+            customers.map((item) => ({
+              id: item.id,
+              name: item.name,
+            })),
+          );
+        }
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    handleGetRecipients();
+
+    return () => {
+      isMounted = false;
+    };
   }, [recipientType]);
 
-  const handleGetFinancialCategory = async (): Promise<void> => {
-    const { financialCategories } = await financialCategoryService.findAll({
-      orderBy: { name: "asc" },
-      where: { financialFlowType: FinancialFlowType.OUT },
-    });
-
-    const options = financialCategories.map((item) => ({
-      id: item.id,
-      name: item.name,
+  const handleSetPayment = (value: Partial<UpdatePaymentDto>): void => {
+    setPaymentList((prev) => ({
+      ...prev,
+      ...value,
     }));
-
-    setOptionsFinancialCategory(options);
   };
 
-  const handleGetEmployee = async (): Promise<void> => {
-    const { employee } = await employeeService.findAll({
-      orderBy: { name: "asc" },
-    });
-
-    const resultOptions = employee.map((item) => ({
-      id: item.id ?? "",
-      name: item.name,
-    }));
-
-    setOptionEmployee(resultOptions);
-  };
-
-  const handleGetCustomer = async (): Promise<void> => {
-    const { customers } = await customerService.findAll({
-      orderBy: { name: "asc" },
-    });
-
-    const resultOptions = customers.map((item) => ({
-      id: item.id,
-      name: item.name,
-    }));
-
-    setOptionCustomer(resultOptions);
-  };
-
-  const handleSetPayment = (data: Partial<UpdatePaymentDto>): void => {
-    setPaymentList((prev) => ({ ...prev, ...data }));
-  };
-
-  const handlerSetAmount = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+  const handleSetAmount = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
-    const amount = Number(parseMoneyToNumber(e.target.value));
-
-    handleSetPayment({ amount });
+    handleSetPayment({
+      amount: parseMoneyToNumber(e.target.value),
+    });
   };
 
   const handleSetName = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
-  ): void => {
-    const name = e.target.value;
-
-    handleSetPayment({ name });
-  };
-
-  const handleSetDueDate = (value: any): void => {
-    const dueDate = new Date(value);
-
-    handleSetPayment({ dueDate });
-  };
-
-  const handleSetPaidAt = (value: any): void => {
-    const paidAt = new Date(value);
-
-    handleSetPayment({ paidAt });
-  };
-
-  const hadleSelectOptionsFinancialCategory = (
-    data: SelectOption | null,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
     handleSetPayment({
-      ...paymentList,
-      financialCategoryId: data?.id,
+      name: e.target.value,
     });
   };
 
-  const hadleSelectOptionsCustomer = (data: SelectOption | null): void => {
+  const handleSetDueDate = (value: Date | string | number): void => {
     handleSetPayment({
-      ...paymentList,
-      customerId: data?.id,
+      dueDate: new Date(value)
     });
   };
 
-  const hadleSelectOptionsEmployee = (data: SelectOption | null): void => {
+  const handleSetPaidAt = (value: Date | string | number): void => {
     handleSetPayment({
-      ...paymentList,
-      employeeId: data?.id,
+      paidAt: new Date(value),
     });
   };
 
-  const handleUpsertReceivedCheck = (): void => {
-    const { id, ...data } = paymentList;
+  const handleSelectFinancialCategory = (
+    option?: SelectOption,
+  ): void => {
+    handleSetPayment({
+      financialCategoryId: option?.id,
+    });
+  };
+
+  const handleSelectCustomer = (option?: SelectOption): void => {
+    handleSetPayment({
+      customerId: option?.id,
+    });
+  };
+
+  const handleSelectEmployee = (option?: SelectOption): void => {
+    handleSetPayment({
+      employeeId: option?.id,
+    });
+  };
+
+  const handleUpsertPayment = (): void => {
+    const { id, ...paymentData } = paymentList;
 
     if (isEdit) {
-      onEdit({ id, ...data });
+      onEdit({
+        id,
+        ...paymentData,
+      });
+
       return;
     }
 
@@ -227,7 +247,7 @@ export default function UpsertPaymentModal({
   if (loading) {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
-        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4" />
         <p className="text-gray-700 font-medium">Carregando...</p>
       </div>
     );
@@ -235,7 +255,9 @@ export default function UpsertPaymentModal({
 
   return (
     <div
-      className={`flex flex-col p-6 space-y-2 gap-4 ${showCalendar ? "min-h-175" : ""}`}
+      className={`flex flex-col p-6 space-y-2 gap-4 ${
+        showCalendar ? "min-h-175" : ""
+      }`}
     >
       <h2 className="text-lg font-semibold">
         {isEdit ? "Atualizar pagamento" : "Registrar pagamento"}
@@ -246,7 +268,7 @@ export default function UpsertPaymentModal({
         onChange={handleSetName}
         inputType={InputType.Text}
         value={paymentList.name}
-        name={"Informe o motivo do pagamento"}
+        name="Informe o motivo do pagamento"
       />
 
       <Input
@@ -256,7 +278,7 @@ export default function UpsertPaymentModal({
         showCalendar={showCalendar}
         value={paymentList.dueDate}
         onValueChange={handleSetDueDate}
-        name={"Selecione a data de vencimento"}
+        name="Selecione a data de vencimento"
         onCalendarVisibilityChange={setShowCalendar}
       />
 
@@ -267,21 +289,19 @@ export default function UpsertPaymentModal({
         showCalendar={showCalendar}
         value={paymentList.paidAt}
         onValueChange={handleSetPaidAt}
-        name={"Selecione a data de pagamento"}
+        name="Selecione a data de pagamento"
         onCalendarVisibilityChange={setShowCalendar}
       />
 
-      <ComboBox
+      <ComboBox<SelectOption>
         valueKey="id"
         labelKey="name"
-        selected={
-          optionsFinancialCategory
-            .filter(({ id }) => id === paymentList.financialCategoryId)
-            .at(0)!
-        }
+        selected={optionsFinancialCategory.find(
+          ({ id }) => id === paymentList.financialCategoryId,
+        )}
         options={optionsFinancialCategory}
         name="Selecione a categoria financeira"
-        onSelectOption={hadleSelectOptionsFinancialCategory}
+        onSelectOption={handleSelectFinancialCategory}
       />
 
       <div className="flex flex-row w-full h-[0.25] bg-gray-300" />
@@ -292,48 +312,42 @@ export default function UpsertPaymentModal({
         icon={<UsersIcon />}
         value={recipientType}
         options={recipientOptions}
-        onChange={(value) =>
-          setRecipientType(RecipientTypeEnum[value as RecipientTypeEnum])
-        }
+        onChange={(value) => setRecipientType(value as RecipientTypeEnum)}
       />
 
       {recipientType === RecipientTypeEnum.EMPLOYEE && (
-        <ComboBox
+        <ComboBox<SelectOption>
           valueKey="id"
           labelKey="name"
           options={optionEmployee}
           name="Selecione o funcionário"
-          onSelectOption={hadleSelectOptionsEmployee}
-          selected={
-            optionEmployee
-              .filter(({ id }) => id === paymentList?.employeeId)
-              .at(0)!
-          }
+          onSelectOption={handleSelectEmployee}
+          selected={optionEmployee.find(
+            ({ id }) => id === paymentList.employeeId,
+          )}
         />
       )}
 
       {recipientType === RecipientTypeEnum.CUSTOMER && (
-        <ComboBox
+        <ComboBox<SelectOption>
           valueKey="id"
           labelKey="name"
           options={optionCustomer}
           name="Selecione o cliente"
-          onSelectOption={hadleSelectOptionsCustomer}
-          selected={
-            optionCustomer
-              .filter(({ id }) => id === paymentList?.customerId)
-              .at(0)!
-          }
+          onSelectOption={handleSelectCustomer}
+          selected={optionCustomer.find(
+            ({ id }) => id === paymentList.customerId,
+          )}
         />
       )}
 
       <Input
         type="number"
         className="flex-1"
-        name={"Insira o valor"}
-        value={paymentList?.amount}
+        name="Insira o valor"
+        value={paymentList.amount}
         inputType={InputType.Number}
-        onChange={handlerSetAmount}
+        onChange={handleSetAmount}
       />
 
       <div className="flex justify-end gap-2 pt-4">
@@ -344,8 +358,8 @@ export default function UpsertPaymentModal({
         />
 
         <Button
-          className={"px-4 py-2"}
-          onClick={handleUpsertReceivedCheck}
+          className="px-4 py-2"
+          onClick={handleUpsertPayment}
           text={isEdit ? "Atualizar" : "Confirmar"}
           status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />

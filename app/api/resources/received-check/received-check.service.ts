@@ -50,60 +50,6 @@ class ReceivedCheckService {
     });
   }
 
-  async findReceivedCheck(
-    params: PaginationDto<
-      Prisma.ReceivedCheckWhereInput,
-      Prisma.ReceivedCheckSelect,
-      Prisma.ReceivedCheckInclude,
-      Prisma.ReceivedCheckOrderByWithRelationInput
-    >,
-  ): Promise<GetReceivedCheckDTOParams> {
-    const baseQuery: Prisma.ReceivedCheckFindManyArgs = {
-      skip: params.skip,
-      where: params.where,
-      take: params.take,
-      orderBy: params.orderBy,
-    };
-
-    const count = await this.databaseService.receivedCheck.count({
-      where: baseQuery.where,
-    });
-
-    if (params.select) baseQuery.select = params.select;
-    if (params.include) baseQuery.include = params.include;
-
-    if (params.where)
-      return { count, receivedChecks: await this.findManyByFilters(baseQuery) };
-
-    return { count, receivedChecks: await this.findMany(baseQuery) };
-  }
-
-  async findManyByFilters(
-    baseQuery: Prisma.ReceivedCheckFindManyArgs,
-  ): Promise<ReceivedCheckDTO[]> {
-    const result = await this.databaseService.receivedCheck.findMany({
-      ...baseQuery,
-      select: receivedCheckSelect,
-      orderBy: { createdAt: "desc" },
-    });
-
-    return result.map((receivedCheck) => this.mapperCheckUsage(receivedCheck));
-  }
-
-  async findMany(
-    baseQuery: Prisma.ReceivedCheckFindManyArgs,
-  ): Promise<ReceivedCheckDTO[]> {
-    const result: ReceivedCheckWithRelations[] =
-      await this.databaseService.receivedCheck.findMany({
-        ...baseQuery,
-        where: undefined,
-        select: receivedCheckSelect,
-        orderBy: { createdAt: "desc" },
-      });
-
-    return result.map((receivedCheck) => this.mapperCheckUsage(receivedCheck));
-  }
-
   async remove({ id }: RemoveReceivedCheckDto) {
     const check = await this.databaseService.receivedCheck.findUnique({
       where: { id },
@@ -142,34 +88,7 @@ class ReceivedCheckService {
     throw new Error(`Status inválido: ${status}`);
   }
 
-  private mapperCheckUsage(item: ReceivedCheckWithRelations): ReceivedCheckDTO {
-    return {
-      bank: {
-        id: item.bank?.id,
-        name: item.bank?.name ?? "",
-        createdAt: item.bank?.createdAt,
-        agencies: item.bank.agencies,
-      },
-      customer: {
-        id: item.customer?.id ?? "",
-        name: item.customer?.name ?? "",
-        code: item.customer?.code ?? "",
-        isActive: item.customer?.isActive,
-        numberId: item.customer?.numberId,
-        createdAt: item.customer?.createdAt ?? new Date(),
-      },
-      id: item.id,
-      agency: item.agency,
-      notes: item.notes,
-      paidAt: item.paidAt,
-      status: item.status,
-      updatedAt: item.updatedAt,
-      createdAt: item.createdAt,
-      goodForAt: item.goodForAt,
-      amount: Number(item.amount),
-      checkNumber: item.checkNumber,
-    };
-  }
+
 }
 
 export const receivedCheckService = new ReceivedCheckService();

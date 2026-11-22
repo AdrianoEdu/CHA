@@ -38,24 +38,6 @@ export class ReceivedCheckController {
     }
   }
 
-  async findAll(req: Request) {
-    try {
-      const { searchParams } = new URL(req.url);
-
-      const params = parsePrismaQuery<
-        Prisma.ReceivedCheckWhereInput,
-        Prisma.ReceivedCheckSelect,
-        Prisma.ReceivedCheckInclude,
-        Prisma.ReceivedCheckOrderByWithRelationInput
-      >(req);
-
-      return await this.receivedCheckService.findReceivedCheck(params);
-    } catch (error: any) {
-      console.error("Erro ao buscar cheques recebidos:", error);
-      return Response.json({ error: error.message }, { status: 500 });
-    }
-  }
-
   async findByFilters(req: Request) {
     try {
       const { searchParams } = new URL(req.url);

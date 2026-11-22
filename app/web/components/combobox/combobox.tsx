@@ -1,4 +1,5 @@
-// Copyright (c) 2026-10-17
+
+ // Copyright (c) 2026-10-17
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -13,13 +14,13 @@ export interface ComboboxProps<T> extends Omit<
   SelectHTMLAttributes<HTMLSelectElement>,
   "value" | "onChange"
 > {
-  selected: T | null;
+  selected?: T;
   options: T[];
   label?: string;
   placeholder?: string;
-  onSelectOption: (data: T | null) => void;
-  valueKey: KeyOf<T>;
-  labelKey: KeyOf<T>;
+  onSelectOption: (data?: T) => void;
+  valueKey: KeyOf<T> | string;
+  labelKey: KeyOf<T> | string;
 }
 
 export default function ComboBox<T>({
@@ -33,12 +34,17 @@ export default function ComboBox<T>({
   className,
   ...rest
 }: Readonly<ComboboxProps<T>>) {
-  const selectedValue = selected ? String(selected[valueKey]) : "";
+  const selectedValue =
+  selected != null
+    ? String(selected[valueKey as keyof T])
+    : "";
 
   const handleChange = (value: string) => {
-    const item = options.find((option) => String(option[valueKey]) === value);
+    const item = options.find(
+      (option) => String(option[valueKey as keyof T]) === value
+    );
 
-    onSelectOption(item ?? null);
+    onSelectOption(item);
   };
 
   return (
@@ -67,11 +73,11 @@ export default function ComboBox<T>({
           </option>
 
           {options.map((item) => {
-            const value = String(item[valueKey]);
+            const value = String(item[valueKey as keyof T]);
 
             return (
               <option key={value} value={value}>
-                {String(item[labelKey])}
+                {String(item[labelKey as keyof T])}
               </option>
             );
           })}

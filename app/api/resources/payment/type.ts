@@ -5,15 +5,3 @@
 
 import { Prisma } from "@/app/generated/prisma";
 
-export type PaymentWithRelations = Prisma.PaymentGetPayload<{
-  include: {
-    customer: true;
-    employee: {
-      include: { employeePosition: true };
-    };
-    recurringPayment: {
-      include: { financialCategory: true };
-    };
-    financialCategory: true;
-  };
-}>;

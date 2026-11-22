@@ -1,21 +1,28 @@
+
 // Copyright (c) 2026-08-15
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { AccountType, FinancialFlowType } from "@/app/web/constants/enum";
-import { JSX, useEffect, useState } from "react";
-import Input, { InputType } from "../../input/input";
-import ComboBox from "../../combobox/combobox";
-import { SelectComboboxFinancialFlowTypeProps } from "../upsert-financial-category/upsert-financial-category";
-import FileUpload from "../../uploadFile/uploadFile";
-import Button, { ButtonStatusEnum } from "../../button/button";
-import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
+"use client";
+
+import { type JSX, useCallback, useEffect, useState } from "react";
+
+import { AccountType } from "@/app/web/constants/enum";
 import {
   CreateFinancialEntryDto,
   GetFinancialEntryDto,
   UpdateFinancialEntryDto,
 } from "@/app/web/dto/general.dto";
+
+import Input, { InputType } from "../../input/input";
+import ComboBox from "../../combobox/combobox";
+import FileUpload from "../../uploadFile/uploadFile";
+import Button, { ButtonStatusEnum } from "../../button/button";
+
+import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
+
+import { SelectComboboxFinancialFlowTypeProps } from "../upsert-financial-category/upsert-financial-category";
 
 export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
@@ -27,13 +34,19 @@ export type UpsertFinancialEntryModalProps = {
 
 type FinancialEntryForm = {
   id?: string;
-  file: File | null;
+  file?: File;
   value: number;
   title: string;
   createdAt?: Date;
   description: string;
-  account?: GetFinancialEntryDto["account"];
-  financialCategory?: GetFinancialEntryDto["financialCategory"];
+  accountId?: string;
+  financialCategoryId?: string;
+};
+
+const initialFormData: FinancialEntryForm = {
+  value: 0,
+  title: "",
+  description: "",
 };
 
 export function UpsertFinancialEntryModal({
@@ -46,190 +59,222 @@ export function UpsertFinancialEntryModal({
   const [options, setOptions] = useState<
     SelectComboboxFinancialFlowTypeProps[]
   >([]);
-  const [selected, setSelected] =
-    useState<SelectComboboxFinancialFlowTypeProps | null>(null);
 
-  const [financialEntry, setFinancialEntry] = useState<FinancialEntryForm>(
-    (): FinancialEntryForm => {
+  const [selected, setSelected] =
+    useState<SelectComboboxFinancialFlowTypeProps | undefined>();
+
+  const [financialEntry, setFinancialEntry] =
+    useState<FinancialEntryForm>(() => {
       if (!data) {
-        return {} as FinancialEntryForm;
+        return initialFormData;
       }
 
       return {
         id: data.id,
-        // file: data.file ?? null,
-        file: null,
         value: data.value,
         title: data.title,
         createdAt: data.createdAt,
         description: data.description,
-        account: data.account,
-        financialCategory: data.financialCategory,
+        accountId: data.account?.id,
+        financialCategoryId: data.financialCategory?.id,
       };
-    },
-  );
+    });
+
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const isRegister = !data;
 
-  useEffect(() => {
-    handleGetFinancialCategoryList(data);
-  }, [data]);
+  const handleGetFinancialCategoryList = useCallback(
+    async (): Promise<void> => {
+      setLoadingCategories(true);
+      setFormError("");
 
-  const handleGetFinancialCategoryList = async (
-    financialEntryData?: GetFinancialEntryDto,
-  ): Promise<void> => {
-    const { financialCategories } = await financialCategoryService.findAll({
-      all: true,
-      where: { accountType },
-    });
+      try {
+        const { financialCategories } =
+          await financialCategoryService.findAll({
+            all: true,
+            where: { accountType },
+          });
 
-    const map: SelectComboboxFinancialFlowTypeProps[] = financialCategories.map(
-      (item) => ({
-        id: item.id,
-        label: item.name,
-        value: item.financialFlowType,
-      }),
-    );
+        const categories: SelectComboboxFinancialFlowTypeProps[] =
+          financialCategories.map((item) => ({
+            id: item.id,
+            label: item.name,
+            value: item.financialFlowType,
+          }));
 
-    if (financialEntryData) {
-      const firstItem = map.find(
-        (item) => item.id === financialEntryData.financialCategory.id,
-      );
+        setOptions(categories);
 
-      if (firstItem) {
-        setSelected(firstItem);
+        if (data?.financialCategory?.id) {
+          setSelected(
+            categories.find(
+              (item) => item.id === data.financialCategory?.id,
+            ),
+          );
+        }
+      } catch {
+        setFormError(
+          "Não foi possível carregar as categorias financeiras. Tente novamente.",
+        );
+      } finally {
+        setLoadingCategories(false);
       }
-    }
+    },
+    [accountType, data?.financialCategory?.id],
+  );
 
-    setOptions(map);
-  };
+  useEffect(() => {
+    void handleGetFinancialCategoryList();
+  }, [handleGetFinancialCategoryList]);
 
-  const handleSetFinancialEntry = (data: Partial<FinancialEntryForm>): void => {
-    setFinancialEntry((prev) => ({
-      ...prev,
-      ...data,
+  const handleSetFinancialEntry = (
+    values: Partial<FinancialEntryForm>,
+  ): void => {
+    setFinancialEntry((current) => ({
+      ...current,
+      ...values,
     }));
+
+    setFormError("");
   };
 
   const handleSetSelectOption = (
-    option: SelectComboboxFinancialFlowTypeProps | null,
+    option?: SelectComboboxFinancialFlowTypeProps,
   ): void => {
-    if (!option) return;
+    setSelected(option);
 
     handleSetFinancialEntry({
-      //@ts-ignore
-      financialCategory: {
-        name: option.label,
-        id: option.id ?? "",
-        createdAt: new Date(),
-        financialFlowType: option.value,
-      },
+      financialCategoryId: option?.id,
     });
+  };
 
-    setSelected(option);
+  const handleValueChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ): void => {
+    const value = event.target.value
+      .replace(/\s/g, "")
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".");
+
+    handleSetFinancialEntry({
+      value: Number(value) || 0,
+    });
   };
 
   const handleUpsertFinancialEntry = (): void => {
-    const {
-      id,
-      value,
-      title,
-      account,
-      description,
-      financialCategory,
-      file: formFile,
-      ...formData
-    } = financialEntry;
+    const title = financialEntry.title.trim();
 
-    if (id) {
+    if (!title) {
+      setFormError("Informe a descrição do lançamento.");
+      return;
+    }
+
+    if (!financialEntry.financialCategoryId) {
+      setFormError("Selecione uma categoria financeira.");
+      return;
+    }
+
+    if (!Number.isFinite(financialEntry.value) || financialEntry.value <= 0) {
+      setFormError("Informe um valor válido.");
+      return;
+    }
+
+    const payload = {
+      title,
+      value: financialEntry.value,
+      description: financialEntry.description,
+      file: financialEntry.file,
+      financialCategoryId: financialEntry.financialCategoryId,
+    };
+
+    if (financialEntry.id) {
       onUpdate({
-        ...formData,
-        id,
-        title,
-        value,
-        description,
-        file: formFile,
-        accountId: account?.id,
-        financialCategoryId: financialCategory?.id,
+        ...payload,
+        id: financialEntry.id,
+        accountId: financialEntry.accountId,
       });
 
       return;
     }
 
     onRegister({
-      ...formData,
-      title,
-      value,
-      description,
-      file: formFile,
-      accountId: account?.id ?? "",
-      financialCategoryId: financialCategory?.id ?? "",
+      ...payload,
+      accountId: financialEntry.accountId ?? "",
     });
   };
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-row w-300 h-100 mt-10 mb-10 gap-5 bg-gray-100 p-5 rounded-2xl">
-        <div className="flex flex-col w-full gap-5 justify-center">
+      <div className="mt-10 mb-10 flex h-100 w-300 flex-row gap-5 rounded-2xl bg-gray-100 p-5">
+        <div className="flex w-full flex-col justify-center gap-5">
           <Input
             className="flex-1"
             name="Descrição do extrato"
             value={financialEntry.title}
-            onChange={(e) =>
+            onChange={(event) =>
               handleSetFinancialEntry({
-                title: e.target.value,
+                title: event.target.value,
               })
             }
           />
 
           <Input
             className="flex-1"
-            name="Descrição do extrato"
+            name="Observações"
             inputType={InputType.Annotation}
             value={financialEntry.description}
-            onChange={(e) =>
+            onChange={(event) =>
               handleSetFinancialEntry({
-                description: e.target.value,
+                description: event.target.value,
               })
             }
           />
 
-          <ComboBox<SelectComboboxFinancialFlowTypeProps>
+          <ComboBox
             options={options}
-            valueKey="value"
+            valueKey="id"
             labelKey="label"
             selected={selected}
             name="Selecione a categoria do extrato"
+            disabled={loadingCategories}
             onSelectOption={handleSetSelectOption}
           />
+
+          {loadingCategories && (
+            <p className="text-sm text-gray-500">
+              Carregando categorias...
+            </p>
+          )}
 
           <Input
             name="Valor"
             className="flex-1"
             inputType={InputType.Money}
             value={financialEntry.value}
-            onChange={(e) =>
+            onChange={handleValueChange}
+          />
+        </div>
+
+        <div className="flex w-full flex-col items-center justify-center">
+          <FileUpload
+            maxSizeInMB={10}
+            value={financialEntry.file}
+            onChange={(file) =>
               handleSetFinancialEntry({
-                value: Number(
-                  e.target.value
-                    .replace(/\s/g, "")
-                    .replace("R$", "")
-                    .replace(/\./g, "")
-                    .replace(",", "."),
-                ),
+                file: file ?? undefined,
               })
             }
           />
         </div>
-
-        <div className="flex flex-col justify-center items-center w-full">
-          <FileUpload
-            maxSizeInMB={10}
-            value={financialEntry.file}
-            onChange={(file) => handleSetFinancialEntry({ file })}
-          />
-        </div>
       </div>
+
+      {formError && (
+        <p className="mb-4 text-sm text-red-600">
+          {formError}
+        </p>
+      )}
 
       <div className="flex w-full justify-end gap-5">
         <Button
@@ -240,7 +285,7 @@ export function UpsertFinancialEntryModal({
 
         <Button
           text={isRegister ? "Registrar" : "Atualizar"}
-          status={ButtonStatusEnum.CONFIRM}
+          status={isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
           onPress={handleUpsertFinancialEntry}
         />
       </div>

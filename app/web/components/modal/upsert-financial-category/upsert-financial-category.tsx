@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-03-22
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -40,6 +41,11 @@ const options: SelectComboboxFinancialFlowTypeProps[] = (
   label: financialCategoryTypeLabels[type],
 }));
 
+const accountTypeOptions: SelectComboboxAccountTypeProps[] = [
+  { label: "Banco", value: AccountType.BANK },
+  { label: "Livro Caixa", value: AccountType.CASHBOOK },
+];
+
 type FinancialCategoryProps = {
   data?: UpdateFinancialCategoryDto;
   onClose: () => void;
@@ -57,28 +63,42 @@ export default function UpsertFinancialCategory({
 }: Readonly<FinancialCategoryProps>) {
   const [name, setName] = useState("");
   const [selected, setSelected] =
-    useState<SelectComboboxFinancialFlowTypeProps | null>(null);
+    useState<SelectComboboxFinancialFlowTypeProps | undefined>(undefined);
   const [accountTypeSelect, setAccountTypeSelect] =
-    useState<SelectComboboxAccountTypeProps | null>(null);
+    useState<SelectComboboxAccountTypeProps | undefined>(undefined);
 
   useEffect(() => {
-    if (!data) return;
+    if (!data) {
+      setName("");
+      setSelected(undefined);
+      setAccountTypeSelect(undefined);
+      return;
+    }
 
-    setName(data.name!);
+    setName(data.name ?? '');
+
     setSelected(
       data.financialFlowType
         ? {
             label: financialCategoryTypeLabels[data.financialFlowType],
             value: data.financialFlowType,
           }
-        : null,
+        : undefined,
+    );
+
+    setAccountTypeSelect(
+      data.accountType
+        ? accountTypeOptions.find(
+            (option) => option.value === data.accountType,
+          )
+        : undefined,
     );
   }, [data]);
 
   const handleUpsertFinancialCategory = (): void => {
-    if (onUpdated) {
+    if (onUpdated && data?.id) {
       onUpdated({
-        id: data?.id!,
+        id: data.id,
         name,
         financialFlowType: selected?.value,
         accountType: accountTypeSelect?.value,
@@ -86,12 +106,13 @@ export default function UpsertFinancialCategory({
       return;
     }
 
-    if (onRegister)
+    if (onRegister && selected && accountTypeSelect) {
       onRegister({
         name,
-        financialFlowType: selected?.value!,
-        accountType: accountTypeSelect?.value!,
+        financialFlowType: selected.value,
+        accountType: accountTypeSelect.value,
       });
+    }
   };
 
   return (
@@ -112,10 +133,7 @@ export default function UpsertFinancialCategory({
       />
 
       <ComboBox<SelectComboboxAccountTypeProps>
-        options={[
-          { label: "Banco", value: AccountType.BANK },
-          { label: "Livro Caixa", value: AccountType.CASHBOOK },
-        ]}
+        options={accountTypeOptions}
         valueKey={"value"}
         labelKey={"label"}
         selected={accountTypeSelect}
@@ -128,8 +146,12 @@ export default function UpsertFinancialCategory({
           onPress={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
+
         <Button
-          disabled={name === ""}
+          disabled={
+            name.trim() === "" ||
+            (!data && (!selected || !accountTypeSelect))
+          }
           onPress={handleUpsertFinancialCategory}
           text={!data ? registerButton : updateButton}
           status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}

@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-04-25
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -5,7 +6,8 @@
 
 "use client";
 
-import { ChangeEvent, JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { ChangeEvent, JSX } from "react";
 import Input, { InputType } from "../../input/input";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import ComboBox from "../../combobox/combobox";
@@ -26,182 +28,226 @@ interface CheckUsageModalProps {
   editData?: GetTrasnactionDTO;
 }
 
-type SelectOption = { id: string; name: string };
+type SelectOption = {
+  id: string;
+  name: string;
+};
+
+type TransactionForm = UpsertTransactionDto;
 
 const mapperFinancialCategory = (
   data: GetFinancialCategoryDto | GetFinancialCategoryDto[],
 ): SelectOption[] => {
-  if (Array.isArray(data))
-    return data.map((financialCategory) => ({
-      id: financialCategory.id,
-      name: financialCategory.name,
-    }));
+  const categories = Array.isArray(data) ? data : [data];
 
-  return [{ id: data.id, name: data.name }];
+  return categories.map(({ id, name }) => ({
+    id,
+    name,
+  }));
 };
 
 const mapperCustomer = (
   data: GetCustomerDto | GetCustomerDto[],
 ): SelectOption[] => {
-  if (Array.isArray(data))
-    return data.map((customer) => ({
-      id: customer.id,
-      name: customer.name,
-    }));
+  const customers = Array.isArray(data) ? data : [data];
 
-  return [{ id: data.id, name: data.name }];
+  return customers.map(({ id, name }) => ({
+    id,
+    name,
+  }));
 };
+
+function parseMoneyToNumber(value: string): number {
+  if (!value.trim()) return 0;
+
+  const normalizedValue = value
+    .replace(/\s/g, "")
+    .replace(/R\$/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .trim();
+
+  const amount = Number(normalizedValue);
+
+  return Number.isFinite(amount) ? amount : 0;
+}
 
 export function UpsertTransaction({
   onClose,
   onSubmit,
   editData,
-}: CheckUsageModalProps): JSX.Element {
-  const [data, setData] = useState<UpsertTransactionDto>({
-    id: "",
-    amount: 0,
-    categoryId: "",
-    customerId: "",
-    currentAmount: 0,
-    dueDate: new Date(),
-    status: TransactionStatus.CREATED,
-  });
+}: Readonly<CheckUsageModalProps>): JSX.Element {
+  const [data, setData] = useState<TransactionForm>(() => ({
+    id: editData?.id ?? "",
+    amount: editData?.amount ?? 0,
+    categoryId: editData?.category.id ?? "",
+    customerId: editData?.customer.id ?? "",
+    currentAmount: editData?.currentAmount ?? 0,
+    dueDate: editData?.dueDate ?? new Date(),
+    status: editData?.status ?? TransactionStatus.CREATED,
+    settledAt: editData?.settledAt,
+  }));
 
-  const [flag, setFlag] = useState(false);
-  const [date, setDate] = useState<Date>();
+  const [flag, setFlag] = useState(Boolean(editData?.settledAt));
+  const [loading, setLoading] = useState(true);
 
   const [financialCategoryOption, setFinancialCategoryOption] =
-    useState<SelectOption | null>(null);
+    useState<SelectOption | undefined>(undefined);
   const [financialCategoryList, setFinancialCategoryList] = useState<
     SelectOption[]
   >([]);
 
   const [customerList, setCustomerList] = useState<SelectOption[]>([]);
-  const [customerOption, setCustomerOption] = useState<SelectOption | null>(
-    null,
-  );
+  const [customerOption, setCustomerOption] = useState<
+    SelectOption | undefined
+  >(undefined);
 
   useEffect(() => {
-    getAllCustomer();
-    getAllFinancialCategory();
+    let isMounted = true;
 
-    if (editData) {
-      setData({
-        id: editData.id,
-        amount: editData.amount,
-        dueDate: editData.dueDate,
-        categoryId: editData.category.id,
-        customerId: editData.customer.id,
-      } as UpsertTransactionDto);
-    }
-  }, []);
+    const loadOptions = async (): Promise<void> => {
+      setLoading(true);
 
-  const getAllFinancialCategory = async (): Promise<void> => {
-    const { financialCategories } = await financialCategoryService.findAll({ all: true });
+      try {
+        const [
+          { financialCategories },
+          { customers },
+        ] = await Promise.all([
+          financialCategoryService.findAll({ all: true }),
+          customerService.findAll({ all: true }),
+        ]);
 
-    if (editData && Array.isArray(financialCategories)) {
-      const filter = financialCategories.filter(
-        (item) => item.id === editData.category.id,
-      );
+        if (!isMounted) return;
 
-      const [firstItem] = mapperFinancialCategory(filter);
+        const categories = mapperFinancialCategory(financialCategories);
+        const customerOptions = mapperCustomer(customers);
 
-      setFinancialCategoryOption(firstItem);
-    }
+        setFinancialCategoryList(categories);
+        setCustomerList(customerOptions);
 
-    setFinancialCategoryList(mapperFinancialCategory(financialCategories));
+        setFinancialCategoryOption(
+          categories.find(
+            ({ id }) => id === editData?.category.id,
+          ),
+        );
+
+        setCustomerOption(
+          customerOptions.find(
+            ({ id }) => id === editData?.customer.id,
+          ),
+        );
+      } catch (error) {
+        console.error("Erro ao carregar categorias e clientes:", error);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    void loadOptions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [editData?.category.id, editData?.customer.id]);
+
+  const handleUpsertData = (
+    value: Partial<UpsertTransactionDto>,
+  ): void => {
+    setData((prev) => ({
+      ...prev,
+      ...value,
+    }));
   };
 
-  const getAllCustomer = async (): Promise<void> => {
-    const { customers } = await customerService.findAll({ all: true });
-
-    if (editData && Array.isArray(customers)) {
-      const filter = customers.filter(
-        (item) => item.id === editData.customer.id,
-      );
-      const [firstItem] = mapperCustomer(filter);
-
-      setCustomerOption(firstItem);
-    }
-
-    setCustomerList(mapperCustomer(customers));
+  const handleSubmit = (): void => {
+    onSubmit(
+      {
+        ...data,
+        settledAt: flag ? new Date() : undefined,
+      },
+      Boolean(editData),
+    );
   };
 
-  const handleSubmit = () => {
-    onSubmit({ ...data, settledAt: flag ? new Date() : undefined });
-  };
-
-  const handleSelectFinancialCategory = (option: SelectOption | null): void => {
-    if (!option) return;
-
+  const handleSelectFinancialCategory = (
+    option?: SelectOption,
+  ): void => {
     setFinancialCategoryOption(option);
-
-    handleUpsertData({ categoryId: option.id });
+    handleUpsertData({
+      categoryId: option?.id ?? "",
+    });
   };
 
-  const handleSelectCustomerOption = (option: SelectOption | null): void => {
-    if (!option) return;
-
+  const handleSelectCustomerOption = (
+    option?: SelectOption,
+  ): void => {
     setCustomerOption(option);
-
-    handleUpsertData({ customerId: option.id });
-  };
-
-  const handleUpsertData = (data: Partial<UpsertTransactionDto>): void => {
-    setData((prev) => ({ ...prev, ...data }));
+    handleUpsertData({
+      customerId: option?.id ?? "",
+    });
   };
 
   const handleSetDueDate = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
-    handleUpsertData({ dueDate: new Date(e.target.value) });
+    const value = event.target.value;
+    const dueDate = value ? new Date(`${value}T00:00:00`) : undefined;
+
+    if (dueDate && Number.isNaN(dueDate.getTime())) return;
+
+    handleUpsertData({
+      dueDate: dueDate ?? new Date(),
+    });
   };
 
   const handleSetAmountValue = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
-    const amount = Number(
-      e.target.value
-        .replace(/\s/g, "")
-        .replace("R$", "")
-        .replace(/\./g, "")
-        .replace(",", "."),
-    );
-
-    handleUpsertData({ amount });
+    handleUpsertData({
+      amount: parseMoneyToNumber(event.target.value),
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col flex-1 justify-center items-center">
+        <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mb-4" />
+        <p className="text-gray-700 font-medium">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col p-6 space-y-2 gap-4">
       <Input
         value={data.amount}
-        name="Valor da tranasação"
+        name="Valor da transação"
         inputType={InputType.Money}
         onChange={handleSetAmountValue}
       />
 
-      <ComboBox
-        valueKey={"id"}
-        labelKey={"name"}
+      <ComboBox<SelectOption>
+        valueKey="id"
+        labelKey="name"
         options={financialCategoryList}
         selected={financialCategoryOption}
-        label={"Selecionar a categoria financeira"}
+        label="Selecionar a categoria financeira"
         onSelectOption={handleSelectFinancialCategory}
       />
 
-      <ComboBox
-        valueKey={"id"}
-        labelKey={"name"}
+      <ComboBox<SelectOption>
+        valueKey="id"
+        labelKey="name"
         options={customerList}
         selected={customerOption}
-        label="Selecionar o cliente :"
+        label="Selecionar o cliente:"
         onSelectOption={handleSelectCustomerOption}
       />
 
       <Input
         name="Data de vencimento"
         inputType={InputType.Date}
-        value={date?.toISOString()}
+        value={data.dueDate}
         onChange={handleSetDueDate}
       />
 

@@ -4,7 +4,6 @@
 // All rights reserved.
 
 import { AccountType, FinancialFlowType, Prisma } from "@/app/generated/prisma";
-import { GetFinancialEntryDto } from "../dto/General";
 import { GetBankDto } from "../dto/Bank/bank";
 
 type FinancialEntryBase = {
@@ -34,28 +33,3 @@ type FinancialEntryBase = {
     financialFlowType: FinancialFlowType;
   };
 };
-
-export function mapFinancialEntry<T extends FinancialEntryBase>(
-  data: T[],
-): GetFinancialEntryDto[] {
-  return data.map((entry) => ({
-    id: entry.id,
-    value: entry.value,
-    title: entry.title,
-    createdAt: entry.createdAt,
-    description: entry.description,
-    filePath: entry.filePath ?? "",
-
-    account: {
-      id: entry.account.id,
-      createdAt: entry.account.createdAt,
-      balance: Number(entry.account.balance),
-      accountType: entry.account.accountType,
-      accountNumber: entry.account.accountNumber,
-      bankId: entry.account.bankId,
-      bank: entry.account.bank ?? null,
-    },
-
-    financialCategory: entry.financialCategory,
-  }));
-}

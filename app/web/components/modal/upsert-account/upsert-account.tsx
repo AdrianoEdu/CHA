@@ -1,16 +1,23 @@
-// Copyright (c) 2026-07-06
+
+ // Copyright (c) 2026-07-06
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
 "use client";
 
-import { CreateAccountDto, UpdateAccountDto } from "@/app/web/dto/account.dto";
+import { useCallback, useEffect, useState } from "react";
+
+import {
+  CreateAccountDto,
+  UpdateAccountDto,
+} from "@/app/web/dto/account.dto";
+
 import Button, { ButtonStatusEnum } from "../../button/button";
-import { useEffect, useState } from "react";
 import ComboBox from "../../combobox/combobox";
-import { bankService } from "@/app/web/services/bankService/bankService";
 import Input from "../../input/input";
+
+import { bankService } from "@/app/web/services/bankService/bankService";
 
 export type UpsertAccountModalProps = {
   data?: UpdateAccountDto;
@@ -19,74 +26,142 @@ export type UpsertAccountModalProps = {
   onRegister?: (data: CreateAccountDto) => void;
 };
 
-type SelectOption = { id: string; name: string };
+type SelectOption = {
+  id: string;
+  name: string;
+};
 
-export default function UpserAccountModal({
+export default function UpsertAccountModal({
   data,
   onClose,
   onUpdated,
   onRegister,
 }: UpsertAccountModalProps) {
-  const isEdit = !!data;
+  const isEdit = Boolean(data?.id);
+
   const [currentData, setCurrentData] = useState<UpdateAccountDto | undefined>(
     data,
   );
 
-  const [listBankOptions, setListBank] = useState<SelectOption[]>([]);
-  const [selectedBank, setSelectBank] = useState<SelectOption | null>(null);
+  const [listBankOptions, setListBankOptions] = useState<SelectOption[]>([]);
+  const [selectedBank, setSelectedBank] = useState<SelectOption | undefined>();
+  const [loadingBanks, setLoadingBanks] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const handleFindBanks = useCallback(async (): Promise<void> => {
+    setLoadingBanks(true);
+    setFormError("");
+
+    try {
+      const { banks } = await bankService.findAll({
+        all: true,
+        orderBy: {
+          name: "asc",
+        },
+      });
+
+      const options: SelectOption[] = banks.map((bank) => ({
+        id: bank.id,
+        name: bank.name,
+      }));
+
+      setListBankOptions(options);
+
+      if (data?.bankId) {
+        setSelectedBank(
+          options.find((bank) => bank.id === data.bankId),
+        );
+      }
+    } catch {
+      setFormError("Não foi possível carregar os bancos. Tente novamente.");
+    } finally {
+      setLoadingBanks(false);
+    }
+  }, [data?.bankId]);
 
   useEffect(() => {
-    handleFindBanks();
+    void handleFindBanks();
+  }, [handleFindBanks]);
 
-    if (isEdit) findBankById(data.bankId!);
-  }, []);
+  const handleSelectOption = (option?: SelectOption): void => {
+    setSelectedBank(option);
 
-  const handleFindBanks = async () => {
-    const { banks } = await bankService.findAll({
-      all: true,
-      orderBy: { name: "asc" },
+    setCurrentData((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        bankId: option?.id,
+      };
     });
 
-    setListBank(
-      banks.map((b) => ({
-        id: b.id,
-        name: b.name,
-      })),
-    );
+    setFormError("");
   };
 
-  const findBankById = async (id: string): Promise<void> => {
-    const {
-      banks: [bank],
-    } = await bankService.findAll({
-      where: { id },
+  const handleUpsertData = (
+    values: Partial<UpdateAccountDto>,
+  ): void => {
+    setCurrentData((current) => {
+      if (!current) {
+        return current;
+      }
+
+      return {
+        ...current,
+        ...values,
+      };
     });
 
-    setSelectBank({ id: bank.id, name: bank.name });
-  };
-
-  const handleSelectOption = (option: SelectOption | null): void => {
-    setSelectBank(option);
-    setCurrentData((prev) => ({ ...prev!, bankId: option?.id }));
-  };
-
-  const handleUpserData = (data: Partial<UpdateAccountDto>): void => {
-    setCurrentData((prev) => ({ ...prev!, ...data }));
+    setFormError("");
   };
 
   const handleSubmit = (): void => {
-    if (isEdit && onUpdated) {
-      onUpdated({ ...currentData! });
+    if (!currentData) {
+      setFormError("Não foi possível carregar os dados da conta.");
       return;
     }
 
-    if (onRegister)
-      onRegister({
-        accountNumber: currentData?.accountNumber!,
-        balance: currentData?.balance!,
-        bankId: currentData?.bankId!,
-        createdAt: currentData?.createdAt!,
+    if (!isEdit && !currentData.bankId) {
+      setFormError("Selecione um banco.");
+      return;
+    }
+
+    if (!currentData.accountNumber?.trim()) {
+      setFormError("Informe o número da conta.");
+      return;
+    }
+
+    if (currentData.balance === undefined || !Number.isFinite(Number(currentData.balance))) {
+      setFormError("Informe um saldo válido.");
+      return;
+    }
+
+    if (isEdit) {
+      if (!onUpdated) {
+        return;
+      }
+
+      onUpdated({
+        ...currentData,
       });
+
+      return;
+    }
+
+    if (!onRegister) {
+      return;
+    }
+
+    const payload: CreateAccountDto = {
+      accountNumber: currentData.accountNumber,
+      balance: currentData.balance,
+      bankId: currentData.bankId ?? '',
+      createdAt: currentData.createdAt ?? new Date(),
+    };
+
+    onRegister(payload);
   };
 
   return (
@@ -98,27 +173,52 @@ export default function UpserAccountModal({
       </div>
 
       <div className="flex flex-col gap-8 p-5">
-        <ComboBox
-          valueKey="id"
-          labelKey="name"
-          disabled={isEdit}
-          selected={selectedBank}
-          options={listBankOptions}
-          onSelectOption={handleSelectOption}
+        <div className="flex flex-col gap-2">
+          <ComboBox
+            valueKey="id"
+            labelKey="name"
+            disabled={isEdit || loadingBanks}
+            selected={selectedBank}
+            options={listBankOptions}
+            name="Banco"
+            onSelectOption={handleSelectOption}
+          />
+
+          {loadingBanks && (
+            <p className="text-sm text-gray-500">
+              Carregando bancos...
+            </p>
+          )}
+        </div>
+
+        <Input
+          name="Número da conta"
+          value={currentData?.accountNumber ?? ""}
+          onChange={(event) =>
+            handleUpsertData({
+              accountNumber: event.target.value,
+            })
+          }
         />
 
         <Input
-          name={"Número da conta"}
-          value={currentData?.accountNumber}
-          onChange={(e) => handleUpserData({ accountNumber: e.target.value })}
+          name="Saldo"
+          className="flex-1"
+          value={currentData?.balance ?? ""}
+          onChange={(event) =>
+            handleUpsertData({
+              balance: event.target.value === ""
+                ? 0
+                : Number(event.target.value),
+            })
+          }
         />
 
-        <Input
-          name={"Saldo"}
-          className={"flex-1"}
-          value={currentData?.balance}
-          onChange={(e) => handleUpserData({ balance: Number(e.target.value) })}
-        />
+        {formError && (
+          <p className="text-sm text-red-600">
+            {formError}
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
@@ -130,7 +230,7 @@ export default function UpserAccountModal({
 
         <Button
           onClick={handleSubmit}
-          className={"px-4 py-2"}
+          className="px-4 py-2"
           text={isEdit ? "Atualizar" : "Confirmar"}
           status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />

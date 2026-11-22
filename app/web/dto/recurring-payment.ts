@@ -8,6 +8,7 @@ import {
   RecurringPaymentDateType,
 } from "../constants/enum";
 import { EmployeeDto } from "./employee.dto";
+import { PaginationDto } from "./pagination.dto";
 
 export type CreateRecurringPaymentDto = {
   name: string;
@@ -36,6 +37,11 @@ export type GetRecurringPaymentDtoParams = {
   count: number;
   recurringPayment: GetRecurringPaymentDto[];
 };
+
+export type RecurringPaymentParams = PaginationDto<RecurringPaymentWhere, any, any, any>;
+
+export type RecurringPaymentWhere = Partial<GetRecurringPaymentDto>;
+
 
 export type RemoverRecurringPaymentDto = {
   id: string;

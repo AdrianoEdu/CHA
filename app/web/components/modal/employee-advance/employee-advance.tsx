@@ -65,7 +65,7 @@ export default function RegisterEmployeeAdvanceModal({
   >([]);
 
   const [selectedOption, setSelectedOption] =
-    useState<SelectOptionAEmployeeAdvance | null>(null);
+    useState<SelectOptionAEmployeeAdvance | null | undefined>(null);
 
   useEffect(() => {
     setName(employeeName);

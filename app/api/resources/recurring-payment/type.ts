@@ -4,9 +4,3 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
-
-export type RecurrentPaymentWithRelations = Prisma.RecurringPaymentGetPayload<{
-  include: {
-    financialCategory: true;
-  };
-}>;

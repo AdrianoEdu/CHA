@@ -6,9 +6,7 @@
 import {
   CreateFinancialCategoryDto,
   FinancialCategoryParams,
-  GetFinancialCategoryDto,
   GetFinancialCategoryParamsDto,
-  SendFinancialCategoryDto,
   UpdateFinancialCategoryDto,
 } from "../../dto/financial.dto";
 import { requestService } from "../requestService/requestService";
@@ -41,13 +39,6 @@ class FinancialCategoryService {
       FinancialCategoryParams,
       GetFinancialCategoryParamsDto
     >(this.url, data);
-  }
-
-  findByName({ name }: Partial<SendFinancialCategoryDto>) {
-    return requestService.getByFilters<
-      Partial<SendFinancialCategoryDto>,
-      GetFinancialCategoryDto[]
-    >(this.url, { name });
   }
 
   delete(id: string) {

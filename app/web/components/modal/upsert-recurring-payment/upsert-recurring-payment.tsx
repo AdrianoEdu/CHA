@@ -1,4 +1,5 @@
-// Copyright (c) 2026-11-07
+
+ // Copyright (c) 2026-11-07
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -10,7 +11,6 @@ import {
   type JSX,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -87,26 +87,23 @@ export default function UpsertRecurringPaymentModal({
 }: RecurringPaymentModalProps): JSX.Element {
   const isEdit = Boolean(data?.id);
 
-  const [isEmployee, setIsEmployee] = useState(Boolean(data?.employeeId));
+  const [isEmployee, setIsEmployee] = useState(
+    Boolean(data?.employeeId),
+  );
 
   const [formData, setFormData] = useState<RecurringPaymentFormData>(() => {
     if (!data) {
       return initialFormData;
     }
 
-    let dueDateType = data.dueDateType;
-
-    if (dueDateType === RecurringPaymentDateType.EMPLOYEE_SALARY) {
-      dueDateType = RecurringPaymentDateType.FIXED_DAY;
-    }
-
     return {
       id: data.id,
-      name: data.name,
-      dueDateType,
+      name: data.name ?? "",
       dueDay: data.dueDay ?? undefined,
       adjustment: data.adjustment ?? undefined,
       employeeId: data.employeeId ?? undefined,
+      dueDateType:
+        data.dueDateType ?? RecurringPaymentDateType.FIXED_DAY,
     };
   });
 
@@ -118,21 +115,17 @@ export default function UpsertRecurringPaymentModal({
   const isFixedDay =
     formData.dueDateType === RecurringPaymentDateType.FIXED_DAY;
 
-  const selectedEmployee = useMemo(() => {
-    return employees.find((employee) => employee.id === formData.employeeId);
-  }, [employees, formData.employeeId]);
+  const selectedEmployee = employees.find(
+    (employee) => employee.id === formData.employeeId,
+  );
 
-  const selectedDueDateType = useMemo(() => {
-    return dueDateTypeOptions.find(
-      (option) => option.id === formData.dueDateType,
-    );
-  }, [formData.dueDateType]);
+  const selectedDueDateType = dueDateTypeOptions.find(
+    (option) => option.id === formData.dueDateType,
+  );
 
-  const selectedAdjustment = useMemo(() => {
-    return adjustmentOptions.find(
-      (option) => option.id === formData.adjustment,
-    );
-  }, [formData.adjustment]);
+  const selectedAdjustment = adjustmentOptions.find(
+    (option) => option.id === formData.adjustment,
+  );
 
   const updateFormData = useCallback(
     (values: Partial<RecurringPaymentFormData>): void => {
@@ -155,7 +148,7 @@ export default function UpsertRecurringPaymentModal({
         },
       });
 
-      const options = response.employee.map((employee) => ({
+      const options: SelectOption[] = response.employee.map((employee) => ({
         id: employee.id ?? "",
         name: employee.name,
       }));
@@ -178,7 +171,9 @@ export default function UpsertRecurringPaymentModal({
     void handleGetEmployees();
   }, [isEmployee, handleGetEmployees]);
 
-  const handleEmployeeToggle = (event: ChangeEvent<HTMLInputElement>): void => {
+  const handleEmployeeToggle = (
+    event: ChangeEvent<HTMLInputElement>,
+  ): void => {
     const checked = event.target.checked;
 
     setIsEmployee(checked);
@@ -206,22 +201,16 @@ export default function UpsertRecurringPaymentModal({
   ): void => {
     const value = event.target.value;
 
-    if (!value) {
-      updateFormData({
-        dueDay: undefined,
-      });
-
-      return;
-    }
-
     updateFormData({
-      dueDay: Number(value),
+      dueDay: value ? Number(value) : undefined,
     });
 
     setFormError("");
   };
 
-  const handleDueDateTypeChange = (option: SelectOption | null): void => {
+  const handleDueDateTypeChange = (
+    option?: SelectOption,
+  ): void => {
     if (!option) {
       return;
     }
@@ -235,31 +224,19 @@ export default function UpsertRecurringPaymentModal({
     setFormError("");
   };
 
-  const handleAdjustmentChange = (option: SelectOption | null): void => {
-    if (!option) {
-      updateFormData({
-        adjustment: undefined,
-      });
-
-      return;
-    }
-
+  const handleAdjustmentChange = (
+    option?: SelectOption,
+  ): void => {
     updateFormData({
-      adjustment: option.id as BusinessDayAdjustment,
+      adjustment: option?.id as BusinessDayAdjustment | undefined,
     });
   };
 
-  const handleEmployeeChange = (option: SelectOption | null): void => {
-    if (!option) {
-      updateFormData({
-        employeeId: undefined,
-      });
-
-      return;
-    }
-
+  const handleEmployeeChange = (
+    option?: SelectOption,
+  ): void => {
     updateFormData({
-      employeeId: option.id,
+      employeeId: option?.id,
     });
 
     setFormError("");
@@ -334,7 +311,9 @@ export default function UpsertRecurringPaymentModal({
   return (
     <div className="flex flex-col gap-5 p-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+        <h2 className="text-lg font-semibold text-gray-800">
+          {title}
+        </h2>
 
         <p className="text-sm text-gray-500">
           Cadastre uma regra para os pagamentos que serão gerados
@@ -391,7 +370,9 @@ export default function UpsertRecurringPaymentModal({
 
             {employeeLoadError && (
               <div className="flex flex-col gap-2">
-                <p className="text-sm text-red-600">{employeeLoadError}</p>
+                <p className="text-sm text-red-600">
+                  {employeeLoadError}
+                </p>
 
                 <Button
                   text="Tentar novamente"
@@ -451,7 +432,11 @@ export default function UpsertRecurringPaymentModal({
           </div>
         )}
 
-        {formError && <p className="text-sm text-red-600">{formError}</p>}
+        {formError && (
+          <p className="text-sm text-red-600">
+            {formError}
+          </p>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 border-t border-gray-200 pt-4">
