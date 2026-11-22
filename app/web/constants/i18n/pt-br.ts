@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { MODAL_I18N } from "./components/modal";
+import { SCREEN_I18N } from "./screen/bankStatement";
 
 export const PtBr = {
   Screen: {
@@ -18,6 +19,7 @@ export const PtBr = {
         systemDownError: "Sistema fora do Ar, tente novamente mais tarde",
       },
     },
+    BankStatement: { ...SCREEN_I18N.BankStatement },
   },
   Modal: {
     Generic: { ...MODAL_I18N.Generic },

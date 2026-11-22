@@ -28,12 +28,13 @@ import { AccountType } from "@/app/web/constants/enum";
 const takeBankStatement = 20;
 
 const { UpsertBankStatement } = i18n["Pt-Br"].Modal;
+const { addMovement, addStatement, fields, messages, title } = i18n['Pt-Br'].Screen.BankStatement;
 
 function FloatingButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      title="Adicionar movimentação"
+      title={addMovement}
       className="
         fixed
         bottom-6
@@ -139,10 +140,10 @@ export default function StatementPage() {
         ...data,
         accountId: account?.id,
       });
-      toast.success("Extrato registrado com successo!");
+      toast.success(messages.registerSuccess);
       closeModal();
     } catch (err) {
-      alert(err);
+      toast.error(messages.registerError)
     }
   };
 
@@ -151,10 +152,10 @@ export default function StatementPage() {
   ): Promise<void> => {
     try {
       await bankStatementService.update(data);
-      toast.success("Extrato atualizado com successo!");
+      toast.success(messages.updateSuccess);
       closeModal();
     } catch (error) {
-      toast.error("Houve um erro ao atualizar o extrato, tente mais tarde");
+      toast.error(messages.updateError);
     }
   };
 
@@ -183,15 +184,15 @@ export default function StatementPage() {
       <div className="mx-auto max-w-6xl">
         <div ref={headerRef}>
           <Header
+            headerTitle={title}
+            buttonTitle={addStatement}
             onClick={() => handleNewStatement()}
-            buttonTitle="Adicionar extrato"
-            headerTitle="Extrato bancário"
             primaryData={{
-              title: "Banco",
+              title: fields.bank,
               description: account?.bank.name ?? "",
             }}
             secondData={{
-              title: "Conta",
+              title: fields.account,
               description: account?.accountNumber ?? "",
             }}
             balanceData={account?.balance ?? 0}
