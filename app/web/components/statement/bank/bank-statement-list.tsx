@@ -46,7 +46,7 @@ const FinancialEntryComponent = ({
   return (
     <List title="Extrato">
       {data.map(
-        ({ createdAt, financialCategory, value, id, title, description }) => (
+        ({ createdAt, financialCategory, value, id, title, description, customer }) => (
           <div
             key={id}
             onClick={onSelect}
@@ -65,6 +65,12 @@ const FinancialEntryComponent = ({
                 <p className="font-semibold text-slate-800">{title}</p>
 
                 <p className="text-sm text-slate-500">{description}</p>
+
+                {customer?.name && (
+                  <p className="text-sm text-slate-500 mt-1">
+                    Cliente: {customer.name}
+                  </p>
+                )}
 
                 <p className="text-xs text-slate-400 mt-1">
                   {createdAt.toLocaleString()}

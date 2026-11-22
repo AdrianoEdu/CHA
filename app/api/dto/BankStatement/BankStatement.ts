@@ -12,6 +12,7 @@ export type CreateBankStatementDto = {
   createdAt: Date;
   description: string;
   accountId: string;
+  customerId: string;
   financialCategoryId: string;
 };
 

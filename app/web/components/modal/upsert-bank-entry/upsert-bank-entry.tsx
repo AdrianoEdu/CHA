@@ -8,7 +8,7 @@
 
 import { type JSX, useCallback, useEffect, useState } from "react";
 
-import { AccountType } from "@/app/web/constants/enum";
+import { AccountType, FinancialFlowType } from "@/app/web/constants/enum";
 import {
   CreateFinancialEntryDto,
   GetFinancialEntryDto,
@@ -22,8 +22,14 @@ import Button, { ButtonStatusEnum } from "../../button/button";
 
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
 
-import { SelectComboboxFinancialFlowTypeProps } from "../upsert-financial-category/upsert-financial-category";
+import {
+  SelectComboboxCustomerTypeProps,
+  SelectComboboxFinancialFlowTypeProps,
+} from "../upsert-financial-category/upsert-financial-category";
+
 import { i18n } from "@/app/web/constants/i18n";
+import { customerService } from "@/app/web/services/customerService/customerService";
+import { GetCustomerDto } from "@/app/web/dto/customer.dto";
 
 export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
@@ -42,14 +48,20 @@ type FinancialEntryForm = {
   description: string;
   accountId?: string;
   financialCategoryId?: string;
+  customer: Partial<GetCustomerDto>;
 };
 
 const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
-const { fields, messages } = i18n["Pt-Br"].Components.Modal.UpsertFinancialEntryModal;
+const { fields, messages } =
+  i18n["Pt-Br"].Components.Modal.UpsertFinancialEntryModal;
 
 const initialFormData: FinancialEntryForm = {
   value: 0,
   title: "",
+  customer: {
+    id: "",
+    name: "",
+  },
   description: "",
 };
 
@@ -60,12 +72,19 @@ export function UpsertFinancialEntryModal({
   onUpdate,
   onRegister,
 }: UpsertFinancialEntryModalProps): JSX.Element {
-  const [options, setOptions] = useState<
+  const [optionsFinancialEntry, setOptionsFinancialEntry] = useState<
     SelectComboboxFinancialFlowTypeProps[]
   >([]);
 
-  const [selected, setSelected] =
+  const [selectedFinancialEntry, setSelectedFinancialEntry] =
     useState<SelectComboboxFinancialFlowTypeProps | undefined>();
+
+  const [optionsCustomer, setOptionsCustomer] = useState<
+    SelectComboboxCustomerTypeProps[]
+  >([]);
+
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<SelectComboboxCustomerTypeProps | undefined>();
 
   const [financialEntry, setFinancialEntry] =
     useState<FinancialEntryForm>(() => {
@@ -78,57 +97,92 @@ export function UpsertFinancialEntryModal({
         value: data.value,
         title: data.title,
         createdAt: data.createdAt,
-        description: data.description,
         accountId: data.account?.id,
+        customer: {
+          id: data.customer?.id ?? "",
+          name: data.customer?.name ?? "",
+        },
+        description: data.description,
         financialCategoryId: data.financialCategory?.id,
       };
     });
 
-  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
   const isRegister = !data;
 
+  const isIncome =
+    selectedFinancialEntry?.value === FinancialFlowType.IN;
+
+  const handleGetCustomerList = useCallback(
+    async (): Promise<void> => {
+      const { customers } = await customerService.findAll();
+
+      const customersList: SelectComboboxCustomerTypeProps[] =
+        customers.map((item) => ({
+          id: item.id,
+          label: item.name,
+        }));
+
+      setOptionsCustomer(customersList);
+
+      if (data?.customer?.id) {
+        setSelectedCustomer(
+          customersList.find((item) => item.id === data.customer?.id),
+        );
+      }
+    },
+    [data?.customer?.id],
+  );
+
   const handleGetFinancialCategoryList = useCallback(
     async (): Promise<void> => {
-      setLoadingCategories(true);
-      setFormError("");
+      const { financialCategories } =
+        await financialCategoryService.findAll({
+          all: true,
+          where: { accountType },
+        });
 
-      try {
-        const { financialCategories } =
-          await financialCategoryService.findAll({
-            all: true,
-            where: { accountType },
-          });
+      const categories: SelectComboboxFinancialFlowTypeProps[] =
+        financialCategories.map((item) => ({
+          id: item.id,
+          label: item.name,
+          value: item.financialFlowType,
+        }));
 
-        const categories: SelectComboboxFinancialFlowTypeProps[] =
-          financialCategories.map((item) => ({
-            id: item.id,
-            label: item.name,
-            value: item.financialFlowType,
-          }));
+      setOptionsFinancialEntry(categories);
 
-        setOptions(categories);
-
-        if (data?.financialCategory?.id) {
-          setSelected(
-            categories.find(
-              (item) => item.id === data.financialCategory?.id,
-            ),
-          );
-        }
-      } catch {
-        setFormError(messages.loadCategoriesError);
-      } finally {
-        setLoadingCategories(false);
+      if (data?.financialCategory?.id) {
+        setSelectedFinancialEntry(
+          categories.find(
+            (item) => item.id === data.financialCategory?.id,
+          ),
+        );
       }
     },
     [accountType, data?.financialCategory?.id],
   );
 
   useEffect(() => {
-    void handleGetFinancialCategoryList();
-  }, [handleGetFinancialCategoryList]);
+    const loadData = async (): Promise<void> => {
+      setLoading(true);
+      setFormError("");
+
+      try {
+        await Promise.all([
+          handleGetCustomerList(),
+          handleGetFinancialCategoryList(),
+        ]);
+      } catch {
+        setFormError(messages.loadCategoriesError);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [handleGetCustomerList, handleGetFinancialCategoryList]);
 
   const handleSetFinancialEntry = (
     values: Partial<FinancialEntryForm>,
@@ -141,13 +195,34 @@ export function UpsertFinancialEntryModal({
     setFormError("");
   };
 
-  const handleSetSelectOption = (
+  const handleSetSelectFinancialEntryOption = (
     option?: SelectComboboxFinancialFlowTypeProps,
   ): void => {
-    setSelected(option);
+    setSelectedFinancialEntry(option);
 
     handleSetFinancialEntry({
       financialCategoryId: option?.id,
+      customer:
+        option?.value === FinancialFlowType.IN
+          ? financialEntry.customer
+          : { id: "", name: "" },
+    });
+
+    if (option?.value !== FinancialFlowType.IN) {
+      setSelectedCustomer(undefined);
+    }
+  };
+
+  const handleSetSelectCustomerOption = (
+    option?: SelectComboboxCustomerTypeProps,
+  ): void => {
+    setSelectedCustomer(option);
+
+    handleSetFinancialEntry({
+      customer: {
+        id: option?.id,
+        name: option?.label,
+      },
     });
   };
 
@@ -189,6 +264,9 @@ export function UpsertFinancialEntryModal({
       description: financialEntry.description,
       file: financialEntry.file,
       financialCategoryId: financialEntry.financialCategoryId,
+      ...(isIncome && financialEntry.customer.id
+        ? { customerId: financialEntry.customer.id }
+        : {}),
     };
 
     if (financialEntry.id) {
@@ -196,6 +274,7 @@ export function UpsertFinancialEntryModal({
         ...payload,
         id: financialEntry.id,
         accountId: financialEntry.accountId,
+        customerId: financialEntry?.customer?.id,
       });
 
       return;
@@ -204,6 +283,7 @@ export function UpsertFinancialEntryModal({
     onRegister({
       ...payload,
       accountId: financialEntry.accountId ?? "",
+      customerId: financialEntry?.customer?.id ?? '',
     });
   };
 
@@ -235,21 +315,35 @@ export function UpsertFinancialEntryModal({
           />
 
           <ComboBox
-            options={options}
+            options={optionsFinancialEntry}
             valueKey="id"
             labelKey="label"
-            selected={selected}
+            selected={selectedFinancialEntry}
             name={fields.category}
-            disabled={loadingCategories}
-            onSelectOption={handleSetSelectOption}
+            disabled={loading}
+            onSelectOption={handleSetSelectFinancialEntryOption}
           />
 
-          {loadingCategories && (
-            <p className="text-sm text-gray-500"> {messages.loadingCategories} </p>
+          {isIncome && (
+            <ComboBox<SelectComboboxCustomerTypeProps>
+              options={optionsCustomer}
+              valueKey="id"
+              labelKey="label"
+              selected={selectedCustomer}
+              name={fields.customer}
+              disabled={loading}
+              onSelectOption={handleSetSelectCustomerOption}
+            />
+          )}
+
+          {loading && (
+            <p className="text-sm text-gray-500">
+              {messages.loadingCategories}
+            </p>
           )}
 
           <Input
-            className="flex-1" i980p---
+            className="flex-1"
             name={fields.value}
             inputType={InputType.Money}
             value={financialEntry.value}
@@ -285,7 +379,11 @@ export function UpsertFinancialEntryModal({
 
         <Button
           text={isRegister ? register : update}
-          status={isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
+          status={
+            isRegister
+              ? ButtonStatusEnum.CONFIRM
+              : ButtonStatusEnum.UPDATE
+          }
           onPress={handleUpsertFinancialEntry}
         />
       </div>

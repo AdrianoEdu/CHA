@@ -23,6 +23,11 @@ export type SelectComboboxFinancialFlowTypeProps = {
   value: FinancialFlowType;
 };
 
+export type SelectComboboxCustomerTypeProps = {
+  id?: string;
+  label: string;
+};
+
 export type SelectComboboxAccountTypeProps = {
   id?: string;
   label: string;

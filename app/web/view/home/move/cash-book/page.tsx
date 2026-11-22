@@ -5,7 +5,7 @@
 
 "use client";
 
-import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-bank-statement/upsert-bank-statement";
+import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-bank-entry/upsert-bank-entry";
 import { FinancialEntryList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";

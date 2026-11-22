@@ -65,6 +65,7 @@ export const MODAL_I18N = {
       category: "Selecione a categoria do extrato",
       value: "Valor",
       notes: 'Observações',
+      customer: 'Recebido por',
     },
     messages: {
       loadCategoriesError:

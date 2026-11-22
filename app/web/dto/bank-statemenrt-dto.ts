@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { GetAccountDto } from "./account.dto";
+import { GetCustomerDto } from "./customer.dto";
 import { GetFinancialCategoryDto } from "./financial.dto";
 import { PaginationDto } from "./pagination.dto";
 
@@ -13,6 +14,7 @@ export type CreateBankStatementDto = {
   accountId: string;
   file?: File | null;
   description: string;
+  customerId: string;
   financialCategoryId: string;
 };
 
@@ -28,6 +30,7 @@ export type GetBankStatementDto = {
   createdAt: Date;
   description: string;
   account: GetAccountDto;
+  customer: Partial<GetCustomerDto>;
   financialCategory: GetFinancialCategoryDto;
 };
 

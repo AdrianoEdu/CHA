@@ -51,14 +51,16 @@ export default function Header({
           </div>
         )}
         <div
-          className={`flex ${
-            !primaryData && !secondData && "col-span-full w-full justify-end"
-          }`}
+          className={`flex ${!primaryData && !secondData && "col-span-full w-full justify-end"
+            }`}
         >
           <div>
             <span className="text-sm text-slate-400">Saldo Atual</span>
 
-            <p className="text-3xl font-bold text-green-600">
+            <p
+              className={`text-3xl font-bold ${balanceData < 0 ? "text-red-600" : "text-green-600"
+                }`}
+            >
               {`R$ ${balanceData.toFixed(2)}`}
             </p>
           </div>

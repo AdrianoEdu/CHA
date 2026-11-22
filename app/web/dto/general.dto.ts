@@ -4,6 +4,7 @@
 // All rights reserved.
 
 import { GetAccountDto } from "./account.dto";
+import { GetCustomerDto } from "./customer.dto";
 import { GetFinancialCategoryDto } from "./financial.dto";
 
 export type GetFinancialEntryDto = {
@@ -14,6 +15,7 @@ export type GetFinancialEntryDto = {
   filePath?: string;
   description: string;
   account: GetAccountDto;
+  customer: Partial<GetCustomerDto>;
   financialCategory: GetFinancialCategoryDto;
 };
 
@@ -22,6 +24,7 @@ export type CreateFinancialEntryDto = {
   title: string;
   accountId: string;
   file?: File | null;
+  customerId: string;
   description: string;
   financialCategoryId: string;
 };

@@ -3,10 +3,12 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import {
   CreateBankStatementDto,
   UpdateBankStatementDto,
 } from "../../dto/BankStatement/BankStatement";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { bankStatementService } from "./bank-statement.service";
 
 class BankStatementController {
@@ -22,6 +24,20 @@ class BankStatementController {
 
   async update(data: UpdateBankStatementDto) {
     return this.bankStatementService.update(data);
+  }
+
+  async findAll(req: Request) {
+    try {
+      const params = parsePrismaQuery<
+        Prisma.BankStatementWhereInput,
+        Prisma.BankStatementSelect,
+        Prisma.BankStatementInclude,
+        Prisma.BankStatementOrderByWithRelationInput
+      >(req);
+      return await this.bankStatementService.findBankStatement(params);
+    } catch (error: any) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
   }
 }
 

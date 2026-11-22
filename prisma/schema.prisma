@@ -90,13 +90,13 @@ model User {
 }
 
 model Employee {
-  id                 String    @id @default(uuid())
-  name               String
-  document           String
-  isActive           Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime? @updatedAt
-  dateOfBirth        DateTime?
+  id          String    @id @default(uuid())
+  name        String
+  document    String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  dateOfBirth DateTime?
 
   employeePositionId String
 
@@ -170,9 +170,9 @@ model Customer {
 
   receivedChecks ReceivedCheck[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  bankStatements BankStatement[]
 
   @@map("customers")
 }
@@ -216,6 +216,8 @@ model BankStatement {
   account             Account           @relation(fields: [accountId], references: [id])
   financialCategoryId String
   financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  customerId          String
+  customer            Customer          @relation(fields: [customerId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -263,28 +265,28 @@ model FinancialCategory {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
-  payment          Payment[]
-  cashBook         CashBook[]
-  bankStatement    BankStatement[]
+  payment       Payment[]
+  cashBook      CashBook[]
+  bankStatement BankStatement[]
 
   @@map("financial_categories")
 }
 
 model Payment {
-  id                  String            @id @default(uuid())
+  id                  String             @id @default(uuid())
   name                String
-  amount              Decimal           @db.Decimal(12, 2)
+  amount              Decimal            @db.Decimal(12, 2)
   dueDate             DateTime
   paidAt              DateTime?
   recurringPaymentId  String?
-  recurringPayment    RecurringPayment? @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
+  recurringPayment    RecurringPayment?  @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
   financialCategoryId String?
   financialCategory   FinancialCategory? @relation(fields: [financialCategoryId], references: [id])
   employeeId          String?
-  employee            Employee?         @relation(fields: [employeeId], references: [id])
+  employee            Employee?          @relation(fields: [employeeId], references: [id])
 
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("payments")
 }
@@ -301,18 +303,18 @@ enum BusinessDayAdjustment {
 }
 
 model RecurringPayment {
-  id                  String                    @id @default(uuid())
-  name                String
-  dueDateType         RecurringPaymentDateType
-  dueDay              Int?
-  adjustment          BusinessDayAdjustment?
-  employeeId          String?
-  employee            Employee?                 @relation(fields: [employeeId], references: [id])
+  id          String                   @id @default(uuid())
+  name        String
+  dueDateType RecurringPaymentDateType
+  dueDay      Int?
+  adjustment  BusinessDayAdjustment?
+  employeeId  String?
+  employee    Employee?                @relation(fields: [employeeId], references: [id])
 
-  payments            Payment[]
+  payments Payment[]
 
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("recurring-payment")
 }

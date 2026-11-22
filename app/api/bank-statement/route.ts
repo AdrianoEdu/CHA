@@ -8,6 +8,30 @@ import { decryptMiddleware } from "../middleware/decrypt-middleware";
 import { authGuard } from "../middleware/validate-token-middleware";
 import { bankStatementConttroller } from "../resources/bank-statement/bank-statement.controller";
 
+export async function GET(req: Request) {
+  try {
+    authGuard(req);
+
+    const result = await bankStatementConttroller.findAll(req);
+
+    return Response.json(result, { status: 200 });
+  } catch (error) {
+    if (error instanceof HttpException) {
+      return Response.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     authGuard(req);

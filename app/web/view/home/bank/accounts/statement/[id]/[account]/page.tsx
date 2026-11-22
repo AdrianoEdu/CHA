@@ -5,7 +5,7 @@
 
 "use client";
 
-import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-bank-statement/upsert-bank-statement";
+import { UpsertFinancialEntryModal } from "@/app/web/components/modal/upsert-bank-entry/upsert-bank-entry";
 import { FinancialEntryList } from "@/app/web/components/statement/bank/bank-statement-list";
 import Header from "@/app/web/components/statement/header/statement-header";
 import { SearchComponent } from "@/app/web/components/statement/search/statement-search";
@@ -69,6 +69,16 @@ export default function StatementPage() {
   const currentSkip = useRef(0);
   const totalCount = useRef(0);
 
+  const handleRefreshBankStatement = async (): Promise<void> => {
+    currentSkip.current = 0;
+    totalCount.current = 0;
+
+    setList([]);
+
+    await handleGetBankAccount();
+    await handleGetBankStatement();
+  };
+
   const handleGetBankStatement = useCallback(async (): Promise<void> => {
     if (totalCount.current > 0 && currentSkip.current >= totalCount.current)
       return;
@@ -122,14 +132,14 @@ export default function StatementPage() {
     return () => observer.disconnect();
   }, [handleGetBankStatement]);
 
-  const filteredBankStatement = useMemo(() => {
-    if (!search.trim()) return list;
-    return list.filter((item) =>
-      item.financialCategory.name.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [list, search]);
+  // const filteredBankStatement = useMemo(() => {
+  //   if (!search.trim()) return list;
+  //   return list.filter((item) =>
+  //     item.financialCategory.name.toLowerCase().includes(search.toLowerCase()),
+  //   );
+  // }, [list, search]);
 
-  const handleRegisterBankStatemen = async (
+  const handleRegisterBankStatement = async (
     data: CreateBankStatementDto,
   ): Promise<void> => {
     if (!account) return;
@@ -140,9 +150,12 @@ export default function StatementPage() {
         accountId: account?.id,
       });
       toast.success(messages.registerSuccess);
-      closeModal();
     } catch (err) {
       toast.error(messages.registerError)
+    }
+    finally {
+      closeModal();
+      await handleRefreshBankStatement()
     }
   };
 
@@ -152,9 +165,12 @@ export default function StatementPage() {
     try {
       await bankStatementService.update(data);
       toast.success(messages.updateSuccess);
-      closeModal();
     } catch (error) {
       toast.error(messages.updateError);
+    }
+    finally {
+      closeModal();
+      await handleRefreshBankStatement()
     }
   };
 
@@ -170,7 +186,7 @@ export default function StatementPage() {
         onClose={closeModal}
         accountType={AccountType.BANK}
         onUpdate={handleUpdateBankStatement}
-        onRegister={handleRegisterBankStatemen}
+        onRegister={handleRegisterBankStatement}
       />,
       !data
         ? UpsertBankStatement.registerTitle
@@ -202,7 +218,7 @@ export default function StatementPage() {
 
         <FinancialEntryList
           data={list}
-          onSelect={() => alert("xpto")}
+          onSelect={() => { }}
           balanceAccount={account?.balance ?? 0}
         />
       </div>

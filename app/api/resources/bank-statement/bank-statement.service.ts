@@ -3,13 +3,17 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { FinancialFlowType } from "@/app/generated/prisma";
+import { AccountType, FinancialFlowType, Prisma } from "@/app/generated/prisma";
 import {
   CreateBankStatementDto,
+  GetBankStatementParamsDto,
   UpdateBankStatementDto,
 } from "../../dto/BankStatement/BankStatement";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { storageSrevice } from "../../providers/storage/storage.service";
+import { PaginationDto } from "../../dto/Pagination/Pagination";
+import { GetFinancialEntryDto } from "../../dto/General";
+import { mapFinancialEntry } from "../../utils/mapFinancialEntry";
 
 class BankStatementService {
   private storageService = storageSrevice;
@@ -163,6 +167,78 @@ class BankStatementService {
 
       throw error;
     }
+  }
+
+  async findBankStatement({
+    skip,
+    take,
+    where,
+    include,
+    orderBy,
+  }: PaginationDto<
+    Prisma.BankStatementWhereInput,
+    Prisma.BankStatementSelect,
+    Prisma.BankStatementInclude,
+    Prisma.BankStatementOrderByWithRelationInput
+  >): Promise<GetBankStatementParamsDto> {
+    const baseQuery: Prisma.BankStatementFindManyArgs = {
+      skip,
+      where: {
+        ...where,
+        account: {
+          is: {
+            id: where?.account?.id,
+            accountType: AccountType.BANK,
+          },
+        },
+      },
+      take,
+      include,
+      orderBy,
+    };
+
+    const count = await this.databaseService.bankStatement.count({ where });
+
+    if (where)
+      return { count, bankStatement: await this.findMany({ ...baseQuery }) };
+
+    return { count, bankStatement: await this.findMany({ ...baseQuery }) };
+  }
+
+  async findMany({
+    include,
+    orderBy,
+    select,
+    skip,
+    take,
+    where,
+  }: Prisma.BankStatementFindManyArgs): Promise<GetFinancialEntryDto[]> {
+    const query: Prisma.BankStatementFindManyArgs = {
+      skip,
+      where,
+      take,
+      select,
+      include,
+      orderBy,
+    };
+
+    const result = await this.databaseService.bankStatement.findMany({
+      ...query,
+      include: {
+        customer: { select: { name: true, id: true } },
+        financialCategory: true,
+        account: {
+          include: {
+            bank: {
+              select: { id: true, name: true, agencies: true, createdAt: true },
+            },
+          },
+        },
+      },
+    });
+
+
+    return mapFinancialEntry(result);
   }
 }
 
