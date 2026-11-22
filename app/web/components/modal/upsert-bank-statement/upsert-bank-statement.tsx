@@ -23,6 +23,7 @@ import Button, { ButtonStatusEnum } from "../../button/button";
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
 
 import { SelectComboboxFinancialFlowTypeProps } from "../upsert-financial-category/upsert-financial-category";
+import { i18n } from "@/app/web/constants/i18n";
 
 export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
@@ -42,6 +43,9 @@ type FinancialEntryForm = {
   accountId?: string;
   financialCategoryId?: string;
 };
+
+const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
+const { fields, messages } = i18n["Pt-Br"].Components.Modal.UpsertFinancialEntryModal;
 
 const initialFormData: FinancialEntryForm = {
   value: 0,
@@ -114,9 +118,7 @@ export function UpsertFinancialEntryModal({
           );
         }
       } catch {
-        setFormError(
-          "Não foi possível carregar as categorias financeiras. Tente novamente.",
-        );
+        setFormError(messages.loadCategoriesError);
       } finally {
         setLoadingCategories(false);
       }
@@ -167,17 +169,17 @@ export function UpsertFinancialEntryModal({
     const title = financialEntry.title.trim();
 
     if (!title) {
-      setFormError("Informe a descrição do lançamento.");
+      setFormError(messages.requiredTitle);
       return;
     }
 
     if (!financialEntry.financialCategoryId) {
-      setFormError("Selecione uma categoria financeira.");
+      setFormError(messages.requiredCategory);
       return;
     }
 
     if (!Number.isFinite(financialEntry.value) || financialEntry.value <= 0) {
-      setFormError("Informe um valor válido.");
+      setFormError(messages.invalidValue);
       return;
     }
 
@@ -211,7 +213,7 @@ export function UpsertFinancialEntryModal({
         <div className="flex w-full flex-col justify-center gap-5">
           <Input
             className="flex-1"
-            name="Descrição do extrato"
+            name={fields.descriptionStatement}
             value={financialEntry.title}
             onChange={(event) =>
               handleSetFinancialEntry({
@@ -222,7 +224,7 @@ export function UpsertFinancialEntryModal({
 
           <Input
             className="flex-1"
-            name="Observações"
+            name={fields.notes}
             inputType={InputType.Annotation}
             value={financialEntry.description}
             onChange={(event) =>
@@ -237,20 +239,18 @@ export function UpsertFinancialEntryModal({
             valueKey="id"
             labelKey="label"
             selected={selected}
-            name="Selecione a categoria do extrato"
+            name={fields.category}
             disabled={loadingCategories}
             onSelectOption={handleSetSelectOption}
           />
 
           {loadingCategories && (
-            <p className="text-sm text-gray-500">
-              Carregando categorias...
-            </p>
+            <p className="text-sm text-gray-500"> {messages.loadingCategories} </p>
           )}
 
           <Input
-            name="Valor"
-            className="flex-1"
+            className="flex-1" i980p---
+            name={fields.value}
             inputType={InputType.Money}
             value={financialEntry.value}
             onChange={handleValueChange}
@@ -278,13 +278,13 @@ export function UpsertFinancialEntryModal({
 
       <div className="flex w-full justify-end gap-5">
         <Button
-          text="Cancelar"
+          text={cancel}
           onPress={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
 
         <Button
-          text={isRegister ? "Registrar" : "Atualizar"}
+          text={isRegister ? register : update}
           status={isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
           onPress={handleUpsertFinancialEntry}
         />

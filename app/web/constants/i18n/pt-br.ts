@@ -18,6 +18,7 @@ export const PtBr = {
       UpsertAccount: { ...MODAL_I18N.UpsertAccount },
       UpsertBank: { ...MODAL_I18N.UpsertBank },
       EmployeeAdvanced: { ...MODAL_I18N.EmployeeAdvanced },
+      UpsertFinancialEntryModal: { ...MODAL_I18N.UpsertFinancialEntryModal },
       UpsertBankStatement: {
         registerTitle: "Registrar extrato",
         updateTitle: "Atualizar extrato",

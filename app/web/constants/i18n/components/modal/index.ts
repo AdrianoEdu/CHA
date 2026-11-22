@@ -58,4 +58,21 @@ export const MODAL_I18N = {
     descriptionRemove:
       "Tem certeza de que deseja remover este registro? Esta ação não poderá ser desfeita.",
   },
+  UpsertFinancialEntryModal: {
+    fields: {
+      titleStatement: "Descrição do extrato",
+      descriptionStatement: "Observações",
+      category: "Selecione a categoria do extrato",
+      value: "Valor",
+      notes: 'Observações',
+    },
+    messages: {
+      loadCategoriesError:
+        "Não foi possível carregar as categorias financeiras. Tente novamente.",
+      loadingCategories: "Carregando categorias...",
+      requiredTitle: "Informe a descrição do lançamento.",
+      requiredCategory: "Selecione uma categoria financeira.",
+      invalidValue: "Informe um valor válido.",
+    },
+  }
 }
