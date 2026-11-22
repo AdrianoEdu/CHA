@@ -1,5 +1,5 @@
 
- // Copyright (c) 2026-07-06
+// Copyright (c) 2026-07-06
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -19,6 +19,9 @@ import Input from "../../input/input";
 
 import { bankService } from "@/app/web/services/bankService/bankService";
 
+import { i18n } from "@/app/web/constants/i18n";
+
+
 export type UpsertAccountModalProps = {
   data?: UpdateAccountDto;
   onClose: () => void;
@@ -31,6 +34,8 @@ type SelectOption = {
   name: string;
 };
 
+const { title, buttons, fields, messages, status } = i18n["Pt-Br"].Modal.UpsertAccount;
+
 export default function UpsertAccountModal({
   data,
   onClose,
@@ -39,9 +44,13 @@ export default function UpsertAccountModal({
 }: UpsertAccountModalProps) {
   const isEdit = Boolean(data?.id);
 
-  const [currentData, setCurrentData] = useState<UpdateAccountDto | undefined>(
-    data,
-  );
+  const [currentData, setCurrentData] = useState<UpdateAccountDto>({
+    id: "",
+    bankId: "",
+    balance: 0,
+    accountNumber: "",
+    createdAt: new Date(),
+  });
 
   const [listBankOptions, setListBankOptions] = useState<SelectOption[]>([]);
   const [selectedBank, setSelectedBank] = useState<SelectOption | undefined>();
@@ -73,7 +82,7 @@ export default function UpsertAccountModal({
         );
       }
     } catch {
-      setFormError("Não foi possível carregar os bancos. Tente novamente.");
+      setFormError(messages.loadBanksError);
     } finally {
       setLoadingBanks(false);
     }
@@ -83,19 +92,19 @@ export default function UpsertAccountModal({
     void handleFindBanks();
   }, [handleFindBanks]);
 
+  useEffect(() => {
+    if (data) {
+      setCurrentData(data);
+    }
+  }, [data]);
+
   const handleSelectOption = (option?: SelectOption): void => {
     setSelectedBank(option);
 
-    setCurrentData((current) => {
-      if (!current) {
-        return current;
-      }
-
-      return {
-        ...current,
-        bankId: option?.id,
-      };
-    });
+    setCurrentData((current) => ({
+      ...current,
+      bankId: option?.id,
+    }));
 
     setFormError("");
   };
@@ -103,38 +112,35 @@ export default function UpsertAccountModal({
   const handleUpsertData = (
     values: Partial<UpdateAccountDto>,
   ): void => {
-    setCurrentData((current) => {
-      if (!current) {
-        return current;
-      }
-
-      return {
-        ...current,
-        ...values,
-      };
-    });
+    setCurrentData((current) => ({
+      ...current,
+      ...values,
+    }));
 
     setFormError("");
   };
 
   const handleSubmit = (): void => {
     if (!currentData) {
-      setFormError("Não foi possível carregar os dados da conta.");
+      setFormError(messages.loadAccountError);
       return;
     }
 
     if (!isEdit && !currentData.bankId) {
-      setFormError("Selecione um banco.");
+      setFormError(messages.selectBank);
       return;
     }
 
     if (!currentData.accountNumber?.trim()) {
-      setFormError("Informe o número da conta.");
+      setFormError(messages.accountNumberRequired);
       return;
     }
 
-    if (currentData.balance === undefined || !Number.isFinite(Number(currentData.balance))) {
-      setFormError("Informe um saldo válido.");
+    if (
+      currentData.balance === undefined ||
+      !Number.isFinite(Number(currentData.balance))
+    ) {
+      setFormError(messages.invalidBalance);
       return;
     }
 
@@ -157,7 +163,7 @@ export default function UpsertAccountModal({
     const payload: CreateAccountDto = {
       accountNumber: currentData.accountNumber,
       balance: currentData.balance,
-      bankId: currentData.bankId ?? '',
+      bankId: currentData.bankId ?? "",
       createdAt: currentData.createdAt ?? new Date(),
     };
 
@@ -168,7 +174,9 @@ export default function UpsertAccountModal({
     <div className="bg-white">
       <div className="mb-4">
         <h2 className="text-lg font-semibold">
-          {isEdit ? "Editar conta corrente" : "Registrar conta corrente"}
+          {isEdit
+            ? title.edit
+            : title.register}
         </h2>
       </div>
 
@@ -180,19 +188,19 @@ export default function UpsertAccountModal({
             disabled={isEdit || loadingBanks}
             selected={selectedBank}
             options={listBankOptions}
-            name="Banco"
+            name={fields.bank}
             onSelectOption={handleSelectOption}
           />
 
           {loadingBanks && (
             <p className="text-sm text-gray-500">
-              Carregando bancos...
+              {status.loadingBanks}
             </p>
           )}
         </div>
 
         <Input
-          name="Número da conta"
+          name={fields.accountNumber}
           value={currentData?.accountNumber ?? ""}
           onChange={(event) =>
             handleUpsertData({
@@ -202,14 +210,15 @@ export default function UpsertAccountModal({
         />
 
         <Input
-          name="Saldo"
+          name={fields.balance}
           className="flex-1"
           value={currentData?.balance ?? ""}
           onChange={(event) =>
             handleUpsertData({
-              balance: event.target.value === ""
-                ? 0
-                : Number(event.target.value),
+              balance:
+                event.target.value === ""
+                  ? 0
+                  : Number(event.target.value),
             })
           }
         />
@@ -223,7 +232,7 @@ export default function UpsertAccountModal({
 
       <div className="flex justify-end gap-2 pt-4">
         <Button
-          text="Cancelar"
+          text={buttons.cancel}
           onClick={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
@@ -231,7 +240,11 @@ export default function UpsertAccountModal({
         <Button
           onClick={handleSubmit}
           className="px-4 py-2"
-          text={isEdit ? "Atualizar" : "Confirmar"}
+          text={
+            isEdit
+              ? buttons.update
+              : buttons.confirm
+          }
           status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />
       </div>

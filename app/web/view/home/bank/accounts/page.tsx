@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-06-05
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -20,6 +21,24 @@ import { accountService } from "@/app/web/services/accountService/acountService"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+
+const ACCOUNT_SCREEN_TEXT = {
+  messages: {
+    createSuccess: "Conta criada com sucesso",
+    createError: "Não foi possível criar conta",
+    updateSuccess: "Conta atualizada com sucesso",
+    updateError: "Não foi possível atualizar conta",
+  },
+  columns: {
+    createdAt: "Registrado em",
+    bank: "Banco",
+    accountNumber: "Número da conta",
+    balance: "Saldo",
+    actions: "Ações",
+  },
+  title: "Conta corrente",
+  route: "/web/view/home/bank/accounts/statement",
+};
 
 let countAccounts = 0;
 const takeAccounts = 20;
@@ -62,7 +81,7 @@ export default function AccountScreen() {
 
   const navigateBankStatement = (row: GetAccountDto): void => {
     router.push(
-      `/web/view/home/bank/accounts/statement/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
+      `${ACCOUNT_SCREEN_TEXT.route}/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
     );
   };
 
@@ -71,9 +90,9 @@ export default function AccountScreen() {
   ): Promise<void> => {
     try {
       await accountService.create(data);
-      toast.success("Conta criada com sucesso");
+      toast.success(ACCOUNT_SCREEN_TEXT.messages.createSuccess);
     } catch (error) {
-      toast.error("Não foi possivel criar conta");
+      toast.error(ACCOUNT_SCREEN_TEXT.messages.createError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
@@ -83,9 +102,9 @@ export default function AccountScreen() {
   const handleUpdateAccount = async (data: UpdateAccountDto): Promise<void> => {
     try {
       await accountService.update(data);
-      toast.success("Conta atualizada com sucesso");
+      toast.success(ACCOUNT_SCREEN_TEXT.messages.updateSuccess);
     } catch (error) {
-      toast.error("Não foi possivel atualizar conta");
+      toast.error(ACCOUNT_SCREEN_TEXT.messages.updateError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
@@ -110,12 +129,15 @@ export default function AccountScreen() {
 
   const getColumns = (): TableColumn<GetAccountDto>[] => {
     return [
-      { label: "Registrado em", accessor: "createdAt" },
-      { label: "Banco", accessor: "bank.name" },
-      { label: "Número da conta", accessor: "accountNumber" },
-      { label: "Saldo", accessor: "balance" },
+      { label: ACCOUNT_SCREEN_TEXT.columns.createdAt, accessor: "createdAt" },
+      { label: ACCOUNT_SCREEN_TEXT.columns.bank, accessor: "bank.name" },
       {
-        label: "Ações",
+        label: ACCOUNT_SCREEN_TEXT.columns.accountNumber,
+        accessor: "accountNumber",
+      },
+      { label: ACCOUNT_SCREEN_TEXT.columns.balance, accessor: "balance" },
+      {
+        label: ACCOUNT_SCREEN_TEXT.columns.actions,
         render(row) {
           return (
             <Button
@@ -142,7 +164,7 @@ export default function AccountScreen() {
       <Table
         rows={list}
         columns={getColumns()}
-        title={"Conta corrente"}
+        title={ACCOUNT_SCREEN_TEXT.title}
         currentPage={currentPage}
         onRowClick={navigateBankStatement}
         onActionClicked={handleOpenModalUpsertAccount}
