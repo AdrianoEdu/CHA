@@ -9,7 +9,8 @@ import { EntityProp, RecipientTypeEnum } from "@/app/web/constants/enum";
 import Button from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { cancelButton, registerButton, DeactiveEntity } = i18n["Pt-Br"].Modal;
+const { DeactiveEntity } = i18n["Pt-Br"].Components.Modal;
+const { cancel } = i18n["Pt-Br"].Components.Modal.Generic
 
 export type UpdateStatusEntityModalProps = {
   entity: EntityProp;
@@ -42,7 +43,7 @@ export default function UpdateStatusEntityModal({
       <p className="mt-2 text-sm text-gray-600">{description}</p>
 
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onCancel} />
+        <Button text={cancel} onPress={onCancel} />
         <Button text={confirmText} onPress={onConfirm} />
       </div>
     </div>

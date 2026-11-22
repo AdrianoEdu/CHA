@@ -8,8 +8,8 @@
 import Button from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { removeButton, cancelButton, titleRemove, descriptionRemove } =
-  i18n["Pt-Br"].Modal;
+const { cancel, remove } = i18n["Pt-Br"].Components.Modal.Generic;
+const { titleRemove, descriptionRemove } = i18n["Pt-Br"].Components.Modal.RemoveModal;
 
 export type RemoveEmployeeModalContentProps = {
   onClose: () => void;
@@ -27,10 +27,10 @@ export default function RemoveModal({
       <p className="text-sm text-gray-600 mt-2">{descriptionRemove}</p>
 
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onClose} />
+        <Button text={cancel} onPress={onClose} />
 
         <Button
-          text={removeButton}
+          text={remove}
           onPress={onConfirm}
           className={"bg-red-500"}
         />

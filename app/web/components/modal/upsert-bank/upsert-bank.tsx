@@ -14,8 +14,8 @@ interface BankModalProps {
   onSubmit: (data: GetBankDto, isEdit?: boolean) => void;
 }
 
-const { fields, title } = i18n['Pt-Br'].Modal.UpsertBank;
-const { update, register } = i18n['Pt-Br'].Modal.Generic;
+const { fields, title } = i18n['Pt-Br'].Components.Modal.UpsertBank;
+const { update, register } = i18n['Pt-Br'].Components.Modal.Generic;
 
 
 export default function BankModal({

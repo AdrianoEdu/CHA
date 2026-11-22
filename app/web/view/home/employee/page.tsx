@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-const { UpsertEmployee, DeactiveEntity, RemoveEmployee } = i18n["Pt-Br"].Modal;
+const { UpsertEmployee, DeactiveEntity, RemoveEmployee } = i18n["Pt-Br"].Components.Modal;
 
 let countEmployee = 0;
 let oldEmployeeList: EmployeeDto[] = [];
@@ -120,14 +120,14 @@ export default function EmployeeScreen() {
 
     const currentData = data
       ? {
-          id: data?.id ?? "",
-          name: data?.name ?? "",
-          document: data?.document ?? "",
-          dateOfBirth: data?.dateOfBirth,
-          isActive: data?.isActive ?? false,
-          employeePositionId: data?.employeePosition
-            .position as EmployeePositionEnum,
-        }
+        id: data?.id ?? "",
+        name: data?.name ?? "",
+        document: data?.document ?? "",
+        dateOfBirth: data?.dateOfBirth,
+        isActive: data?.isActive ?? false,
+        employeePositionId: data?.employeePosition
+          .position as EmployeePositionEnum,
+      }
       : undefined;
 
     openModal(

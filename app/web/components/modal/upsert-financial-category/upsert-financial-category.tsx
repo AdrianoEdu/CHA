@@ -29,9 +29,12 @@ export type SelectComboboxAccountTypeProps = {
   value: AccountType;
 };
 
+const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
+const { FinancialCategory } = i18n['Pt-Br'].Components.ComboBox;
+
 const financialCategoryTypeLabels: Record<FinancialFlowType, string> = {
-  IN: "Entrada",
-  OUT: "Saída",
+  IN: FinancialCategory.FINANCIAL_FLOW.IN,
+  OUT: FinancialCategory.FINANCIAL_FLOW.OUT,
 };
 
 const options: SelectComboboxFinancialFlowTypeProps[] = (
@@ -42,8 +45,8 @@ const options: SelectComboboxFinancialFlowTypeProps[] = (
 }));
 
 const accountTypeOptions: SelectComboboxAccountTypeProps[] = [
-  { label: "Banco", value: AccountType.BANK },
-  { label: "Livro Caixa", value: AccountType.CASHBOOK },
+  { label: FinancialCategory.ACCOUNT_TYPE.BANK, value: AccountType.BANK },
+  { label: FinancialCategory.ACCOUNT_TYPE.CASHBOOK, value: AccountType.CASHBOOK },
 ];
 
 type FinancialCategoryProps = {
@@ -52,8 +55,6 @@ type FinancialCategoryProps = {
   onUpdated?: (data: UpdateFinancialCategoryDto) => void;
   onRegister?: (data: CreateFinancialCategoryDto) => void;
 };
-
-const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
 
 export default function UpsertFinancialCategory({
   data,
@@ -80,17 +81,17 @@ export default function UpsertFinancialCategory({
     setSelected(
       data.financialFlowType
         ? {
-            label: financialCategoryTypeLabels[data.financialFlowType],
-            value: data.financialFlowType,
-          }
+          label: financialCategoryTypeLabels[data.financialFlowType],
+          value: data.financialFlowType,
+        }
         : undefined,
     );
 
     setAccountTypeSelect(
       data.accountType
         ? accountTypeOptions.find(
-            (option) => option.value === data.accountType,
-          )
+          (option) => option.value === data.accountType,
+        )
         : undefined,
     );
   }, [data]);
@@ -142,7 +143,7 @@ export default function UpsertFinancialCategory({
 
       <div className="mt-6 flex justify-end gap-4">
         <Button
-          text={cancelButton}
+          text={cancel}
           onPress={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
@@ -153,7 +154,7 @@ export default function UpsertFinancialCategory({
             (!data && (!selected || !accountTypeSelect))
           }
           onPress={handleUpsertFinancialCategory}
-          text={!data ? registerButton : updateButton}
+          text={!data ? register : update}
           status={!data ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE}
         />
       </div>

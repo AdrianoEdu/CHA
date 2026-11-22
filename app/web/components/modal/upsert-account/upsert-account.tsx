@@ -34,8 +34,8 @@ type SelectOption = {
   name: string;
 };
 
-const { title, fields, messages, status } = i18n["Pt-Br"].Modal.UpsertAccount;
-const { cancel, confirm, update } = i18n["Pt-Br"].Modal.Generic;
+const { title, fields, messages, status } = i18n["Pt-Br"].Components.Modal.UpsertAccount;
+const { cancel, confirm, update } = i18n["Pt-Br"].Components.Modal.Generic;
 
 export default function UpsertAccountModal({
   data,

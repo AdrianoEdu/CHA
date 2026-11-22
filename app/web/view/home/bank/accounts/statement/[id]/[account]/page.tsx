@@ -26,7 +26,7 @@ import { AccountType } from "@/app/web/constants/enum";
 
 const takeBankStatement = 20;
 
-const { UpsertBankStatement } = i18n["Pt-Br"].Modal;
+const { UpsertBankStatement } = i18n["Pt-Br"].Components.Modal;
 const { addMovement, addStatement, fields, messages, title } = i18n['Pt-Br'].Screen.BankStatement;
 
 function FloatingButton({ onClick }: { onClick: () => void }) {

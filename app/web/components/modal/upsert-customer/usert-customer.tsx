@@ -25,7 +25,7 @@ type RegisterCustomerProps = {
   onRegister?: (data: CreateCustomerDto) => void;
 };
 
-const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
+const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
 
 const labelCNPJ = "Informe o CNPJ";
 const labelCPF = "Informe o CPF";
@@ -161,14 +161,14 @@ export default function UpsertCustomerModal({
 
       <div className="mt-6 flex justify-end gap-4">
         <Button
-          text={cancelButton}
+          text={cancel}
           onPress={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
         <Button
           onPress={handleUpsertCustomer}
           disabled={disable || !formStatus}
-          text={isRegister ? registerButton : updateButton}
+          text={isRegister ? register : update}
           status={
             isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE
           }

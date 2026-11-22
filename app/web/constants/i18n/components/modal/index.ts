@@ -5,10 +5,11 @@
 
 export const MODAL_I18N = {
   Generic: {
+    remove: 'Remover',
     cancel: 'Cancelar',
     update: 'Atualizar',
     confirm: 'Confirmar',
-    register: 'Registrar'
+    register: 'Registrar',
   },
   UpsertAccount: {
     title: {
@@ -40,5 +41,21 @@ export const MODAL_I18N = {
       name: "Nome do banco",
       agency: "Agência",
     },
+  },
+  EmployeeAdvanced: {
+    Register: {
+      title: "Registrar adiantamento",
+      inputNamePlaceholder: "Informe o motivo do adiantamento",
+      inputAmountPlaceholder: "Informe valor do adiantamento",
+      errorEmptyName: "Por favor, informe o motivo do adiantamento.",
+      errorInvalidName:
+        "Por favor, insira somente caracteres válidos (apenas letras).",
+      successRegisterEmployeeAdvance: "Adiantamento registrado com sucesso!",
+    },
+  },
+  RemoveModal: {
+    titleRemove: "Confirmação de exclusão",
+    descriptionRemove:
+      "Tem certeza de que deseja remover este registro? Esta ação não poderá ser desfeita.",
   },
 }

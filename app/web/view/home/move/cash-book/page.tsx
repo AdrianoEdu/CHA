@@ -26,7 +26,7 @@ import { toast } from "react-toastify";
 
 const takeCashBook = 20;
 
-const { UpsertCashBook } = i18n["Pt-Br"].Modal;
+const { UpsertCashBook } = i18n["Pt-Br"].Components.Modal;
 
 function FloatingButton({ onClick }: { onClick: () => void }) {
   return (

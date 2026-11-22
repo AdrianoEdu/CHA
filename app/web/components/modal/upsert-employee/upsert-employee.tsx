@@ -21,10 +21,10 @@ import {
 import ComboBox from "../../combobox/combobox";
 import { EmployeePositionEnum } from "@/app/web/constants/enum";
 
-const { cancelButton, UpsertEmployee, registerButton, updateButton } =
-  i18n["Pt-Br"].Modal;
+const { cancel, register, update } =
+  i18n["Pt-Br"].Components.Modal.Generic;
 
-const { inputNamePlaceholder } = UpsertEmployee;
+const { inputNamePlaceholder } = i18n["Pt-Br"].Components.Modal.UpsertEmployee;
 
 type SelectOption = { id: string; name: string };
 
@@ -252,7 +252,7 @@ export default function UspertEmployeeModal({
 
       <div className="mt-auto pt-6 flex justify-end gap-4">
         <Button
-          text={cancelButton}
+          text={cancel}
           onPress={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
@@ -260,7 +260,7 @@ export default function UspertEmployeeModal({
         <Button
           onPress={handleUpsertEmployee}
           disabled={!formStatus || disable}
-          text={isRegister ? registerButton : updateButton}
+          text={isRegister ? register : update}
           status={
             isRegister ? ButtonStatusEnum.CONFIRM : ButtonStatusEnum.UPDATE
           }

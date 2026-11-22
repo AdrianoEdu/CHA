@@ -22,7 +22,7 @@ type AdvanceReasonProps = {
   onRegister?: (data: CreateAdvanceReasonDto) => void;
 };
 
-const { cancelButton, registerButton, updateButton } = i18n["Pt-Br"].Modal;
+const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
 
 export default function UpsertAdvanceReason({
   data,
@@ -57,11 +57,11 @@ export default function UpsertAdvanceReason({
       />
 
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onClose} />
+        <Button text={cancel} onPress={onClose} />
         <Button
           disabled={name === ""}
           onPress={handleUpsertAdvanceReason}
-          text={!data ? registerButton : updateButton}
+          text={!data ? register : update}
         />
       </div>
     </div>

@@ -17,11 +17,8 @@ import {
 } from "@/app/web/dto/advance-reason.dto";
 import { CreateEmployeeAdvanceDto } from "@/app/web/dto/employee-advance.dto";
 
-const { cancelButton, registerButton, RegisterEmployeeAdvanced } =
-  i18n["Pt-Br"].Modal;
-
-const { inputNamePlaceholder, inputAmountPlaceholder } =
-  RegisterEmployeeAdvanced;
+const { Register } = i18n["Pt-Br"].Components.Modal.EmployeeAdvanced;
+const { cancel, register } = i18n["Pt-Br"].Components.Modal.Generic;
 
 export function parseMoney(value: string | number): number {
   if (typeof value === "number") {
@@ -38,7 +35,6 @@ export function parseMoney(value: string | number): number {
 
   const numberValue = Number(cleaned);
 
-  // fallback seguro
   if (isNaN(numberValue)) return 0;
 
   return Number(numberValue.toFixed(2));
@@ -99,7 +95,7 @@ export default function RegisterEmployeeAdvanceModal({
         disabled
         value={name}
         className="flex-1"
-        name={inputNamePlaceholder}
+        name={Register.inputNamePlaceholder}
       />
 
       <ComboBox
@@ -113,7 +109,7 @@ export default function RegisterEmployeeAdvanceModal({
       <Input
         value={amount}
         inputType={InputType.Money}
-        name={inputAmountPlaceholder}
+        name={Register.inputAmountPlaceholder}
         className="flex-1 appearance-none no-spinner"
         onChange={(e) => {
           setAmount(e.target.value);
@@ -121,10 +117,10 @@ export default function RegisterEmployeeAdvanceModal({
       />
 
       <div className="mt-6 flex justify-end gap-4">
-        <Button text={cancelButton} onPress={onClose} />
+        <Button text={cancel} onPress={onClose} />
 
         <Button
-          text={registerButton}
+          text={register}
           onPress={handleRegisterAdvanceEmployee}
           disabled={!selectedOption || parseMoney(amount) <= 0}
         />

@@ -32,7 +32,7 @@ import { i18n } from "@/app/web/constants/i18n";
 let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
 
-const { DeactiveEntity } = i18n["Pt-Br"].Modal;
+const { DeactiveEntity } = i18n["Pt-Br"].Components.Modal;
 
 const { activateTitle, deactivateTitle, successActive, successDeactive } =
   DeactiveEntity.customer;
