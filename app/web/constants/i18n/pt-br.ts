@@ -3,33 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-
-const UPSERT_ACCOUNT_MODAL_TEXT = {
-  title: {
-    edit: "Editar conta corrente",
-    register: "Registrar conta corrente",
-  },
-  messages: {
-    loadBanksError: "Não foi possível carregar os bancos. Tente novamente.",
-    loadAccountError: "Não foi possível carregar os dados da conta.",
-    selectBank: "Selecione um banco.",
-    accountNumberRequired: "Informe o número da conta.",
-    invalidBalance: "Informe um saldo válido.",
-  },
-  fields: {
-    bank: "Banco",
-    accountNumber: "Número da conta",
-    balance: "Saldo",
-  },
-  buttons: {
-    cancel: "Cancelar",
-    update: "Atualizar",
-    confirm: "Confirmar",
-  },
-  status: {
-    loadingBanks: "Carregando bancos...",
-  },
-};
+import { MODAL_I18N } from "./components/modal";
 
 export const PtBr = {
   Screen: {
@@ -46,7 +20,9 @@ export const PtBr = {
     },
   },
   Modal: {
-    UpsertAccount: { ...UPSERT_ACCOUNT_MODAL_TEXT },
+    Generic: { ...MODAL_I18N.Generic },
+    UpsertAccount: { ...MODAL_I18N.UpsertAccount },
+    UpsertBank: { ...MODAL_I18N.UpsertBank },
     UpsertBankStatement: {
       registerTitle: "Registrar extrato",
       updateTitle: "Atualizar extrato",

@@ -34,7 +34,8 @@ type SelectOption = {
   name: string;
 };
 
-const { title, buttons, fields, messages, status } = i18n["Pt-Br"].Modal.UpsertAccount;
+const { title, fields, messages, status } = i18n["Pt-Br"].Modal.UpsertAccount;
+const { cancel, confirm, update } = i18n["Pt-Br"].Modal.Generic;
 
 export default function UpsertAccountModal({
   data,
@@ -232,7 +233,7 @@ export default function UpsertAccountModal({
 
       <div className="flex justify-end gap-2 pt-4">
         <Button
-          text={buttons.cancel}
+          text={cancel}
           onClick={onClose}
           status={ButtonStatusEnum.CANCEL}
         />
@@ -242,8 +243,8 @@ export default function UpsertAccountModal({
           className="px-4 py-2"
           text={
             isEdit
-              ? buttons.update
-              : buttons.confirm
+              ? update
+              : confirm
           }
           status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
         />

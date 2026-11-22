@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, JSX } from "react";
 import Input, { InputType } from "../../input/input";
 import Button, { ButtonStatusEnum } from "../../button/button";
 import { AddIcon, DeleteIcon } from "@/app/web/icons";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
+import { i18n } from "@/app/web/constants/i18n";
 
 interface BankModalProps {
   data?: GetBankDto;
@@ -13,12 +14,16 @@ interface BankModalProps {
   onSubmit: (data: GetBankDto, isEdit?: boolean) => void;
 }
 
+const { fields, title } = i18n['Pt-Br'].Modal.UpsertBank;
+const { update, register } = i18n['Pt-Br'].Modal.Generic;
+
+
 export default function BankModal({
   data,
   onClose,
   onSubmit,
   isEdit = false,
-}: BankModalProps) {
+}: Readonly<BankModalProps>): JSX.Element {
   const [name, setName] = useState(data?.name ?? "");
   const [agencyInput, setAgencyInput] = useState("");
   const [agencies, setAgencies] = useState<string[]>(data?.agencies ?? []);
@@ -53,11 +58,11 @@ export default function BankModal({
     <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
       <div className="bg-white rounded-xl shadow-lg w-125 p-6 space-y-6">
         <h2 className="text-lg font-semibold">
-          {isEdit ? "Editar Banco" : "Criar Banco"}
+          {isEdit ? title.edit : title.create}
         </h2>
 
         <Input
-          name="Nome do banco"
+          name={fields.name}
           value={name}
           disabled={isEdit}
           onChange={(e: any) => setName(e.target.value)}
@@ -66,7 +71,7 @@ export default function BankModal({
         <div className="flex items-center gap-2">
           <div>
             <Input
-              name="Agência"
+              name={fields.agency}
               value={agencyInput}
               inputType={InputType.Number}
               onChange={(e) => {
@@ -117,7 +122,7 @@ export default function BankModal({
           <Button
             onClick={handleSubmit}
             className={"px-4 py-2"}
-            text={isEdit ? "Atualizar" : "Criar"}
+            text={isEdit ? update : register}
             status={isEdit ? ButtonStatusEnum.UPDATE : ButtonStatusEnum.CONFIRM}
           />
         </div>
