@@ -32,6 +32,10 @@ class AccountService {
       data,
     );
   }
+
+  delete(id: string) {
+    return requestService.delete(this.url, id);
+  }
 }
 
 export const accountService = new AccountService();

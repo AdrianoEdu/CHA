@@ -30,3 +30,7 @@ export type GetAccountParamsDto = {
   count: number;
   account: GetAccountDto[];
 };
+
+export type DeleteAccountDto = {
+  id: string
+}

@@ -13,6 +13,8 @@ import {
 import { PaginationDto } from "../../dto/Pagination/Pagination";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { AccountWithRelations } from "./type";
+import { NotFoundException } from "../../error/NotFoundException";
+import { BadRequestException } from "../../error/BadRequestException";
 
 class AccountService {
   private databaseService = databaseService;
@@ -25,6 +27,30 @@ class AccountService {
     await this.databaseService.account.update({
       data: { ...data },
       where: { id: data.id },
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    const account = await databaseService.account.findUnique({
+      where: { id },
+      include: {
+        bankStatement: true,
+        cashBook: true,
+      },
+    });
+
+    if (!account) {
+      throw new NotFoundException("Conta não encontrada.");
+    }
+
+    if (account.bankStatement.length > 0 || account.cashBook.length > 0) {
+      throw new BadRequestException(
+        "Não é possível excluir esta conta, pois existem movimentações vinculadas a ela."
+      );
+    }
+
+    await databaseService.account.delete({
+      where: { id },
     });
   }
 

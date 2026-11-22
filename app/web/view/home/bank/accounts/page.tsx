@@ -7,14 +7,17 @@
 "use client";
 
 import Button from "@/app/web/components/button/button";
+import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import UpserAccountModal from "@/app/web/components/modal/upsert-account/upsert-account";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import { AccountType } from "@/app/web/constants/enum";
+import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateAccountDto,
   GetAccountDto,
   UpdateAccountDto,
 } from "@/app/web/dto/account.dto";
+import { DeleteIcon } from "@/app/web/icons";
 import EditIcon from "@/app/web/icons/edit-icon";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { accountService } from "@/app/web/services/accountService/acountService";
@@ -22,27 +25,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const ACCOUNT_SCREEN_TEXT = {
-  messages: {
-    createSuccess: "Conta criada com sucesso",
-    createError: "Não foi possível criar conta",
-    updateSuccess: "Conta atualizada com sucesso",
-    updateError: "Não foi possível atualizar conta",
-  },
-  columns: {
-    createdAt: "Registrado em",
-    bank: "Banco",
-    accountNumber: "Número da conta",
-    balance: "Saldo",
-    actions: "Ações",
-  },
-  title: "Conta corrente",
-  route: "/web/view/home/bank/accounts/statement",
-};
-
 let countAccounts = 0;
 const takeAccounts = 20;
 let oldAccountList: GetAccountDto[] = [];
+
+const { columns, messages, route, title } = i18n['Pt-Br'].Screen.AccountScreen;
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -81,7 +68,7 @@ export default function AccountScreen() {
 
   const navigateBankStatement = (row: GetAccountDto): void => {
     router.push(
-      `${ACCOUNT_SCREEN_TEXT.route}/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
+      `${route}/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
     );
   };
 
@@ -90,9 +77,9 @@ export default function AccountScreen() {
   ): Promise<void> => {
     try {
       await accountService.create(data);
-      toast.success(ACCOUNT_SCREEN_TEXT.messages.createSuccess);
+      toast.success(messages.createSuccess);
     } catch (error) {
-      toast.error(ACCOUNT_SCREEN_TEXT.messages.createError);
+      toast.error(messages.createError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
@@ -102,12 +89,25 @@ export default function AccountScreen() {
   const handleUpdateAccount = async (data: UpdateAccountDto): Promise<void> => {
     try {
       await accountService.update(data);
-      toast.success(ACCOUNT_SCREEN_TEXT.messages.updateSuccess);
+      toast.success(messages.updateSuccess);
     } catch (error) {
-      toast.error(ACCOUNT_SCREEN_TEXT.messages.updateError);
+      toast.error(messages.updateError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
+    }
+  };
+
+  const handleRemoveAccount = async (id: string): Promise<void> => {
+    try {
+      await accountService.delete(id)
+      toast.success(messages.removeSuccess)
+    } catch (error) {
+      toast.error(messages.removeError)
+    }
+    finally {
+      closeModal();
+      await handleFindAccounts(1)
     }
   };
 
@@ -127,32 +127,50 @@ export default function AccountScreen() {
     );
   };
 
+  const handleOpenModalRemoveCurrentAccount = (mouseEvent: React.MouseEvent<HTMLButtonElement>, id: string): void => {
+    if (mouseEvent) mouseEvent.stopPropagation();
+
+    openModal(
+      <RemoveModal
+        onClose={closeModal}
+        onConfirm={() => handleRemoveAccount(id)}
+      />
+    )
+  }
+
   const getColumns = (): TableColumn<GetAccountDto>[] => {
     return [
-      { label: ACCOUNT_SCREEN_TEXT.columns.createdAt, accessor: "createdAt" },
-      { label: ACCOUNT_SCREEN_TEXT.columns.bank, accessor: "bank.name" },
+      { label: columns.createdAt, accessor: "createdAt" },
+      { label: columns.bank, accessor: "bank.name" },
       {
-        label: ACCOUNT_SCREEN_TEXT.columns.accountNumber,
+        label: columns.accountNumber,
         accessor: "accountNumber",
       },
-      { label: ACCOUNT_SCREEN_TEXT.columns.balance, accessor: "balance" },
+      { label: columns.balance, accessor: "balance" },
       {
-        label: ACCOUNT_SCREEN_TEXT.columns.actions,
+        label: columns.actions,
         render(row) {
           return (
-            <Button
-              icon={<EditIcon />}
-              className="bg-green-500"
-              onClick={(e) =>
-                handleOpenModalUpsertAccount(e, {
-                  id: row.id,
-                  bankId: row.bank.id,
-                  balance: row.balance,
-                  createdAt: row.createdAt,
-                  accountNumber: row.accountNumber,
-                })
-              }
-            />
+            <div className="flex flex-row gap-2">
+              <Button
+                icon={<DeleteIcon />}
+                className="bg-red-500"
+                onClick={(e) => handleOpenModalRemoveCurrentAccount(e, row.id)}
+              />
+              <Button
+                icon={<EditIcon />}
+                className="bg-green-500"
+                onClick={(e) =>
+                  handleOpenModalUpsertAccount(e, {
+                    id: row.id,
+                    bankId: row.bank.id,
+                    balance: row.balance,
+                    createdAt: row.createdAt,
+                    accountNumber: row.accountNumber,
+                  })
+                }
+              />
+            </div>
           );
         },
       },
@@ -164,7 +182,7 @@ export default function AccountScreen() {
       <Table
         rows={list}
         columns={getColumns()}
-        title={ACCOUNT_SCREEN_TEXT.title}
+        title={title}
         currentPage={currentPage}
         onRowClick={navigateBankStatement}
         onActionClicked={handleOpenModalUpsertAccount}

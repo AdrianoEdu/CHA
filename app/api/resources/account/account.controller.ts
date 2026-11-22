@@ -4,7 +4,7 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
-import { CreateAccountDto, UpdateAccountDto } from "../../dto/Account/Account";
+import { CreateAccountDto, DeleteAccountDto, UpdateAccountDto } from "../../dto/Account/Account";
 import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { accountService } from "./account.service";
 
@@ -34,6 +34,14 @@ class AccountController {
       return await this.accountService.findAccount(params);
     } catch (error: any) {
       return Response.json({ error: error.message }, { status: 500 });
+    }
+  }
+
+  async delete({ id }: DeleteAccountDto) {
+    try {
+      await this.accountService.delete(id)
+    } catch (error: any) {
+      return Response.json({ error: error.message }, { status: error.status });
     }
   }
 }

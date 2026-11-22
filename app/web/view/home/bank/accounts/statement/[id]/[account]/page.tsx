@@ -15,7 +15,6 @@ import {
   GetBankStatementDto,
   UpdateBankStatementDto,
 } from "@/app/web/dto/bank-statemenrt-dto";
-import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { GetAccountDto } from "@/app/web/dto/account.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { bankStatementService } from "@/app/web/services/bankStatementService/bankStatementService";

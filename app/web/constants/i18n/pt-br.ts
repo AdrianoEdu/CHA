@@ -3,6 +3,7 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import AccountScreen from "../../view/home/bank/accounts/page";
 import { MODAL_I18N } from "./components/modal";
 import { SCREEN_I18N } from "./screen/bankStatement";
 
@@ -20,6 +21,7 @@ export const PtBr = {
       },
     },
     BankStatement: { ...SCREEN_I18N.BankStatement },
+    AccountScreen: { ...SCREEN_I18N.AccountScreen },
   },
   Modal: {
     Generic: { ...MODAL_I18N.Generic },
