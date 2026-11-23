@@ -150,6 +150,7 @@ class EmployeeService {
       document: item.document,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      salary: Number(item.salary),
       dateOfBirth: item.dateOfBirth,
       employeePosition: item.employeePosition,
     }));

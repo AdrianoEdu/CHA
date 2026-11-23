@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-03-12
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -28,7 +29,7 @@ let oldEmployeeAdvanceList: GetAllEmployeeAdvanceDto[] = [];
 
 const takeEmployees = 20;
 
-type EmployeeTab = "advance" | "vacation";
+type EmployeeTab = "advance" | "vacation" | "complementary";
 
 const normalizeDate = (date: Date): Date =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -169,10 +170,22 @@ export default function EmployeeAdvanced() {
     new Date(Number.NaN),
   );
 
-  const { id, name } = useParams();
+  const { id, name, value } = useParams();
   const { openModal, closeModal } = useModal();
 
   const employeeName = decodeURIComponent(name as string);
+
+  const employeeSalary = Number(
+    Array.isArray(value) ? value[0] : value,
+  );
+
+  const formattedSalary = Number.isFinite(employeeSalary)
+    ? employeeSalary.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+    : "Não informado";
+
   const [today, setToday] = useState<Date>(() => normalizeDate(new Date()));
 
   const onHandleGetEmployeeVacations = useCallback(async (): Promise<void> => {
@@ -594,20 +607,28 @@ export default function EmployeeAdvanced() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-1">
         <span className="text-gray-500">Funcionário selecionado:</span>
+
         <span className="text-2xl font-bold">{employeeName}</span>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-500">Salário:</span>
+
+          <span className="text-sm font-semibold text-green-700">
+            {formattedSalary}
+          </span>
+        </div>
       </div>
 
       <div className="flex border-b border-gray-200">
         <button
           type="button"
           onClick={() => setActiveTab("advance")}
-          className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${
-            activeTab === "advance"
+          className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "advance"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Adiantamentos
         </button>
@@ -615,13 +636,23 @@ export default function EmployeeAdvanced() {
         <button
           type="button"
           onClick={() => setActiveTab("vacation")}
-          className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${
-            activeTab === "vacation"
+          className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "vacation"
               ? "border-blue-600 text-blue-600"
               : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
+            }`}
         >
           Férias
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("complementary")}
+          className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "complementary"
+              ? "border-blue-600 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+        >
+          Informações complementares
         </button>
       </div>
 
@@ -738,9 +769,10 @@ export default function EmployeeAdvanced() {
                     </span>
 
                     <div
-                      className={`mt-2 text-3xl font-bold ${
-                        hasDelayedVacations ? "text-red-600" : "text-green-600"
-                      }`}
+                      className={`mt-2 text-3xl font-bold ${hasDelayedVacations
+                          ? "text-red-600"
+                          : "text-green-600"
+                        }`}
                     >
                       {totalRemainingDays}
                     </div>
@@ -765,18 +797,18 @@ export default function EmployeeAdvanced() {
                   </div>
 
                   <div
-                    className={`rounded-lg border p-4 ${
-                      hasDelayedVacations
+                    className={`rounded-lg border p-4 ${hasDelayedVacations
                         ? "border-red-200 bg-red-50"
                         : "border-gray-200"
-                    }`}
+                      }`}
                   >
                     <span className="text-sm text-gray-500">Situação</span>
 
                     <div
-                      className={`mt-2 text-lg font-bold ${
-                        hasDelayedVacations ? "text-red-600" : "text-green-600"
-                      }`}
+                      className={`mt-2 text-lg font-bold ${hasDelayedVacations
+                          ? "text-red-600"
+                          : "text-green-600"
+                        }`}
                     >
                       {hasDelayedVacations
                         ? "Férias acumuladas"
@@ -904,9 +936,9 @@ export default function EmployeeAdvanced() {
                         <span className="text-xs text-gray-500">
                           {isValidDate(period.begin) && isValidDate(period.end)
                             ? `${getVacationPeriodDays(
-                                period.begin,
-                                period.end,
-                              )} dias neste período`
+                              period.begin,
+                              period.end,
+                            )} dias neste período`
                             : "Informe as duas datas"}
                         </span>
                       </div>
@@ -999,13 +1031,12 @@ export default function EmployeeAdvanced() {
                               </div>
 
                               <span
-                                className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold ${
-                                  status === "completed"
+                                className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold ${status === "completed"
                                     ? "bg-green-100 text-green-700"
                                     : status === "ongoing"
                                       ? "bg-blue-100 text-blue-700"
                                       : "bg-gray-100 text-gray-600"
-                                }`}
+                                  }`}
                               >
                                 {status === "completed"
                                   ? "Concluído"
@@ -1023,6 +1054,53 @@ export default function EmployeeAdvanced() {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {activeTab === "complementary" && (
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-lg font-semibold">
+              Informações complementares
+            </h2>
+
+            <p className="text-sm text-gray-500">
+              Gerencie configurações adicionais vinculadas ao funcionário.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4 rounded-lg border border-gray-200 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-lg font-semibold">
+                  Pagamento recorrente
+                </h3>
+
+                <p className="text-sm text-gray-500">
+                  Configure os pagamentos recorrentes deste funcionário.
+                </p>
+              </div>
+
+              <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-600">
+                Não configurado
+              </span>
+            </div>
+
+            <div className="rounded-lg bg-gray-50 p-4">
+              <p className="text-sm text-gray-500">
+                Nenhum pagamento recorrente cadastrado para este funcionário.
+              </p>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+              >
+                + Cadastrar pagamento recorrente
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

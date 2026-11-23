@@ -64,7 +64,7 @@ export default function EmployeeScreen() {
   }, [countEmployee]);
 
   const handleNavigateEmployeeAdvancedScreen = (row: EmployeeDto) => {
-    router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}`);
+    router.push(`/web/view/home/employee/advanced/${row.id}/${row.name}/${row.salary}`);
   };
 
   const handleRegisterEmployee = async (

@@ -11,6 +11,7 @@ import RemoveModal from "@/app/web/components/modal/remove-employee/remove-emplo
 import UpsertFinancialCategory from "@/app/web/components/modal/upsert-financial-category/upsert-financial-category";
 import Table, { TableColumn } from "@/app/web/components/table/table";
 import { AccountType } from "@/app/web/constants/enum";
+import { i18n } from "@/app/web/constants/i18n";
 import {
   CreateFinancialCategoryDto,
   GetFinancialCategoryDto,
@@ -28,6 +29,10 @@ let countFinancial = 0;
 let oldFinancialList: GetFinancialCategoryDto[] = [];
 
 const takeFinancial = 20;
+
+const { FinancialCategory: FinancialCategoryKey } = i18n["Pt-Br"].Components.ComboBox;
+const { Table: TableKey, messages } = i18n["Pt-Br"].Screen.FinancialCategory;
+const { editTitle, registerTitle } = i18n["Pt-Br"].Components.Modal.UpsertFinancialCategory;
 
 export default function FinancialCategory() {
   const [financialList, setFinancialList] =
@@ -74,7 +79,7 @@ export default function FinancialCategory() {
         onClose={closeModal}
         onUpdated={handleUpdateFinancialCategory}
       />,
-      "Editar uma categoria financeira",
+      editTitle,
     );
   };
 
@@ -100,28 +105,37 @@ export default function FinancialCategory() {
         onClose={closeModal}
         onRegister={handleRegisterFinancialCategory}
       />,
-      "Registrar categoria financeira",
+      registerTitle,
     );
   };
 
-  const handleRegisterFinancialCategory = (
+  const handleRegisterFinancialCategory = async (
     data: CreateFinancialCategoryDto,
-  ): void => {
-    financialCategoryService.create(data).then(() => {
-      toast.success("Categoria financeira registrada com sucesso");
+  ): Promise<void> => {
+    try {
+      await financialCategoryService.create(data);
+      toast.success(messages.registerSuccess);
+
+    } catch (error) {
+      toast.error(messages.registerError)
+    } finally {
       handleGetAllFinancialCategory(currentPage);
       closeModal();
-    });
+    }
   };
 
-  const handleUpdateFinancialCategory = (
+  const handleUpdateFinancialCategory = async (
     data: UpdateFinancialCategoryDto,
-  ): void => {
-    financialCategoryService.update(data).then(() => {
-      toast.success("Categoria financeira atualizada com sucesso");
+  ): Promise<void> => {
+    try {
+      await financialCategoryService.update(data)
+      toast.success(messages.updateSuccess);
+    } catch (error) {
+      toast.error(messages.updateError)
+    } finally {
       handleGetAllFinancialCategory(currentPage);
       closeModal();
-    });
+    }
   };
 
   const handleFilterFinancialCategoryName = async (page: number) => {
@@ -152,12 +166,16 @@ export default function FinancialCategory() {
     });
   };
 
-  const handleRemoveFinancialCategory = (categoryId: string): void => {
-    financialCategoryService.delete(categoryId).then(() => {
+  const handleRemoveFinancialCategory = async (categoryId: string): Promise<void> => {
+    try {
+      await financialCategoryService.delete(categoryId)
+      toast.success(messages.removeSuccess)
+    } catch (error) {
+      toast.error(messages.removeError)
+    } finally {
       closeModal();
-      toast.success("Categoria financeira removida com sucesso");
       handleGetAllFinancialCategory(currentPage);
-    });
+    }
   };
 
   const handleOpenModalRemove = (
@@ -175,25 +193,25 @@ export default function FinancialCategory() {
 
   const getColumns = (): TableColumn<GetFinancialCategoryDto>[] => {
     const columns: TableColumn<GetFinancialCategoryDto>[] = [
-      { label: "Criado em", accessor: "createdAt" },
-      { label: "Nome", accessor: "name" },
+      { label: TableKey.columns.createdAt, accessor: "createdAt" },
+      { label: TableKey.columns.name, accessor: "name" },
       {
-        label: "Referente",
+        label: TableKey.columns.reference,
         render(row) {
-          return row.accountType === AccountType.BANK ? "Banco" : "Livro Caixa";
+          return row.accountType === AccountType.BANK ? FinancialCategoryKey.ACCOUNT_TYPE.BANK : FinancialCategoryKey.ACCOUNT_TYPE.CASHBOOK;
         },
       },
       {
-        label: "Tipo",
+        label: TableKey.columns.type,
         accessor: "financialFlowType",
-        render: (row) => (row.financialFlowType === "IN" ? "Entrada" : "Saída"),
+        render: (row) => (row.financialFlowType === "IN" ? FinancialCategoryKey.FINANCIAL_FLOW.IN : FinancialCategoryKey.FINANCIAL_FLOW.OUT),
       },
     ];
 
     if (isAdmin)
       if (isAdmin)
         columns.push({
-          label: "Ações",
+          label: TableKey.columns.actions,
           render: (row) => {
             return (
               <div className="flex gap-2 justify-center">
@@ -219,8 +237,8 @@ export default function FinancialCategory() {
         take={takeFinancial}
         rows={financialList}
         columns={getColumns()}
+        title={TableKey.title}
         currentPage={currentPage}
-        title={"Entradas e saídas"}
         onPageChange={setCurrentPage}
         countRows={currentCountFinancial}
         onFilterChange={handleSetFilterChange}

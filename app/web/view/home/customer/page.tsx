@@ -92,21 +92,35 @@ export default function Customer() {
   const handleRegisterCustomer = async (
     data: CreateCustomerDto,
   ): Promise<void> => {
-    await customerService.create(data).then(() => {
+    try {
+      await customerService.create(data);
+
       toast.success("Cliente registrado com sucesso");
-      handleGetAllCustomers(currentPage);
-      closeModal();
-    });
+    } catch (error) {
+      console.error("Erro ao cadastrar cliente:", error);
+      toast.error("Não foi possível cadastrar o cliente");
+    }
+    finally {
+      await handleGetAllCustomers(currentPage);
+      closeModal()
+    }
   };
 
   const handleUpdateCustomer = async (
     data: UpdateCustomerDto,
   ): Promise<void> => {
-    await customerService.update(data).then(() => {
-      toast.success("Cliente Atualizado com sucesso");
-      handleGetAllCustomers(currentPage);
-      closeModal();
-    });
+    try {
+      await customerService.update(data);
+
+      toast.success("Cliente atualizado com sucesso");
+    } catch (error) {
+      console.error("Erro ao atualizar cliente:", error);
+      toast.error("Não foi possível atualizar o cliente");
+    }
+    finally {
+      await handleGetAllCustomers(currentPage);
+      closeModal()
+    }
   };
 
   const handleFilterCustomerName = async (page: number) => {

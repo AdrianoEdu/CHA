@@ -26,9 +26,7 @@ type RegisterCustomerProps = {
 };
 
 const { cancel, register, update } = i18n["Pt-Br"].Components.Modal.Generic;
-
-const labelCNPJ = "Informe o CNPJ";
-const labelCPF = "Informe o CPF";
+const { fields, regex: regexKey } = i18n["Pt-Br"].Components.Modal.UpsertCustomer;
 
 export default function UpsertCustomerModal({
   data,
@@ -39,12 +37,11 @@ export default function UpsertCustomerModal({
   const [status, setStatus] = useState(false);
   const [disable, setDisable] = useState(false);
   const [customer, setCustomer] = useState<UpdateCustomerDto>({ id: "" });
-
   const isRegister = !data;
 
   const { inputType, label, regex, maxLength } = {
     maxLength: status ? 18 : 14,
-    label: status ? labelCNPJ : labelCPF,
+    label: status ? fields.labelCNPJ : fields.labelCPF,
     regex: status ? Regex.onlyCNPJ : Regex.onlyCPF,
     inputType: status ? InputType.Cnpj : InputType.CPF,
   };
@@ -57,14 +54,19 @@ export default function UpsertCustomerModal({
   };
 
   useEffect(() => {
-    if (isRegister) return;
+    if (!data) return;
 
     setCustomer({
       id: data.id,
       name: data.name,
       code: data.code,
       numberId: data.numberId,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
     });
+
+    setStatus((data.code?.length ?? 0) > 14);
   }, [data]);
 
   const handleUpsertCustomer = (): void => {
@@ -95,7 +97,7 @@ export default function UpsertCustomerModal({
       <Toggle
         value={status}
         onChange={handleSetStatus}
-        title={"Pessoal jurídica?"}
+        title={fields.toggleLegalEntity}
       />
 
       <Input
@@ -104,9 +106,9 @@ export default function UpsertCustomerModal({
         value={customer.numberId}
         regex={Regex.onlyNumbers}
         onRegexError={handleIsRegexError}
-        name={"Informe a identificação do cliente"}
+        name={fields.identification}
         regexMessageError={
-          "Por favor informar caracteres válidos (apenas números)"
+          regexKey.error.identificationRegexOnlyNumbers
         }
         onChange={(e) =>
           handleSetCustomer({ numberId: validateIsNan(Number(e.target.value)) })
@@ -115,8 +117,8 @@ export default function UpsertCustomerModal({
 
       <Input
         className="flex-1"
+        name={fields.name}
         value={customer.name}
-        name={"Informe o nome do cliente"}
         onChange={(e) => handleSetCustomer({ name: e.target.value })}
       />
 
@@ -128,26 +130,26 @@ export default function UpsertCustomerModal({
         value={customer.code}
         inputType={inputType}
         onRegexError={handleIsRegexError}
-        regexMessageError={"Por favor informar caracteres válidos"}
+        regexMessageError={regexKey.error.generic}
         onChange={(e) => handleSetCustomer({ code: e.target.value })}
       />
 
       <Input
-        name="Telefone"
+        name={fields.phone}
         value={customer.phone}
         regex={Regex.onlyNumbers}
         inputType={InputType.Phone}
-        regexMessageError="Informe número válido."
         onRegexError={handleIsRegexError}
+        regexMessageError={regexKey.error.phoneRegex}
         onValueChange={(value: any) => handleSetCustomer({ phone: value })}
       />
 
       <Input
-        name="E-mail"
+        name={fields.email}
         value={customer.email}
         regex={Regex.onlyEmail}
         inputType={InputType.Email}
-        regexMessageError="Informe um e-mail válido."
+        regexMessageError={regexKey.error.email}
         onRegexError={handleIsRegexError}
         onValueChange={(value: any) => handleSetCustomer({ email: value })}
       />
@@ -155,7 +157,7 @@ export default function UpsertCustomerModal({
       <Input
         className="flex-1"
         value={customer.address}
-        name={"Informe o endereço"}
+        name={fields.address}
         onChange={(e) => handleSetCustomer({ address: e.target.value })}
       />
 

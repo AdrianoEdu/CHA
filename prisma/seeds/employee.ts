@@ -1,160 +1,140 @@
+
 // Copyright (c) 2026-10-16
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Employee, EmployeePositionEnum, Prisma } from "@/app/generated/prisma";
+import { EmployeePositionEnum, Prisma } from "@/app/generated/prisma";
 import { PrismaClient } from "@prisma/client";
 
-const employeeList: Partial<Employee[]> = [
+type EmployeeSeed = {
+  name: string;
+  document: string;
+  isActive: boolean;
+  dateOfBirth: Date | null;
+  salary: number;
+  employeePositionId: EmployeePositionEnum;
+};
+
+const employeeList: EmployeeSeed[] = [
   {
-    id: "",
+    name: "PAULO CESAR DE SOUZA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "PAULO CESAR DE SOUZA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.ADMINISTRATIVE_ASSISTANT,
   },
   {
-    id: "",
+    name: "DEYSE DE CASSIA ZANIN",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "DEYSE DE CASSIA ZANIN",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N6,
   },
   {
-    id: "",
+    name: "ALEX LUIS MOREIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "ALEX LUIS MOREIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.OFFICE_ASSISTANT,
   },
   {
-    id: "",
+    name: "REINALDO ODILON FERREIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "REINALDO ODILON FERREIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N4,
   },
   {
-    id: "",
+    name: "MARILIA MARTIN SOARES",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "MARILIA MARTIN SOARES",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N3,
   },
   {
-    id: "",
+    name: "JOAO VICTOR DE ASSIS MORAES",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "JOAO VICTOR DE ASSIS MORAES",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N2,
   },
   {
-    id: "",
+    name: "LUCIO DE OLIVEIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "LUCIO DE OLIVEIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_DEPARTMENT_MANAGER,
   },
   {
-    id: "",
+    name: "JANAINA DOMINGUES PEREIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "JANAINA DOMINGUES PEREIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT,
   },
   {
-    id: "",
+    name: "LEONARDO DE SOUZA CIRILO",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "LEONARDO DE SOUZA CIRILO",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.MOTORBOY,
   },
   {
-    id: "",
+    name: "NATALIA DE FATIMA FERREIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "NATALIA DE FATIMA FERREIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N5,
   },
   {
-    id: "",
+    name: "RAIANE MIRELE PEREIRA LIMA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "RAIANE MIRELE PEREIRA LIMA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.PERSONNEL_DEPARTMENT_ASSISTANT,
   },
   {
-    id: "",
+    name: "GABRIELE ALVES DE OLIVEIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "GABRIELE ALVES DE OLIVEIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N3,
   },
   {
-    id: "",
+    name: "ERICA REZENDE FIGUEIREDO",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "ERICA REZENDE FIGUEIREDO",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.TAX_ASSISTANT_N1,
   },
   {
-    id: "",
+    name: "AMANDA DE COUTO MUNHOZ",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "AMANDA DE COUTO MUNHOZ",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.OFFICE_ASSISTANT,
   },
   {
-    id: "",
+    name: "JOYCE ALVES DE OLIVEIRA",
     document: "",
     isActive: true,
-    updatedAt: null,
     dateOfBirth: null,
-    createdAt: new Date(),
-    name: "JOYCE ALVES DE OLIVEIRA",
+    salary: 0,
     employeePositionId: EmployeePositionEnum.CLEANING_ASSISTANT,
   },
 ];
@@ -162,22 +142,30 @@ const employeeList: Partial<Employee[]> = [
 export async function seedEmployee(prisma: PrismaClient) {
   const count = await prisma.employee.count();
 
-  if (count === 0) {
-    employeeList.forEach(async (employee) => {
-      const employeePosition = await prisma.employeePosition.findUnique({
-        where: { position: employee?.employeePositionId },
-      });
+  if (count > 0) return;
 
-      await prisma.employee.create({
-        data: {
-          name: employee?.name,
-          document: employee?.document,
-          dateOfBirth: employee?.dateOfBirth,
-          employeePositionId: employeePosition.id,
-        },
-      });
+  for (const employee of employeeList) {
+    const employeePosition = await prisma.employeePosition.findFirst({
+      where: { position: employee.employeePositionId },
     });
 
-    console.log("🏦 Funcionários cadastrados registrados");
+    if (!employeePosition) {
+      throw new Error(
+        `Cargo não encontrado: ${employee.employeePositionId}`,
+      );
+    }
+
+    await prisma.employee.create({
+      data: {
+        name: employee.name,
+        document: employee.document,
+        isActive: employee.isActive,
+        dateOfBirth: employee.dateOfBirth,
+        salary: new Prisma.Decimal(employee.salary),
+        employeePositionId: employeePosition.id,
+      },
+    });
   }
+
+  console.log("🏦 Funcionários cadastrados registrados");
 }

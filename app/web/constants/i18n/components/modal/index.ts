@@ -75,5 +75,30 @@ export const MODAL_I18N = {
       requiredCategory: "Selecione uma categoria financeira.",
       invalidValue: "Informe um valor válido.",
     },
+  },
+  UpsertFinancialCategory: {
+    editTitle: "Editar uma categoria financeira",
+    registerTitle: "Registrar categoria financeira",
+  },
+  UpsertCustomer: {
+    fields: {
+      email: "E-mail",
+      phone: "Telefone",
+      labelCPF: "Informe o CPF",
+      labelCNPJ: "Informe o CNPJ",
+      address: "Informe o endereço",
+      name: "Informe o nome do cliente",
+      toggleLegalEntity: "Pessoa jurídica?",
+      identification: "Informe a identificação do cliente",
+    },
+    regex: {
+      error: {
+        identificationRegexOnlyNumbers:
+          "Por favor informar caracteres válidos (apenas números)",
+        phoneRegex: "Informe número válido.",
+        generic: "Por favor informar caracteres válidos",
+        email: 'Informe um e-mail válido'
+      },
+    },
   }
 }

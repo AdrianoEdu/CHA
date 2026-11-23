@@ -6,7 +6,6 @@
 import { requestService } from "../requestService/requestService";
 import {
   CreateEmployeeDto,
-  EmployeeDto,
   EmployeeParams,
   GetEmployeeDtoParams,
   UpdateEmployeeDto,

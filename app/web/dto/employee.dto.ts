@@ -9,6 +9,7 @@ import { PaginationDto } from "./pagination.dto";
 export interface EmployeeDto {
   id?: string;
   name: string;
+  salary: number;
   document: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -25,6 +26,7 @@ export interface EmployeePoistionDto {
 export interface CreateEmployeeDto {
   name: string;
   salary: number;
+  salaty: number;
   document: string;
   dateOfBirth: Date;
   isActive?: boolean;

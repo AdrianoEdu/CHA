@@ -18,6 +18,7 @@ export interface CreateEmployeeDto {
 export interface EmployeeDto {
   id: string;
   name: string;
+  salary: number;
   createdAt: Date;
   document: string;
   isActive: boolean;

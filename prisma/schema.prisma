@@ -97,6 +97,7 @@ model Employee {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime? @updatedAt
   dateOfBirth DateTime?
+  salary      Decimal   @db.Decimal(12, 2)
 
   employeePositionId String
 
@@ -308,8 +309,9 @@ model RecurringPayment {
   dueDateType RecurringPaymentDateType
   dueDay      Int?
   adjustment  BusinessDayAdjustment?
-  employeeId  String?
-  employee    Employee?                @relation(fields: [employeeId], references: [id])
+
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
 
   payments Payment[]
 

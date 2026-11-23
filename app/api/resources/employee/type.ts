@@ -9,6 +9,7 @@ export type EmployeeWithRelations = Prisma.EmployeeGetPayload<{
   select: {
     id: true;
     name: true;
+    salary: true;
     isActive: true;
     document: true;
     createdAt: true;

@@ -6,18 +6,18 @@
 import { MODAL_I18N } from "./components/modal";
 import { SCREEN_I18N } from "./screen/bankStatement";
 import { COMBOBOX_I18N } from "./components/Combobox";
-import RemoveModal from "../../components/modal/remove-employee/remove-employee";
-
 
 export const PtBr = {
   Components: {
     ComboBox: { ...COMBOBOX_I18N },
     Modal: {
       Generic: { ...MODAL_I18N.Generic },
+      UpsertBank: { ...MODAL_I18N.UpsertBank },
       RemoveModal: { ...MODAL_I18N.RemoveModal },
       UpsertAccount: { ...MODAL_I18N.UpsertAccount },
-      UpsertBank: { ...MODAL_I18N.UpsertBank },
+      UpsertCustomer: { ...MODAL_I18N.UpsertCustomer },
       EmployeeAdvanced: { ...MODAL_I18N.EmployeeAdvanced },
+      UpsertFinancialCategory: { ...MODAL_I18N.UpsertFinancialCategory },
       UpsertFinancialEntryModal: { ...MODAL_I18N.UpsertFinancialEntryModal },
       UpsertBankStatement: {
         registerTitle: "Registrar extrato",
@@ -89,6 +89,7 @@ export const PtBr = {
     },
     BankStatement: { ...SCREEN_I18N.BankStatement },
     AccountScreen: { ...SCREEN_I18N.AccountScreen },
+    FinancialCategory: { ...SCREEN_I18N.FinancialCategory },
   },
 
 };
