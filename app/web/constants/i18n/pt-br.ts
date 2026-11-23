@@ -3,9 +3,12 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { MODAL_I18N } from "./components/modal";
-import { SCREEN_I18N } from "./screen/bankStatement";
+import { MODAL_I18N } from "./components/Modal";
 import { COMBOBOX_I18N } from "./components/Combobox";
+import { SCREEN_I18N_FINANCIAL_CATEGORY } from "./screen/FinancialCategory";
+import { SCREEN_I18N_BANK_STATEMENT } from "./screen/BankStatement";
+import { SCREEN_I18N_ACCOUNT } from "./screen/AccountScreen";
+import { ENUM_I18N } from "./enum";
 
 export const PtBr = {
   Components: {
@@ -87,9 +90,9 @@ export const PtBr = {
         systemDownError: "Sistema fora do Ar, tente novamente mais tarde",
       },
     },
-    BankStatement: { ...SCREEN_I18N.BankStatement },
-    AccountScreen: { ...SCREEN_I18N.AccountScreen },
-    FinancialCategory: { ...SCREEN_I18N.FinancialCategory },
+    BankStatement: { ...SCREEN_I18N_BANK_STATEMENT },
+    AccountScreen: { ...SCREEN_I18N_ACCOUNT },
+    FinancialCategory: { ...SCREEN_I18N_FINANCIAL_CATEGORY },
   },
-
+  ENUM_I18N: { ...ENUM_I18N, }
 };

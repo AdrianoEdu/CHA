@@ -48,8 +48,21 @@ class RecurringPaymentService {
       orderBy: params.orderBy,
     };
 
-    if (params.select) baseQuery.select = params.select;
-    if (params.include) baseQuery.include = params.include;
+    if (params.select) {
+      baseQuery.select = params.select;
+      baseQuery.select.employee = true;
+    }
+
+    if (params.include) {
+      baseQuery.include = params.include;
+      baseQuery.include.employee = true;
+    }
+
+    if (!params.select && !params.include) {
+      baseQuery.include = {
+        employee: true,
+      };
+    }
 
     const count = await this.databaseService.recurringPayment.count({
       where: baseQuery.where,

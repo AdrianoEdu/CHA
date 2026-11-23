@@ -296,6 +296,8 @@ enum RecurringPaymentDateType {
   FIXED_DAY
   BIWEEKLY
   FIFTH_BUSINESS_DAY
+  THIRTEENTH_SALARY
+  VACATION
 }
 
 enum BusinessDayAdjustment {

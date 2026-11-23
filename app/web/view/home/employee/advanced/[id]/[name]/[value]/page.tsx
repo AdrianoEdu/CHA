@@ -23,6 +23,7 @@ import { employeeVacationService } from "@/app/web/services/employeeVacationServ
 import { handleGenericFilter } from "@/app/web/utils/filters";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Complementary from "../../../components/complementary/complementary";
 
 let countEmployees = 0;
 let oldEmployeeAdvanceList: GetAllEmployeeAdvanceDto[] = [];
@@ -626,8 +627,8 @@ export default function EmployeeAdvanced() {
           type="button"
           onClick={() => setActiveTab("advance")}
           className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "advance"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+            ? "border-blue-600 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
         >
           Adiantamentos
@@ -637,8 +638,8 @@ export default function EmployeeAdvanced() {
           type="button"
           onClick={() => setActiveTab("vacation")}
           className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "vacation"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+            ? "border-blue-600 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
         >
           Férias
@@ -648,8 +649,8 @@ export default function EmployeeAdvanced() {
           type="button"
           onClick={() => setActiveTab("complementary")}
           className={`border-b-2 px-5 py-3 text-sm font-medium transition-colors ${activeTab === "complementary"
-              ? "border-blue-600 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-gray-700"
+            ? "border-blue-600 text-blue-600"
+            : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
         >
           Informações complementares
@@ -770,8 +771,8 @@ export default function EmployeeAdvanced() {
 
                     <div
                       className={`mt-2 text-3xl font-bold ${hasDelayedVacations
-                          ? "text-red-600"
-                          : "text-green-600"
+                        ? "text-red-600"
+                        : "text-green-600"
                         }`}
                     >
                       {totalRemainingDays}
@@ -798,16 +799,16 @@ export default function EmployeeAdvanced() {
 
                   <div
                     className={`rounded-lg border p-4 ${hasDelayedVacations
-                        ? "border-red-200 bg-red-50"
-                        : "border-gray-200"
+                      ? "border-red-200 bg-red-50"
+                      : "border-gray-200"
                       }`}
                   >
                     <span className="text-sm text-gray-500">Situação</span>
 
                     <div
                       className={`mt-2 text-lg font-bold ${hasDelayedVacations
-                          ? "text-red-600"
-                          : "text-green-600"
+                        ? "text-red-600"
+                        : "text-green-600"
                         }`}
                     >
                       {hasDelayedVacations
@@ -1032,10 +1033,10 @@ export default function EmployeeAdvanced() {
 
                               <span
                                 className={`whitespace-nowrap rounded-md px-3 py-2 text-xs font-semibold ${status === "completed"
-                                    ? "bg-green-100 text-green-700"
-                                    : status === "ongoing"
-                                      ? "bg-blue-100 text-blue-700"
-                                      : "bg-gray-100 text-gray-600"
+                                  ? "bg-green-100 text-green-700"
+                                  : status === "ongoing"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-600"
                                   }`}
                               >
                                 {status === "completed"
@@ -1058,50 +1059,7 @@ export default function EmployeeAdvanced() {
       )}
 
       {activeTab === "complementary" && (
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold">
-              Informações complementares
-            </h2>
-
-            <p className="text-sm text-gray-500">
-              Gerencie configurações adicionais vinculadas ao funcionário.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4 rounded-lg border border-gray-200 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold">
-                  Pagamento recorrente
-                </h3>
-
-                <p className="text-sm text-gray-500">
-                  Configure os pagamentos recorrentes deste funcionário.
-                </p>
-              </div>
-
-              <span className="rounded-md bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-600">
-                Não configurado
-              </span>
-            </div>
-
-            <div className="rounded-lg bg-gray-50 p-4">
-              <p className="text-sm text-gray-500">
-                Nenhum pagamento recorrente cadastrado para este funcionário.
-              </p>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-              >
-                + Cadastrar pagamento recorrente
-              </button>
-            </div>
-          </div>
-        </div>
+        <Complementary employeeId={id as string} />
       )}
     </div>
   );

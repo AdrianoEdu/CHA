@@ -1,5 +1,5 @@
 
- // Copyright (c) 2026-11-07
+// Copyright (c) 2026-11-07
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
@@ -30,9 +30,12 @@ import {
 
 import { employeeService } from "@/app/web/services/employeeService/employeeService";
 import { CalendarIcon, UsersIcon } from "@/app/web/icons";
+import { i18n } from "@/app/web/constants/i18n";
 
 interface RecurringPaymentModalProps {
+  employeeId?: string;
   data?: UpdateRecurringPaymentDto;
+
   onClose: () => void;
   onEdit: (data: UpdateRecurringPaymentDto) => void;
   onRegister: (data: CreateRecurringPaymentDto) => void;
@@ -46,20 +49,32 @@ interface SelectOption {
 interface RecurringPaymentFormData {
   id?: string;
   name: string;
-  dueDateType: RecurringPaymentDateType;
   dueDay?: number;
-  adjustment?: BusinessDayAdjustment;
   employeeId?: string;
+  adjustment?: BusinessDayAdjustment;
+  dueDateType: RecurringPaymentDateType;
 }
 
 const dueDateTypeOptions: SelectOption[] = [
   {
     id: RecurringPaymentDateType.FIXED_DAY,
-    name: "Dia fixo do mês",
+    name: i18n["Pt-Br"].ENUM_I18N.RecurringPaymentDateType.FIXED_DAY,
   },
   {
     id: RecurringPaymentDateType.FIFTH_BUSINESS_DAY,
-    name: "Quinto dia útil",
+    name: i18n["Pt-Br"].ENUM_I18N.RecurringPaymentDateType.FIFTH_BUSINESS_DAY,
+  },
+  {
+    id: RecurringPaymentDateType.BIWEEKLY,
+    name: i18n["Pt-Br"].ENUM_I18N.RecurringPaymentDateType.BIWEEKLY,
+  },
+  {
+    id: RecurringPaymentDateType.THIRTEENTH_SALARY,
+    name: i18n["Pt-Br"].ENUM_I18N.RecurringPaymentDateType.THIRTEENTH_SALARY,
+  },
+  {
+    id: RecurringPaymentDateType.VACATION,
+    name: i18n["Pt-Br"].ENUM_I18N.RecurringPaymentDateType.VACATION,
   },
 ];
 
@@ -81,31 +96,30 @@ const initialFormData: RecurringPaymentFormData = {
 
 export default function UpsertRecurringPaymentModal({
   data,
+  employeeId,
   onEdit,
   onClose,
   onRegister,
 }: RecurringPaymentModalProps): JSX.Element {
   const isEdit = Boolean(data?.id);
-
-  const [isEmployee, setIsEmployee] = useState(
-    Boolean(data?.employeeId),
+  const isEmployeeRecurringPayment = Boolean(
+    employeeId || data?.employeeId,
   );
 
-  const [formData, setFormData] = useState<RecurringPaymentFormData>(() => {
-    if (!data) {
-      return initialFormData;
-    }
+  const [isEmployee, setIsEmployee] = useState(
+    isEmployeeRecurringPayment,
+  );
 
-    return {
-      id: data.id,
-      name: data.name ?? "",
-      dueDay: data.dueDay ?? undefined,
-      adjustment: data.adjustment ?? undefined,
-      employeeId: data.employeeId ?? undefined,
-      dueDateType:
-        data.dueDateType ?? RecurringPaymentDateType.FIXED_DAY,
-    };
-  });
+  const [formData, setFormData] = useState<RecurringPaymentFormData>(() => ({
+    ...initialFormData,
+    id: data?.id,
+    name: data?.name ?? "",
+    dueDay: data?.dueDay ?? undefined,
+    adjustment: data?.adjustment ?? undefined,
+    employeeId: employeeId ?? data?.employeeId,
+    dueDateType:
+      data?.dueDateType ?? RecurringPaymentDateType.FIXED_DAY,
+  }));
 
   const [employees, setEmployees] = useState<SelectOption[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -335,6 +349,7 @@ export default function UpsertRecurringPaymentModal({
             type="checkbox"
             checked={isEmployee}
             onChange={handleEmployeeToggle}
+            disabled={isEmployeeRecurringPayment}
             className="mt-1 h-4 w-4 cursor-pointer accent-blue-600"
           />
 
@@ -360,6 +375,7 @@ export default function UpsertRecurringPaymentModal({
               selected={selectedEmployee}
               name="Selecione o funcionário"
               onSelectOption={handleEmployeeChange}
+              disabled={isEmployeeRecurringPayment}
             />
 
             {loadingEmployees && (
@@ -416,21 +432,21 @@ export default function UpsertRecurringPaymentModal({
 
         {formData.dueDateType ===
           RecurringPaymentDateType.FIFTH_BUSINESS_DAY && (
-          <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <CalendarIcon />
+            <div className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <CalendarIcon />
 
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium text-gray-800">
-                Quinto dia útil
-              </p>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-gray-800">
+                  Quinto dia útil
+                </p>
 
-              <p className="text-sm text-gray-500">
-                O vencimento será calculado automaticamente com base no quinto
-                dia útil de cada mês.
-              </p>
+                <p className="text-sm text-gray-500">
+                  O vencimento será calculado automaticamente com base no quinto
+                  dia útil de cada mês.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {formError && (
           <p className="text-sm text-red-600">

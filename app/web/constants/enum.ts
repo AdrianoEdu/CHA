@@ -48,9 +48,11 @@ export enum AccountType {
 }
 
 export enum RecurringPaymentDateType {
-  BIWEEKLY = "BIWEEKLY ",
+  BIWEEKLY = "BIWEEKLY",
   FIXED_DAY = "FIXED_DAY",
   FIFTH_BUSINESS_DAY = "FIFTH_BUSINESS_DAY",
+  THIRTEENTH_SALARY = 'THIRTEENTH_SALARY',
+  VACATION = 'VACATION'
 }
 
 export enum BusinessDayAdjustment {
