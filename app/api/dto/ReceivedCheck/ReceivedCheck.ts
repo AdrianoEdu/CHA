@@ -3,9 +3,10 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { ReceivedCheckStatus } from "@/app/generated/prisma";
+import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
 import { GetBankDto } from "../Bank/bank";
 import { GetCustomerDto } from "../Customer/Customer";
+import { PaginationDto } from "../Pagination/Pagination";
 
 export type ReceivedCheckDTO = {
   id: string;
@@ -52,3 +53,12 @@ export type GetReceivedCheckDTOParams = {
   count: number;
   receivedChecks: ReceivedCheckDTO[];
 };
+
+export type ReceivedCheckWhere = Prisma.ReceivedCheckWhereInput;
+
+export type ReceivedCheckParams = PaginationDto<
+  ReceivedCheckWhere,
+  any,
+  any,
+  any
+>;

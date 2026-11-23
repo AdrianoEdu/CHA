@@ -55,6 +55,22 @@ export class ReceivedCheckController {
   async remove({ id }: RemoveReceivedCheckDto) {
     return await this.receivedCheckService.remove({ id });
   }
+
+  async findAll(req: Request) {
+    try {
+      const query = parsePrismaQuery<
+        Prisma.ReceivedCheckWhereInput,
+        Prisma.ReceivedCheckSelect,
+        Prisma.ReceivedCheckInclude,
+        Prisma.ReceivedCheckOrderByWithRelationInput
+      >(req);
+
+      return this.receivedCheckService.findByReceivedChecks(query);
+    } catch (error: any) {
+      console.error("Erro ao buscar cheques recebidos:", error);
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+  }
 }
 
 export const receivedCheckController = new ReceivedCheckController();

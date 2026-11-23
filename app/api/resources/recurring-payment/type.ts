@@ -4,3 +4,11 @@
 // All rights reserved.
 
 import { Prisma } from "@/app/generated/prisma";
+
+export type ReceivedCheckWithRelations =
+  Prisma.ReceivedCheckGetPayload<{
+    include: {
+      bank: true;
+      customer: true;
+    };
+  }>;

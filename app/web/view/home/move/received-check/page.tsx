@@ -36,81 +36,80 @@ const getColumns = ({
   handleEdit,
   handleRemove,
 }: GetColumnsProps): TableColumn<ReceivedCheckDTO>[] => [
-  { label: "Criado em", accessor: "createdAt" },
-  { label: "Nome do cliente", accessor: "customer.name" },
-  { label: "Banco", accessor: "bank.name" },
-  {
-    label: "Agência",
-    accessor: "agency",
-    render(row) {
-      return row.agency;
+    { label: "Criado em", accessor: "createdAt" },
+    { label: "Nome do cliente", accessor: "customer.name" },
+    { label: "Banco", accessor: "bank.name" },
+    {
+      label: "Agência",
+      accessor: "agency",
+      render(row) {
+        return row.agency;
+      },
     },
-  },
-  { label: "Cheque", accessor: "checkNumber" },
-  { label: "Bom para", accessor: "goodForAt" },
-  {
-    label: "Valor",
-    accessor: "amount",
-    render: (row) => `R$ ${row.amount?.toFixed(2) ?? 0}`,
-  },
-  {
-    label: "Status",
-    accessor: "status",
-    render: (row) => {
-      const statusMap: Record<ReceivedCheckStatus, string> = {
-        RECEIVED: "Recebido",
-        FINALIZED: "Finalizado",
-        CANCELLED: "Cancelado",
-      };
-
-      const colorMap: Record<ReceivedCheckStatus, string> = {
-        RECEIVED: "bg-green-100 text-green-800",
-        FINALIZED: "bg-blue-100 text-blue-800",
-        CANCELLED: "bg-red-100 text-red-800",
-      };
-
-      return (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            colorMap[row.status] || "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {statusMap[row.status] || row.status}
-        </span>
-      );
+    { label: "Cheque", accessor: "checkNumber" },
+    { label: "Bom para", accessor: "goodForAt" },
+    {
+      label: "Valor",
+      accessor: "amount",
+      render: (row) => `R$ ${row.amount?.toFixed(2) ?? 0}`,
     },
-  },
-  {
-    label: "Ações",
-    isAction: true,
-    render: (row) => {
-      return (
-        <div className="flex gap-2 justify-center">
-          {row.status !== ReceivedCheckStatus.CANCELLED && (
-            <Button
-              icon={<EditIcon />}
-              status={ButtonStatusEnum.UPDATE}
-              onClick={(e) => {
-                (e.stopPropagation(), handleEdit(row));
-              }}
-            />
-          )}
-          {row.status !== ReceivedCheckStatus.CANCELLED &&
-            row.status !== ReceivedCheckStatus.FINALIZED && (
+    {
+      label: "Status",
+      accessor: "status",
+      render: (row) => {
+        const statusMap: Record<ReceivedCheckStatus, string> = {
+          RECEIVED: "Recebido",
+          FINALIZED: "Finalizado",
+          CANCELLED: "Cancelado",
+        };
+
+        const colorMap: Record<ReceivedCheckStatus, string> = {
+          RECEIVED: "bg-green-100 text-green-800",
+          FINALIZED: "bg-blue-100 text-blue-800",
+          CANCELLED: "bg-red-100 text-red-800",
+        };
+
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorMap[row.status] || "bg-gray-100 text-gray-800"
+              }`}
+          >
+            {statusMap[row.status] || row.status}
+          </span>
+        );
+      },
+    },
+    {
+      label: "Ações",
+      isAction: true,
+      render: (row) => {
+        return (
+          <div className="flex gap-2 justify-center">
+            {row.status !== ReceivedCheckStatus.CANCELLED && (
               <Button
+                icon={<EditIcon />}
+                status={ButtonStatusEnum.UPDATE}
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(row.id);
+                  (e.stopPropagation(), handleEdit(row));
                 }}
-                icon={<DeleteIcon />}
-                status={ButtonStatusEnum.CANCEL}
               />
-            )}{" "}
-        </div>
-      );
+            )}
+            {row.status !== ReceivedCheckStatus.CANCELLED &&
+              row.status !== ReceivedCheckStatus.FINALIZED && (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove(row.id);
+                  }}
+                  icon={<DeleteIcon />}
+                  status={ButtonStatusEnum.CANCEL}
+                />
+              )}{" "}
+          </div>
+        );
+      },
     },
-  },
-];
+  ];
 
 export default function ReceiveCheck() {
   const [filter, setFilter] = useState("");
@@ -138,17 +137,17 @@ export default function ReceiveCheck() {
   const handleOpenModal = (item?: ReceivedCheckDTO): void => {
     const data = item
       ? {
-          id: item.id ?? "",
-          notes: item.notes,
-          agency: item.agency,
-          paidAt: item.paidAt,
-          status: item.status,
-          bankId: item.bank?.id,
-          amount: item.amount ?? 0,
-          goodForAt: item.goodForAt,
-          customerId: item.customer?.id,
-          checkNumber: item.checkNumber,
-        }
+        id: item.id ?? "",
+        notes: item.notes,
+        agency: item.agency,
+        paidAt: item.paidAt,
+        status: item.status,
+        bankId: item.bank?.id,
+        amount: item.amount ?? 0,
+        goodForAt: item.goodForAt,
+        customerId: item.customer?.id,
+        checkNumber: item.checkNumber,
+      }
       : undefined;
 
     openModal(
@@ -166,10 +165,11 @@ export default function ReceiveCheck() {
   ): Promise<void> => {
     try {
       await receiveCheckService.create(data);
-      await resetPagination();
       toast.success("Cheque registrado com sucesso");
     } catch (err) {
       toast.error("Error ao registar o cheque");
+    } finally {
+      await resetPagination();
     }
   };
 
@@ -188,12 +188,11 @@ export default function ReceiveCheck() {
   const handleOnRemove = async (id: string): Promise<void> => {
     try {
       await receiveCheckService.remove(id);
-
       toast.success("Cheque recebido cancelado com sucesso");
-
-      resetPagination();
     } catch (err) {
       toast.error("Erro ao cancelar cheque");
+    } finally {
+      await resetPagination();
     }
   };
 
@@ -247,13 +246,13 @@ export default function ReceiveCheck() {
       all: true,
       skip: currentSkip,
       take: takeReceivedCheck,
-      orderBy: { name: "asc" },
+      orderBy: { createdAt: "desc" },
     });
 
     countReceivedCheck = count;
     setReceivedCheckList(receivedChecks);
     oldReceiveChecks = receivedChecks;
-  };
+  }
 
   return (
     <div>

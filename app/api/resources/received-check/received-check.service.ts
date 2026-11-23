@@ -3,32 +3,66 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
-import { PaginationDto } from "../../dto/Pagination/Pagination";
+import { AccountType, FinancialFlowType, Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { HttpException } from "../../error/HttpException";
 import {
   CreateReceivedCheckDTO,
-  GetReceivedCheckDTOParams,
   ReceivedCheckDTO,
+  ReceivedCheckParams,
   RemoveReceivedCheckDto,
   UpdateReceivedCheckDTO,
 } from "../../dto/ReceivedCheck/ReceivedCheck";
-import { receivedCheckSelect, ReceivedCheckWithRelations } from "./types";
+import { ReceivedCheckWithRelations } from "./types";
 
 class ReceivedCheckService {
   private databaseService = databaseService;
 
   async create(data: CreateReceivedCheckDTO): Promise<void> {
-    await databaseService.receivedCheck.create({
-      data: {
-        agency: data.agency,
-        bankId: data.bankId,
-        amount: data.amount,
-        goodForAt: data.goodForAt,
-        customerId: data.customerId,
-        checkNumber: data.checkNumber,
-      },
+    await this.databaseService.$transaction(async (transaction) => {
+      const receivedCheck = await transaction.receivedCheck.create({
+        data: {
+          agency: data.agency,
+          bankId: data.bankId,
+          amount: data.amount,
+          goodForAt: data.goodForAt,
+          customerId: data.customerId,
+          checkNumber: data.checkNumber,
+        },
+      });
+
+      const account = await transaction.account.findFirst({
+        where: {
+          accountType: AccountType.CASHBOOK,
+        },
+      });
+
+      if (!account) {
+        throw new HttpException("Conta do caixa não encontrada.", 404);
+      }
+
+      const financialCategory =
+        await transaction.financialCategory.findFirst({
+          where: {
+            name: "Pagamento com cheque de terceiro",
+            accountType: AccountType.CASHBOOK,
+            financialFlowType: FinancialFlowType.OUT,
+          },
+        });
+
+      if (!financialCategory) {
+        throw new HttpException("Categoria financeira não encontrada.", 404);
+      }
+
+      await transaction.cashBook.create({
+        data: {
+          value: receivedCheck.amount,
+          title: `Cheque recebido nº ${receivedCheck.checkNumber}`,
+          description: `Cheque recebido da agência ${receivedCheck.agency}`,
+          accountId: account.id,
+          financialCategoryId: financialCategory.id,
+        },
+      });
     });
   }
 
@@ -37,16 +71,27 @@ class ReceivedCheckService {
       where: { id: data.id },
     });
 
-    if (result?.status === ReceivedCheckStatus.FINALIZED) {
-      new HttpException(
-        "Não é possível atualizar um cheque que ja foi finalizado",
+    if (!result) {
+      throw new HttpException("Cheque não encontrado.", 404);
+    }
+
+    if (result.status === ReceivedCheckStatus.FINALIZED) {
+      throw new HttpException(
+        "Não é possível atualizar um cheque que já foi finalizado",
         409,
       );
     }
 
+    const status = data.status
+      ? this.parseStatus(data.status)
+      : result.status;
+
     await this.databaseService.receivedCheck.update({
       where: { id: data.id },
-      data: { ...data },
+      data: {
+        ...data,
+        status,
+      },
     });
   }
 
@@ -78,6 +123,33 @@ class ReceivedCheckService {
     });
   }
 
+  async findByReceivedChecks(
+    params: ReceivedCheckParams,
+  ): Promise<{
+    count: number;
+    receivedChecks: ReceivedCheckWithRelations[];
+  }> {
+    const baseQuery = {
+      skip: params.skip,
+      where: params.where,
+      take: params.take,
+      orderBy: params.orderBy,
+      include: {
+        bank: true,
+        customer: true,
+      },
+    } satisfies Prisma.ReceivedCheckFindManyArgs;
+
+    const count = await this.databaseService.receivedCheck.count({
+      where: baseQuery.where,
+    });
+
+    const receivedChecks =
+      await this.databaseService.receivedCheck.findMany(baseQuery);
+
+    return { count, receivedChecks };
+  }
+
   private parseStatus(status: string): ReceivedCheckStatus {
     const statusUpper = status.toUpperCase();
 
@@ -87,8 +159,6 @@ class ReceivedCheckService {
 
     throw new Error(`Status inválido: ${status}`);
   }
-
-
 }
 
 export const receivedCheckService = new ReceivedCheckService();
