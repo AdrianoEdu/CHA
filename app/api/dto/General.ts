@@ -15,6 +15,6 @@ export type GetFinancialEntryDto = {
   filePath?: string;
   description: string;
   account?: GetAccountDto;
-  customer: Partial<GetCustomerDto>,
+  customer?: Partial<GetCustomerDto> | null,
   financialCategory?: GetFinancialCategoryDto;
 };

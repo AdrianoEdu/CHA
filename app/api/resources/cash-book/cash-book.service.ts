@@ -20,7 +20,13 @@ class CashBookService {
   private databaseService = databaseService;
 
   async create(data: CreateCashBookDto): Promise<CashBookWithRelations> {
-    const { file, receivedCheck, receivedCheckIds, ...cashBookData } = data;
+    const {
+      file,
+      receivedCheck,
+      receivedCheckIds,
+      customerId,
+      ...cashBookData
+    } = data;
 
     let key: string | null = null;
     let fileUploaded = false;
@@ -42,46 +48,53 @@ class CashBookService {
 
       const result = await this.databaseService.$transaction(
         async (tx): Promise<CashBookWithRelations> => {
-          let receivedCheckId: string | undefined;
+          const category = await tx.financialCategory.findUniqueOrThrow({
+            where: {
+              id: cashBookData.financialCategoryId,
+            },
+            select: {
+              name: true,
+            },
+          });
 
-          if (receivedCheck) {
-            const category = await tx.financialCategory.findUnique({
-              where: {
-                id: cashBookData.financialCategoryId,
-              },
-              select: {
-                name: true,
+          let receivedCheckId: string | undefined;
+          const isCheckReceipt =
+            category.name === "Recebimento de cheque de terceiro";
+
+          if (isCheckReceipt && receivedCheck) {
+            if (!customerId) {
+              throw new Error(
+                "É necessário informar o cliente para receber um cheque.",
+              );
+            }
+
+            const createdCheck = await tx.receivedCheck.create({
+              data: {
+                checkNumber: receivedCheck.checkNumber,
+                amount: receivedCheck.amount,
+                agency: receivedCheck.agency,
+                goodForAt: receivedCheck.goodForAt,
+                notes: receivedCheck.notes,
+                customer: {
+                  connect: {
+                    id: customerId,
+                  },
+                },
+                bank: {
+                  connect: {
+                    id: receivedCheck.bankId,
+                  },
+                },
               },
             });
 
-            if (category?.name === "Recebimento de cheque de terceiro") {
-              const createdCheck = await tx.receivedCheck.create({
-                data: {
-                  checkNumber: receivedCheck.checkNumber,
-                  amount: receivedCheck.amount,
-                  agency: receivedCheck.agency,
-                  goodForAt: receivedCheck.goodForAt,
-                  notes: receivedCheck.notes,
-                  customer: {
-                    connect: {
-                      id: cashBookData.customerId,
-                    },
-                  },
-                  bank: {
-                    connect: {
-                      id: receivedCheck.bankId,
-                    },
-                  },
-                },
-              });
-
-              receivedCheckId = createdCheck.id;
-            }
+            receivedCheckId = createdCheck.id;
           }
 
           const cashBook = await tx.cashBook.create({
             data: {
               ...cashBookData,
+              customerId: isCheckReceipt ? customerId : null,
               filePath: key,
               receivedCheckId,
             },
@@ -96,7 +109,7 @@ class CashBookService {
           } satisfies Prisma.CashBookCreateArgs);
 
           if (
-            cashBook.financialCategory.name === "Pagamento com cheque de terceiro" &&
+            category.name === "Pagamento com cheque de terceiro" &&
             receivedCheckIds?.length
           ) {
             await tx.receivedCheck.updateMany({
@@ -145,7 +158,13 @@ class CashBookService {
   }
 
   async update(data: UpdateCashBookDto) {
-    const { id, file, receivedCheck, receivedCheckIds, ...cashBookData } = data;
+    const {
+      id,
+      file,
+      receivedCheck: _receivedCheck,
+      receivedCheckIds,
+      ...cashBookData
+    } = data;
 
     let newKey: string | null = null;
     let fileUploaded = false;
@@ -190,7 +209,9 @@ class CashBookService {
       const result = await this.databaseService.$transaction(async (tx) => {
         const category = await tx.financialCategory.findUniqueOrThrow({
           where: {
-            id: cashBookData.financialCategoryId ?? currentCashBook.financialCategoryId,
+            id:
+              cashBookData.financialCategoryId ??
+              currentCashBook.financialCategoryId,
           },
           select: {
             name: true,
@@ -215,7 +236,9 @@ class CashBookService {
           });
 
           if (checks.length !== receivedCheckIds.length) {
-            throw new Error("Um ou mais cheques selecionados não foram encontrados.");
+            throw new Error(
+              "Um ou mais cheques selecionados não foram encontrados.",
+            );
           }
 
           if (
@@ -244,12 +267,18 @@ class CashBookService {
           },
         });
 
+        const isCheckReceipt =
+          category.name === "Recebimento de cheque de terceiro";
+
         const cashBook = await tx.cashBook.update({
           where: {
             id,
           },
           data: {
             ...cashBookData,
+            customerId: isCheckReceipt
+              ? cashBookData.customerId ?? currentCashBook.customerId
+              : null,
             ...(newKey && {
               filePath: newKey,
             }),
@@ -302,10 +331,10 @@ class CashBookService {
   async findCashBooks(
     params: CashBookParams,
   ): Promise<GetCashBookParamsDto> {
-    const baseQuery = {
+    const query = {
       skip: params.skip,
-      where: params.where,
       take: params.take,
+      where: params.where,
       orderBy: params.orderBy,
       include: {
         account: {
@@ -315,18 +344,20 @@ class CashBookService {
         },
         financialCategory: true,
         customer: true,
+        receivedCheck: true,
       },
     } satisfies Prisma.CashBookFindManyArgs;
 
-    const count = await this.databaseService.cashBook.count({
-      where: baseQuery.where,
-    });
-
-    const cashBook = await this.databaseService.cashBook.findMany(baseQuery);
+    const [count, cashBooks] = await this.databaseService.$transaction([
+      this.databaseService.cashBook.count({
+        where: query.where,
+      }),
+      this.databaseService.cashBook.findMany(query),
+    ]);
 
     return {
       count,
-      cashBook: cashBook.map((item) => ({
+      cashBook: cashBooks.map((item) => ({
         ...item,
         account: {
           ...item.account,

@@ -19,8 +19,11 @@ import Input, { InputType } from "../../input/input";
 import ComboBox from "../../combobox/combobox";
 import FileUpload from "../../uploadFile/uploadFile";
 import Button, { ButtonStatusEnum } from "../../button/button";
+import SelectReceivedChecks from "../../selectReceivedChecks/selectReceivedChecks";
 
 import { financialCategoryService } from "@/app/web/services/financialCategoryService/financialCategoryService";
+import { customerService } from "@/app/web/services/customerService/customerService";
+import { bankService } from "@/app/web/services/bankService/bankService";
 
 import {
   SelectComboboxCustomerTypeProps,
@@ -28,10 +31,8 @@ import {
 } from "../upsert-financial-category/upsert-financial-category";
 
 import { i18n } from "@/app/web/constants/i18n";
-import { customerService } from "@/app/web/services/customerService/customerService";
 import { GetCustomerDto } from "@/app/web/dto/customer.dto";
 import { CreateReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
-import { bankService } from "@/app/web/services/bankService/bankService";
 import {
   CreateCashBookDto,
   UpdateCashBookDto,
@@ -145,6 +146,8 @@ export function UpsertFinancialEntryModal({
   const [receivedCheck, setRecevidedCheck] =
     useState<CreateReceivedCheckDTO>();
 
+  const [receivedCheckIds, setReceivedCheckIds] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -156,6 +159,10 @@ export function UpsertFinancialEntryModal({
   const isReceivedCheck =
     accountType === AccountType.CASHBOOK &&
     selectedFinancialEntry?.label === "Recebimento de cheque de terceiro";
+
+  const isPaymentCheck =
+    accountType === AccountType.CASHBOOK &&
+    selectedFinancialEntry?.label === "Pagamento com cheque de terceiro";
 
   const handleGetAllBanks = useCallback(async (): Promise<void> => {
     const { banks } = await bankService.findAll({
@@ -288,6 +295,10 @@ export function UpsertFinancialEntryModal({
       setAgencyOptions([]);
       setRecevidedCheck(undefined);
     }
+
+    if (option?.label !== "Pagamento com cheque de terceiro") {
+      setReceivedCheckIds([]);
+    }
   };
 
   const handleSetSelectCustomerOption = (
@@ -370,6 +381,11 @@ export function UpsertFinancialEntryModal({
       return;
     }
 
+    if (isPaymentCheck && receivedCheckIds.length === 0) {
+      setFormError("Selecione pelo menos um cheque para realizar o pagamento.");
+      return;
+    }
+
     const payload = {
       title,
       value: financialEntry.value,
@@ -389,6 +405,7 @@ export function UpsertFinancialEntryModal({
           accountId: financialEntry.accountId,
           customerId: financialEntry?.customer?.id,
           receivedCheck,
+          receivedCheckIds,
         });
 
         return;
@@ -410,6 +427,7 @@ export function UpsertFinancialEntryModal({
         accountId: financialEntry.accountId ?? "",
         customerId: financialEntry?.customer?.id ?? "",
         receivedCheck,
+        receivedCheckIds,
       });
 
       return;
@@ -556,6 +574,14 @@ export function UpsertFinancialEntryModal({
                 </>
               )}
             </div>
+          )}
+
+          {isPaymentCheck && (
+            <SelectReceivedChecks
+              selectedIds={receivedCheckIds}
+              onChange={setReceivedCheckIds}
+              disabled={loading}
+            />
           )}
 
           {loading && (
