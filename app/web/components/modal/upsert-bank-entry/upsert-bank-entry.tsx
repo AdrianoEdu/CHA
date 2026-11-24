@@ -30,13 +30,25 @@ import {
 import { i18n } from "@/app/web/constants/i18n";
 import { customerService } from "@/app/web/services/customerService/customerService";
 import { GetCustomerDto } from "@/app/web/dto/customer.dto";
+import { CreateReceivedCheckDTO } from "@/app/web/dto/receive-check.dto";
+import { bankService } from "@/app/web/services/bankService/bankService";
+import {
+  CreateCashBookDto,
+  UpdateCashBookDto,
+} from "@/app/web/dto/cash-book.dto";
 
 export type UpsertFinancialEntryModalProps = {
   onClose: () => void;
   accountType: AccountType;
   data?: GetFinancialEntryDto;
-  onUpdate: (data: UpdateFinancialEntryDto) => void;
-  onRegister: (data: CreateFinancialEntryDto) => void;
+  onUpdate: (data: UpdateFinancialEntryDto | UpdateCashBookDto) => void;
+  onRegister: (data: CreateFinancialEntryDto | CreateCashBookDto) => void;
+};
+
+type SelectOption = {
+  id: string;
+  name: string;
+  list?: string[];
 };
 
 type FinancialEntryForm = {
@@ -65,6 +77,21 @@ const initialFormData: FinancialEntryForm = {
   description: "",
 };
 
+function parseMoneyToNumber(value: string): number {
+  if (!value.trim()) return 0;
+
+  const normalizedValue = value
+    .replace(/\s/g, "")
+    .replace(/R\$/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .trim();
+
+  const amount = Number(normalizedValue);
+
+  return Number.isFinite(amount) ? amount : 0;
+}
+
 export function UpsertFinancialEntryModal({
   data,
   accountType,
@@ -85,6 +112,14 @@ export function UpsertFinancialEntryModal({
 
   const [selectedCustomer, setSelectedCustomer] =
     useState<SelectComboboxCustomerTypeProps | undefined>();
+
+  const [bankOptions, setBankOptions] = useState<SelectOption[]>([]);
+  const [selectBankOption, setSelectBankOption] = useState<SelectOption>();
+
+  const [agencyOptions, setAgencyOptions] = useState<SelectOption[]>([]);
+  const [selectAgencyOption, setSelectAgencyOption] = useState<SelectOption>();
+
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const [financialEntry, setFinancialEntry] =
     useState<FinancialEntryForm>(() => {
@@ -107,6 +142,9 @@ export function UpsertFinancialEntryModal({
       };
     });
 
+  const [receivedCheck, setRecevidedCheck] =
+    useState<CreateReceivedCheckDTO>();
+
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -114,6 +152,24 @@ export function UpsertFinancialEntryModal({
 
   const isIncome =
     selectedFinancialEntry?.value === FinancialFlowType.IN;
+
+  const isReceivedCheck =
+    accountType === AccountType.CASHBOOK &&
+    selectedFinancialEntry?.label === "Recebimento de cheque de terceiro";
+
+  const handleGetAllBanks = useCallback(async (): Promise<void> => {
+    const { banks } = await bankService.findAll({
+      orderBy: { name: "asc" },
+    });
+
+    setBankOptions(
+      banks.map(({ id, name, agencies }) => ({
+        id,
+        name,
+        list: agencies ?? [],
+      })),
+    );
+  }, []);
 
   const handleGetCustomerList = useCallback(
     async (): Promise<void> => {
@@ -171,6 +227,7 @@ export function UpsertFinancialEntryModal({
 
       try {
         await Promise.all([
+          handleGetAllBanks(),
           handleGetCustomerList(),
           handleGetFinancialCategoryList(),
         ]);
@@ -182,7 +239,11 @@ export function UpsertFinancialEntryModal({
     };
 
     loadData();
-  }, [handleGetCustomerList, handleGetFinancialCategoryList]);
+  }, [
+    handleGetAllBanks,
+    handleGetCustomerList,
+    handleGetFinancialCategoryList,
+  ]);
 
   const handleSetFinancialEntry = (
     values: Partial<FinancialEntryForm>,
@@ -193,6 +254,15 @@ export function UpsertFinancialEntryModal({
     }));
 
     setFormError("");
+  };
+
+  const handleSetReceivedCheck = (
+    values: Partial<CreateReceivedCheckDTO>,
+  ): void => {
+    setRecevidedCheck((current) => ({
+      ...(current ?? ({} as CreateReceivedCheckDTO)),
+      ...values,
+    }));
   };
 
   const handleSetSelectFinancialEntryOption = (
@@ -211,6 +281,13 @@ export function UpsertFinancialEntryModal({
     if (option?.value !== FinancialFlowType.IN) {
       setSelectedCustomer(undefined);
     }
+
+    if (option?.label !== "Recebimento de cheque de terceiro") {
+      setSelectBankOption(undefined);
+      setSelectAgencyOption(undefined);
+      setAgencyOptions([]);
+      setRecevidedCheck(undefined);
+    }
   };
 
   const handleSetSelectCustomerOption = (
@@ -226,6 +303,31 @@ export function UpsertFinancialEntryModal({
     });
   };
 
+  const handleSelectBank = (option?: SelectOption): void => {
+    setSelectBankOption(option);
+    setSelectAgencyOption(undefined);
+
+    setAgencyOptions(
+      (option?.list ?? []).map((agency) => ({
+        id: agency,
+        name: agency,
+      })),
+    );
+
+    handleSetReceivedCheck({
+      bankId: option?.id,
+      agency: undefined,
+    });
+  };
+
+  const handleSelectAgency = (option?: SelectOption): void => {
+    setSelectAgencyOption(option);
+
+    handleSetReceivedCheck({
+      agency: option?.name,
+    });
+  };
+
   const handleValueChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ): void => {
@@ -238,6 +340,16 @@ export function UpsertFinancialEntryModal({
     handleSetFinancialEntry({
       value: Number(value) || 0,
     });
+  };
+
+  const handleSetGoodForAt = (value: Date | string | number): void => {
+    if (!value) return;
+
+    const goodForAt = value instanceof Date ? value : new Date(value);
+
+    if (Number.isNaN(goodForAt.getTime())) return;
+
+    handleSetReceivedCheck({ goodForAt });
   };
 
   const handleUpsertFinancialEntry = (): void => {
@@ -270,6 +382,18 @@ export function UpsertFinancialEntryModal({
     };
 
     if (financialEntry.id) {
+      if (accountType === AccountType.CASHBOOK) {
+        onUpdate({
+          ...payload,
+          id: financialEntry.id,
+          accountId: financialEntry.accountId,
+          customerId: financialEntry?.customer?.id,
+          receivedCheck,
+        });
+
+        return;
+      }
+
       onUpdate({
         ...payload,
         id: financialEntry.id,
@@ -280,19 +404,30 @@ export function UpsertFinancialEntryModal({
       return;
     }
 
+    if (accountType === AccountType.CASHBOOK) {
+      onRegister({
+        ...payload,
+        accountId: financialEntry.accountId ?? "",
+        customerId: financialEntry?.customer?.id ?? "",
+        receivedCheck,
+      });
+
+      return;
+    }
+
     onRegister({
       ...payload,
       accountId: financialEntry.accountId ?? "",
-      customerId: financialEntry?.customer?.id ?? '',
+      customerId: financialEntry?.customer?.id ?? "",
     });
   };
 
   return (
-    <div className="flex flex-col">
-      <div className="mt-10 mb-10 flex h-100 w-300 flex-row gap-5 rounded-2xl bg-gray-100 p-5">
-        <div className="flex w-full flex-col justify-center gap-5">
+    <div className="flex w-full min-w-0 flex-col">
+      <div className="mt-10 mb-6 flex min-h-[25rem] w-300 max-w-full flex-col gap-5 rounded-2xl bg-gray-100 p-5 lg:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-5">
           <Input
-            className="flex-1"
+            className="w-full"
             name={fields.descriptionStatement}
             value={financialEntry.title}
             onChange={(event) =>
@@ -303,7 +438,7 @@ export function UpsertFinancialEntryModal({
           />
 
           <Input
-            className="flex-1"
+            className="w-full"
             name={fields.notes}
             inputType={InputType.Annotation}
             value={financialEntry.description}
@@ -325,15 +460,102 @@ export function UpsertFinancialEntryModal({
           />
 
           {isIncome && (
-            <ComboBox<SelectComboboxCustomerTypeProps>
-              options={optionsCustomer}
-              valueKey="id"
-              labelKey="label"
-              selected={selectedCustomer}
-              name={fields.customer}
-              disabled={loading}
-              onSelectOption={handleSetSelectCustomerOption}
-            />
+            <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="min-w-0 sm:col-span-2">
+                <ComboBox<SelectComboboxCustomerTypeProps>
+                  options={optionsCustomer}
+                  valueKey="id"
+                  labelKey="label"
+                  selected={selectedCustomer}
+                  name={fields.customer}
+                  disabled={loading}
+                  onSelectOption={handleSetSelectCustomerOption}
+                />
+              </div>
+
+              {isReceivedCheck && (
+                <>
+                  <div className="min-w-0">
+                    <ComboBox<SelectOption>
+                      valueKey="id"
+                      labelKey="name"
+                      options={bankOptions}
+                      selected={selectBankOption}
+                      placeholder="Selecione o banco..."
+                      disabled={loading}
+                      onSelectOption={handleSelectBank}
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <ComboBox<SelectOption>
+                      valueKey="id"
+                      labelKey="name"
+                      selected={selectAgencyOption}
+                      options={agencyOptions}
+                      disabled={loading || !selectBankOption}
+                      onSelectOption={handleSelectAgency}
+                      placeholder="Selecione a agência..."
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <Input
+                      type="number"
+                      className="w-full"
+                      inputType={InputType.Number}
+                      onChange={(event) =>
+                        handleSetReceivedCheck({
+                          checkNumber: Number(event.target.value),
+                        })
+                      }
+                      value={receivedCheck?.checkNumber}
+                      name="Insira o número do cheque"
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <Input
+                      className="w-full"
+                      inputType={InputType.Date}
+                      showCalendar={showCalendar}
+                      value={receivedCheck?.goodForAt}
+                      onValueChange={handleSetGoodForAt}
+                      name="Selecione a data do bom para"
+                      onCalendarVisibilityChange={setShowCalendar}
+                    />
+                  </div>
+
+                  <div className="min-w-0 sm:col-span-2">
+                    <Input
+                      className="w-full"
+                      inputType={InputType.Money}
+                      onChange={(event) =>
+                        handleSetReceivedCheck({
+                          amount: parseMoneyToNumber(event.target.value),
+                        })
+                      }
+                      value={receivedCheck?.amount}
+                      name="Insira o valor do cheque"
+                    />
+                  </div>
+
+                  <div className="min-w-0 sm:col-span-2">
+                    <Input
+                      className="w-full"
+                      value={receivedCheck?.notes}
+                      inputType={InputType.Annotation}
+                      name="Anotação de recebimento de cheque"
+                      onChange={(event) =>
+                        handleSetReceivedCheck({
+                          notes: event.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </>
+              )}
+            </div>
           )}
 
           {loading && (
@@ -343,7 +565,7 @@ export function UpsertFinancialEntryModal({
           )}
 
           <Input
-            className="flex-1"
+            className="w-full"
             name={fields.value}
             inputType={InputType.Money}
             value={financialEntry.value}
@@ -351,7 +573,7 @@ export function UpsertFinancialEntryModal({
           />
         </div>
 
-        <div className="flex w-full flex-col items-center justify-center">
+        <div className="flex w-full shrink-0 flex-col items-center justify-center rounded-xl border border-gray-200 bg-white p-4 lg:w-[18.75rem]">
           <FileUpload
             maxSizeInMB={10}
             value={financialEntry.file}
@@ -370,7 +592,7 @@ export function UpsertFinancialEntryModal({
         </p>
       )}
 
-      <div className="flex w-full justify-end gap-5">
+      <div className="flex w-full flex-wrap justify-end gap-3">
         <Button
           text={cancel}
           onPress={onClose}

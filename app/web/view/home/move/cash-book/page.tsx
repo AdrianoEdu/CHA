@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-09-02
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -13,9 +14,7 @@ import { AccountType } from "@/app/web/constants/enum";
 import { i18n } from "@/app/web/constants/i18n";
 import { GetAccountDto } from "@/app/web/dto/account.dto";
 import {
-  CreateFinancialEntryDto,
   GetFinancialEntryDto,
-  UpdateFinancialEntryDto,
 } from "@/app/web/dto/general.dto";
 import { useModal } from "@/app/web/providers/ModalProvider";
 import { cashBookService } from "@/app/web/services/cashBookService/cashBookService";
@@ -23,6 +22,7 @@ import { accountService } from "@/app/web/services/accountService/acountService"
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { CreateCashBookDto, UpdateCashBookDto } from "@/app/web/dto/cash-book.dto";
 
 const takeCashBook = 20;
 
@@ -87,10 +87,10 @@ export default function CashBookPage() {
 
     totalCount.current = count;
     setList((prev) => [...prev, ...(cashBook ?? [])]);
-    currentSkip.current += cashBook?.length;
+    currentSkip.current += cashBook?.length ?? 0;
   }, []);
 
-  const handleGetBankAccount = async (): Promise<void> => {
+  const handleGetBankAccount = useCallback(async (): Promise<void> => {
     const id = params.id as string;
 
     const { account } = await accountService.findAll({
@@ -98,14 +98,21 @@ export default function CashBookPage() {
       where: { id, accountType: AccountType.CASHBOOK },
     });
 
-    const accountItem = account[0];
+    setAccount(account[0]);
+  }, [params.id]);
 
-    setAccount(accountItem);
+  const handleRefreshCashBook = async (): Promise<void> => {
+    currentSkip.current = 0;
+    totalCount.current = 0;
+    setList([]);
+
+    await handleGetCashBook();
+    await handleGetBankAccount();
   };
 
   useEffect(() => {
     handleGetBankAccount();
-  }, []);
+  }, [handleGetBankAccount]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -123,37 +130,44 @@ export default function CashBookPage() {
 
   const filteredCashBook = useMemo(() => {
     if (!search.trim()) return list;
+
     return list.filter((item) =>
       item.financialCategory.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [list, search]);
 
   const handleRegisterCashBook = async (
-    data: CreateFinancialEntryDto,
+    data: CreateCashBookDto,
   ): Promise<void> => {
     if (!account) return;
 
     try {
       await cashBookService.create({
         ...data,
-        accountId: account?.id,
+        accountId: account.id,
       });
-      toast.success("Extrato registrado com successo!");
+
+
+      toast.success("Extrato registrado com sucesso!");
       closeModal();
     } catch (err) {
-      alert(err);
+      toast.error("Houve um erro ao registrar o extrato.");
+    } finally {
+      await handleRefreshCashBook();
     }
   };
 
   const handleUpdateCashBook = async (
-    data: UpdateFinancialEntryDto,
+    data: UpdateCashBookDto,
   ): Promise<void> => {
     try {
       await cashBookService.update(data);
-      toast.success("Extrato atualizado com successo!");
+      toast.success("Extrato atualizado com sucesso!");
       closeModal();
     } catch (error) {
-      toast.error("Houve um erro ao atualizar o extrato, tente mais tarde");
+      toast.error("Houve um erro ao atualizar o extrato, tente mais tarde.");
+    } finally {
+      await handleRefreshCashBook();
     }
   };
 
@@ -167,9 +181,9 @@ export default function CashBookPage() {
       <UpsertFinancialEntryModal
         data={data}
         onClose={closeModal}
-        onUpdate={handleUpdateCashBook}
         accountType={AccountType.CASHBOOK}
-        onRegister={handleRegisterCashBook}
+        onUpdate={(data) => handleUpdateCashBook(data as UpdateCashBookDto)}
+        onRegister={(data) => handleRegisterCashBook(data as CreateCashBookDto)}
       />,
       !data ? UpsertCashBook.registerTitle : UpsertCashBook.updateTitle,
     );
@@ -190,16 +204,14 @@ export default function CashBookPage() {
         <SearchComponent onChange={setSearch} />
 
         <FinancialEntryList
-          data={list}
-          onSelect={() => alert("xpto")}
+          data={filteredCashBook}
+          onSelect={() => { }}
           balanceAccount={account?.balance ?? 0}
         />
       </div>
 
       <FloatingButton
-        onClick={() => {
-          handleNewStatement();
-        }}
+        onClick={() => handleNewStatement()}
       />
 
       <div ref={loadMoreRef} style={{ height: 1 }} />

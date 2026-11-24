@@ -30,8 +30,8 @@ let oldFinancialList: GetFinancialCategoryDto[] = [];
 
 const takeFinancial = 20;
 
-const { FinancialCategory: FinancialCategoryKey } = i18n["Pt-Br"].Components.ComboBox;
-const { Table: TableKey, messages } = i18n["Pt-Br"].Screen.FinancialCategory;
+const { FinancialCategory: FinancialCategoryComboboxKey } = i18n["Pt-Br"].Components.ComboBox;
+const { FinancialCategory: FinancialCategoryKey } = i18n["Pt-Br"].Screen.FinancialCategory;
 const { editTitle, registerTitle } = i18n["Pt-Br"].Components.Modal.UpsertFinancialCategory;
 
 export default function FinancialCategory() {
@@ -114,10 +114,10 @@ export default function FinancialCategory() {
   ): Promise<void> => {
     try {
       await financialCategoryService.create(data);
-      toast.success(messages.registerSuccess);
+      toast.success(FinancialCategoryKey.messages.registerSuccess);
 
     } catch (error) {
-      toast.error(messages.registerError)
+      toast.error(FinancialCategoryKey.messages.registerError)
     } finally {
       handleGetAllFinancialCategory(currentPage);
       closeModal();
@@ -129,9 +129,9 @@ export default function FinancialCategory() {
   ): Promise<void> => {
     try {
       await financialCategoryService.update(data)
-      toast.success(messages.updateSuccess);
+      toast.success(FinancialCategoryKey.messages.updateSuccess);
     } catch (error) {
-      toast.error(messages.updateError)
+      toast.error(FinancialCategoryKey.messages.updateError)
     } finally {
       handleGetAllFinancialCategory(currentPage);
       closeModal();
@@ -169,9 +169,9 @@ export default function FinancialCategory() {
   const handleRemoveFinancialCategory = async (categoryId: string): Promise<void> => {
     try {
       await financialCategoryService.delete(categoryId)
-      toast.success(messages.removeSuccess)
+      toast.success(FinancialCategoryKey.messages.removeSuccess)
     } catch (error) {
-      toast.error(messages.removeError)
+      toast.error(FinancialCategoryKey.messages.removeError)
     } finally {
       closeModal();
       handleGetAllFinancialCategory(currentPage);
@@ -193,25 +193,25 @@ export default function FinancialCategory() {
 
   const getColumns = (): TableColumn<GetFinancialCategoryDto>[] => {
     const columns: TableColumn<GetFinancialCategoryDto>[] = [
-      { label: TableKey.columns.createdAt, accessor: "createdAt" },
-      { label: TableKey.columns.name, accessor: "name" },
+      { label: FinancialCategoryKey.Table.columns.createdAt, accessor: "createdAt" },
+      { label: FinancialCategoryKey.Table.columns.name, accessor: "name" },
       {
-        label: TableKey.columns.reference,
+        label: FinancialCategoryKey.Table.columns.reference,
         render(row) {
-          return row.accountType === AccountType.BANK ? FinancialCategoryKey.ACCOUNT_TYPE.BANK : FinancialCategoryKey.ACCOUNT_TYPE.CASHBOOK;
+          return row.accountType === AccountType.BANK ? FinancialCategoryComboboxKey.ACCOUNT_TYPE.BANK : FinancialCategoryComboboxKey.ACCOUNT_TYPE.CASHBOOK;
         },
       },
       {
-        label: TableKey.columns.type,
+        label: FinancialCategoryKey.Table.columns.type,
         accessor: "financialFlowType",
-        render: (row) => (row.financialFlowType === "IN" ? FinancialCategoryKey.FINANCIAL_FLOW.IN : FinancialCategoryKey.FINANCIAL_FLOW.OUT),
+        render: (row) => (row.financialFlowType === "IN" ? FinancialCategoryComboboxKey.FINANCIAL_FLOW.IN : FinancialCategoryComboboxKey.FINANCIAL_FLOW.OUT),
       },
     ];
 
     if (isAdmin)
       if (isAdmin)
         columns.push({
-          label: TableKey.columns.actions,
+          label: FinancialCategoryKey.Table.columns.actions,
           render: (row) => {
             return (
               <div className="flex gap-2 justify-center">
@@ -237,7 +237,7 @@ export default function FinancialCategory() {
         take={takeFinancial}
         rows={financialList}
         columns={getColumns()}
-        title={TableKey.title}
+        title={FinancialCategoryKey.Table.title}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         countRows={currentCountFinancial}

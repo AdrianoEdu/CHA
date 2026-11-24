@@ -29,7 +29,7 @@ let countAccounts = 0;
 const takeAccounts = 20;
 let oldAccountList: GetAccountDto[] = [];
 
-const { columns, messages, route, title } = i18n['Pt-Br'].Screen.AccountScreen;
+const { AccountScreen: AccountScreenKey } = i18n['Pt-Br'].Screen.AccountScreen;
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -54,6 +54,7 @@ export default function AccountScreen() {
         balance: true,
         createdAt: true,
         accountNumber: true,
+        accountType: true,
       },
       take: takeAccounts,
       orderBy: { createdAt: "desc" },
@@ -68,7 +69,7 @@ export default function AccountScreen() {
 
   const navigateBankStatement = (row: GetAccountDto): void => {
     router.push(
-      `${route}/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}`,
+      `${AccountScreenKey.route}/${row.id}/${row.accountNumber.replaceAll("/", "").replaceAll("-", "")}/${row.accountType}`,
     );
   };
 
@@ -77,9 +78,9 @@ export default function AccountScreen() {
   ): Promise<void> => {
     try {
       await accountService.create(data);
-      toast.success(messages.createSuccess);
+      toast.success(AccountScreenKey.messages.createSuccess);
     } catch (error) {
-      toast.error(messages.createError);
+      toast.error(AccountScreenKey.messages.createError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
@@ -89,9 +90,9 @@ export default function AccountScreen() {
   const handleUpdateAccount = async (data: UpdateAccountDto): Promise<void> => {
     try {
       await accountService.update(data);
-      toast.success(messages.updateSuccess);
+      toast.success(AccountScreenKey.messages.updateSuccess);
     } catch (error) {
-      toast.error(messages.updateError);
+      toast.error(AccountScreenKey.messages.updateError);
     } finally {
       closeModal();
       await handleFindAccounts(1);
@@ -101,9 +102,9 @@ export default function AccountScreen() {
   const handleRemoveAccount = async (id: string): Promise<void> => {
     try {
       await accountService.delete(id)
-      toast.success(messages.removeSuccess)
+      toast.success(AccountScreenKey.messages.removeSuccess)
     } catch (error) {
-      toast.error(messages.removeError)
+      toast.error(AccountScreenKey.messages.removeError)
     }
     finally {
       closeModal();
@@ -140,15 +141,15 @@ export default function AccountScreen() {
 
   const getColumns = (): TableColumn<GetAccountDto>[] => {
     return [
-      { label: columns.createdAt, accessor: "createdAt" },
-      { label: columns.bank, accessor: "bank.name" },
+      { label: AccountScreenKey.columns.createdAt, accessor: "createdAt" },
+      { label: AccountScreenKey.columns.bank, accessor: "bank.name" },
       {
-        label: columns.accountNumber,
+        label: AccountScreenKey.columns.accountNumber,
         accessor: "accountNumber",
       },
-      { label: columns.balance, accessor: "balance" },
+      { label: AccountScreenKey.columns.balance, accessor: "balance" },
       {
-        label: columns.actions,
+        label: AccountScreenKey.columns.actions,
         render(row) {
           return (
             <div className="flex flex-row gap-2">
@@ -182,7 +183,7 @@ export default function AccountScreen() {
       <Table
         rows={list}
         columns={getColumns()}
-        title={title}
+        title={AccountScreenKey.title}
         currentPage={currentPage}
         onRowClick={navigateBankStatement}
         onActionClicked={handleOpenModalUpsertAccount}

@@ -27,13 +27,13 @@ import { AccountType } from "@/app/web/constants/enum";
 const takeBankStatement = 20;
 
 const { UpsertBankStatement } = i18n["Pt-Br"].Components.Modal;
-const { addMovement, addStatement, fields, messages, title } = i18n['Pt-Br'].Screen.BankStatement;
+const { BankStatement } = i18n['Pt-Br'].Screen.BankStatement;
 
 function FloatingButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      title={addMovement}
+      title={BankStatement.addMovement}
       className="
         fixed
         bottom-6
@@ -149,9 +149,9 @@ export default function StatementPage() {
         ...data,
         accountId: account?.id,
       });
-      toast.success(messages.registerSuccess);
+      toast.success(BankStatement.messages.registerSuccess);
     } catch (err) {
-      toast.error(messages.registerError)
+      toast.error(BankStatement.messages.registerError)
     }
     finally {
       closeModal();
@@ -164,9 +164,9 @@ export default function StatementPage() {
   ): Promise<void> => {
     try {
       await bankStatementService.update(data);
-      toast.success(messages.updateSuccess);
+      toast.success(BankStatement.messages.updateSuccess);
     } catch (error) {
-      toast.error(messages.updateError);
+      toast.error(BankStatement.messages.updateError);
     }
     finally {
       closeModal();
@@ -184,8 +184,8 @@ export default function StatementPage() {
       <UpsertFinancialEntryModal
         data={data}
         onClose={closeModal}
-        accountType={AccountType.BANK}
         onUpdate={handleUpdateBankStatement}
+        accountType={params.type as AccountType}
         onRegister={handleRegisterBankStatement}
       />,
       !data
@@ -199,15 +199,15 @@ export default function StatementPage() {
       <div className="mx-auto max-w-6xl">
         <div ref={headerRef}>
           <Header
-            headerTitle={title}
-            buttonTitle={addStatement}
+            headerTitle={BankStatement.title}
+            buttonTitle={BankStatement.addStatement}
             onClick={() => handleNewStatement()}
             primaryData={{
-              title: fields.bank,
+              title: BankStatement.fields.bank,
               description: account?.bank.name ?? "",
             }}
             secondData={{
-              title: fields.account,
+              title: BankStatement.fields.account,
               description: account?.accountNumber ?? "",
             }}
             balanceData={account?.balance ?? 0}

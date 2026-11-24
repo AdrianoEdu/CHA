@@ -22,6 +22,7 @@ class ReceivedCheckService {
     await this.databaseService.$transaction(async (transaction) => {
       const receivedCheck = await transaction.receivedCheck.create({
         data: {
+          notes: data.notes,
           agency: data.agency,
           bankId: data.bankId,
           amount: data.amount,
@@ -56,11 +57,12 @@ class ReceivedCheckService {
 
       await transaction.cashBook.create({
         data: {
+          accountId: account.id,
           value: receivedCheck.amount,
+          customerId: receivedCheck.customerId,
+          financialCategoryId: financialCategory.id,
           title: `Cheque recebido nº ${receivedCheck.checkNumber}`,
           description: `Cheque recebido da agência ${receivedCheck.agency}`,
-          accountId: account.id,
-          financialCategoryId: financialCategory.id,
         },
       });
     });

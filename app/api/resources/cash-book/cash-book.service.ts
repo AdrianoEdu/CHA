@@ -1,23 +1,26 @@
+
 // Copyright (c) 2026-09-01
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
-import { FinancialFlowType, Prisma } from "@/app/generated/prisma";
+import { FinancialFlowType, Prisma, ReceivedCheckStatus } from "@/app/generated/prisma";
 import {
+  CashBookParams,
   CreateCashBookDto,
+  GetCashBookParamsDto,
   UpdateCashBookDto,
 } from "../../dto/CashBook/CashBook";
 import { databaseService } from "../../providers/database/DatabaseService";
 import { storageSrevice } from "../../providers/storage/storage.service";
-import { GetFinancialEntryDto } from "../../dto/General";
+import { CashBookWithRelations } from "./type";
 
 class CashBookService {
   private storageService = storageSrevice;
   private databaseService = databaseService;
 
-  async create(data: CreateCashBookDto) {
-    const { file, ...cashBookData } = data;
+  async create(data: CreateCashBookDto): Promise<CashBookWithRelations> {
+    const { file, receivedCheck, receivedCheckIds, ...cashBookData } = data;
 
     let key: string | null = null;
     let fileUploaded = false;
@@ -25,9 +28,7 @@ class CashBookService {
     try {
       if (file) {
         const id = crypto.randomUUID();
-
         const extension = file.name.split(".").pop();
-
         const date = new Date().toISOString().replace(/:/g, "-");
 
         key = `cash-book/${id}/extrato-${date}.${extension}`;
@@ -39,37 +40,95 @@ class CashBookService {
         fileUploaded = true;
       }
 
-      const result = await this.databaseService.$transaction(async (tx) => {
-        const cashBook = await tx.cashBook.create({
-          data: {
-            ...cashBookData,
-            filePath: key ?? "",
-          },
-          include: {
-            account: { select: { balance: true } },
-            financialCategory: true,
-          },
-        });
+      const result = await this.databaseService.$transaction(
+        async (tx): Promise<CashBookWithRelations> => {
+          let receivedCheckId: string | undefined;
 
-        const isOut =
-          cashBook.financialCategory.financialFlowType ===
-          FinancialFlowType.OUT;
+          if (receivedCheck) {
+            const category = await tx.financialCategory.findUnique({
+              where: {
+                id: cashBookData.financialCategoryId,
+              },
+              select: {
+                name: true,
+              },
+            });
 
-        const currentValue = isOut
-          ? Number(cashBook.account.balance) - Number(cashBook.value)
-          : Number(cashBook.account.balance) + Number(cashBook.value);
+            if (category?.name === "Recebimento de cheque de terceiro") {
+              const createdCheck = await tx.receivedCheck.create({
+                data: {
+                  checkNumber: receivedCheck.checkNumber,
+                  amount: receivedCheck.amount,
+                  agency: receivedCheck.agency,
+                  goodForAt: receivedCheck.goodForAt,
+                  notes: receivedCheck.notes,
+                  customer: {
+                    connect: {
+                      id: cashBookData.customerId,
+                    },
+                  },
+                  bank: {
+                    connect: {
+                      id: receivedCheck.bankId,
+                    },
+                  },
+                },
+              });
 
-        await tx.account.update({
-          data: {
-            balance: currentValue,
-          },
-          where: {
-            id: cashBook.accountId,
-          },
-        });
+              receivedCheckId = createdCheck.id;
+            }
+          }
 
-        return cashBook;
-      });
+          const cashBook = await tx.cashBook.create({
+            data: {
+              ...cashBookData,
+              filePath: key,
+              receivedCheckId,
+            },
+            include: {
+              account: {
+                select: {
+                  balance: true,
+                },
+              },
+              financialCategory: true,
+            },
+          } satisfies Prisma.CashBookCreateArgs);
+
+          if (
+            cashBook.financialCategory.name === "Pagamento com cheque de terceiro" &&
+            receivedCheckIds?.length
+          ) {
+            await tx.receivedCheck.updateMany({
+              where: {
+                id: {
+                  in: receivedCheckIds,
+                },
+              },
+              data: {
+                status: ReceivedCheckStatus.FINALIZED,
+              },
+            });
+          }
+
+          const isOut =
+            cashBook.financialCategory.financialFlowType ===
+            FinancialFlowType.OUT;
+
+          await tx.account.update({
+            where: {
+              id: cashBook.accountId,
+            },
+            data: {
+              balance: isOut
+                ? { decrement: Number(cashBook.value) }
+                : { increment: Number(cashBook.value) },
+            },
+          });
+
+          return cashBook;
+        },
+      );
 
       return result;
     } catch (error) {
@@ -86,7 +145,7 @@ class CashBookService {
   }
 
   async update(data: UpdateCashBookDto) {
-    const { id, file, ...cashBookData } = data;
+    const { id, file, receivedCheck, receivedCheckIds, ...cashBookData } = data;
 
     let newKey: string | null = null;
     let fileUploaded = false;
@@ -94,6 +153,10 @@ class CashBookService {
     try {
       const currentCashBook = await this.databaseService.cashBook.findUnique({
         where: { id },
+        include: {
+          financialCategory: true,
+          receivedCheck: true,
+        },
       });
 
       if (!currentCashBook) {
@@ -102,9 +165,17 @@ class CashBookService {
 
       const oldKey = currentCashBook.filePath;
 
+      if (
+        currentCashBook.receivedCheck?.status ===
+        ReceivedCheckStatus.FINALIZED
+      ) {
+        throw new Error(
+          "Não é possível editar um lançamento vinculado a um cheque finalizado.",
+        );
+      }
+
       if (file) {
         const extension = file.name.split(".").pop();
-
         const date = new Date().toISOString().replace(/:/g, "-");
 
         newKey = `cash-book/${id}/extrato-${date}.${extension}`;
@@ -117,20 +188,83 @@ class CashBookService {
       }
 
       const result = await this.databaseService.$transaction(async (tx) => {
+        const category = await tx.financialCategory.findUniqueOrThrow({
+          where: {
+            id: cashBookData.financialCategoryId ?? currentCashBook.financialCategoryId,
+          },
+          select: {
+            name: true,
+            financialFlowType: true,
+          },
+        });
+
+        if (
+          category.name === "Pagamento com cheque de terceiro" &&
+          receivedCheckIds?.length
+        ) {
+          const checks = await tx.receivedCheck.findMany({
+            where: {
+              id: {
+                in: receivedCheckIds,
+              },
+            },
+            select: {
+              id: true,
+              status: true,
+            },
+          });
+
+          if (checks.length !== receivedCheckIds.length) {
+            throw new Error("Um ou mais cheques selecionados não foram encontrados.");
+          }
+
+          if (
+            checks.some(
+              (check) => check.status === ReceivedCheckStatus.FINALIZED,
+            )
+          ) {
+            throw new Error(
+              "Não é possível utilizar cheques que já foram finalizados.",
+            );
+          }
+        }
+
+        const oldIsOut =
+          currentCashBook.financialCategory.financialFlowType ===
+          FinancialFlowType.OUT;
+
+        await tx.account.update({
+          where: {
+            id: currentCashBook.accountId,
+          },
+          data: {
+            balance: oldIsOut
+              ? { increment: Number(currentCashBook.value) }
+              : { decrement: Number(currentCashBook.value) },
+          },
+        });
+
         const cashBook = await tx.cashBook.update({
           where: {
             id,
           },
           data: {
             ...cashBookData,
-
             ...(newKey && {
               filePath: newKey,
             }),
           },
-          include: {
-            account: true,
-            financialCategory: true,
+        });
+
+        await tx.account.update({
+          where: {
+            id: cashBook.accountId,
+          },
+          data: {
+            balance:
+              category.financialFlowType === FinancialFlowType.OUT
+                ? { decrement: Number(cashBook.value) }
+                : { increment: Number(cashBook.value) },
           },
         });
 
@@ -165,6 +299,42 @@ class CashBookService {
     }
   }
 
+  async findCashBooks(
+    params: CashBookParams,
+  ): Promise<GetCashBookParamsDto> {
+    const baseQuery = {
+      skip: params.skip,
+      where: params.where,
+      take: params.take,
+      orderBy: params.orderBy,
+      include: {
+        account: {
+          include: {
+            bank: true,
+          },
+        },
+        financialCategory: true,
+        customer: true,
+      },
+    } satisfies Prisma.CashBookFindManyArgs;
+
+    const count = await this.databaseService.cashBook.count({
+      where: baseQuery.where,
+    });
+
+    const cashBook = await this.databaseService.cashBook.findMany(baseQuery);
+
+    return {
+      count,
+      cashBook: cashBook.map((item) => ({
+        ...item,
+        account: {
+          ...item.account,
+          balance: Number(item.account.balance),
+        },
+      })),
+    };
+  }
 }
 
 export const cashBookService = new CashBookService();

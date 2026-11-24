@@ -174,6 +174,7 @@ model Customer {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   bankStatements BankStatement[]
+  cashBooks      CashBook[]
 
   @@map("customers")
 }
@@ -234,6 +235,10 @@ model CashBook {
   account             Account           @relation(fields: [accountId], references: [id])
   financialCategoryId String
   financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
+  customerId          String
+  customer            Customer          @relation(fields: [customerId], references: [id])
+  receivedCheckId     String?           @unique
+  receivedCheck       ReceivedCheck?    @relation(fields: [receivedCheckId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -254,6 +259,7 @@ model ReceivedCheck {
   bank        Bank                @relation(fields: [bankId], references: [id])
   updatedAt   DateTime            @updatedAt
   createdAt   DateTime            @default(now())
+  cashBook    CashBook?
 
   @@map("received_checks")
 }

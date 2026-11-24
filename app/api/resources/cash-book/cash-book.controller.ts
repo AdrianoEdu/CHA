@@ -25,6 +25,22 @@ class CashBookController {
   async update(data: UpdateCashBookDto) {
     return this.cashBookService.update(data);
   }
+
+  async findAll(req: Request) {
+    try {
+      const query = parsePrismaQuery<
+        Prisma.CashBookWhereInput,
+        Prisma.CashBookSelect,
+        Prisma.CashBookInclude,
+        Prisma.CashBookOrderByWithRelationInput
+      >(req);
+
+      return this.cashBookService.findCashBooks(query);
+    } catch (error: any) {
+      console.error("Erro ao buscar dados do livro caixa:", error);
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+  }
 }
 
 export const cashBookController = new CashBookController();

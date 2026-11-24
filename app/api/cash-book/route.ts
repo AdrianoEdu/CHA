@@ -84,3 +84,17 @@ export async function PUT(req: Request) {
     );
   }
 }
+
+export async function GET(req: Request) {
+  try {
+    authGuard(req);
+
+    const result = await cashBookController.findAll(req);
+
+    return new Response(JSON.stringify(result), { status: 200 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Erro interno" }), {
+      status: 500,
+    });
+  }
+}
