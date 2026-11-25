@@ -34,67 +34,67 @@ const getColumns = ({
   handleEdit,
   handleRemove,
 }: GetColumnsProps): TableColumn<GetPaymentDto>[] => [
-  { label: "Criado em", accessor: "createdAt" },
-  { label: "Nome", accessor: "name" },
-  { label: "Data de vencimento", accessor: "dueDate" },
-  { label: "Valor", accessor: "amount" },
-  { label: "Data de pagamento", accessor: "paidAt" },
-  {
-    label: "Destinatário",
-    render(row) {
-      if (row.employee) return row.employee.name;
-      if (row.customer) return row.customer.name;
+    { label: "Criado em", accessor: "createdAt" },
+    { label: "Nome", accessor: "name" },
+    { label: "Data de vencimento", accessor: "dueDate" },
+    { label: "Valor", accessor: "amount" },
+    { label: "Data de pagamento", accessor: "paidAt" },
+    {
+      label: "Destinatário",
+      render(row) {
+        if (row.employee) return row.employee.name;
+        if (row.customer) return row.customer.name;
+      },
     },
-  },
-  {
-    label: "Status",
-    render(row) {
-      const isPaid = Boolean(row.paidAt);
-      const isOverdue = !isPaid && new Date().getTime() > row.dueDate.getTime();
+    {
+      label: "Status",
+      render(row) {
+        const isPaid = Boolean(row.paidAt);
+        const isOverdue = !isPaid && new Date().getTime() > row.dueDate.getTime();
 
-      const colorStatus = isPaid
-        ? "bg-green-100 text-green-800"
-        : isOverdue
-          ? "bg-red-100 text-red-800"
-          : "bg-blue-100 text-blue-800";
+        const colorStatus = isPaid
+          ? "bg-green-100 text-green-800"
+          : isOverdue
+            ? "bg-red-100 text-red-800"
+            : "bg-blue-100 text-blue-800";
 
-      const textStatus = isPaid ? "Pago" : isOverdue ? "Atrasado" : "Em dia";
+        const textStatus = isPaid ? "Pago" : isOverdue ? "Atrasado" : "Em dia";
 
-      return (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${colorStatus}`}
-        >
-          {textStatus}
-        </span>
-      );
+        return (
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${colorStatus}`}
+          >
+            {textStatus}
+          </span>
+        );
+      },
     },
-  },
-  {
-    label: "Ações",
-    isAction: true,
-    render: (row) => {
-      return (
-        <div className="flex gap-2 justify-center">
-          <Button
-            icon={<EditIcon />}
-            status={ButtonStatusEnum.UPDATE}
-            onClick={(e) => {
-              (e.stopPropagation(), handleEdit(row));
-            }}
-          />
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRemove(row.id);
-            }}
-            icon={<DeleteIcon />}
-            status={ButtonStatusEnum.CANCEL}
-          />
-        </div>
-      );
+    {
+      label: "Ações",
+      isAction: true,
+      render: (row) => {
+        return (
+          <div className="flex gap-2 justify-center">
+            <Button
+              icon={<EditIcon />}
+              status={ButtonStatusEnum.UPDATE}
+              onClick={(e) => {
+                (e.stopPropagation(), handleEdit(row));
+              }}
+            />
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemove(row.id);
+              }}
+              icon={<DeleteIcon />}
+              status={ButtonStatusEnum.CANCEL}
+            />
+          </div>
+        );
+      },
     },
-  },
-];
+  ];
 
 export default function PaymentList() {
   const [filter, setFilter] = useState("");
@@ -137,19 +137,18 @@ export default function PaymentList() {
   const handleOpenModal = (item?: GetPaymentDto): void => {
     const data = item
       ? {
-          id: item.id ?? "",
-          amount: item.amount,
-          name: item.name ?? "",
-          dueDate: item.dueDate,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          paidAt: item.paidAt ?? undefined,
-          employeeId: item.employee?.id ?? undefined,
-          customerId: item.customer?.id ?? undefined,
-          financialCategoryId: item.financialCategory.id,
-          referenceMonth: item.referenceMonth ?? undefined,
-          recurringPaymentId: item.recurringPayment?.id ?? undefined,
-        }
+        id: item.id ?? "",
+        amount: item.amount,
+        name: item.name ?? "",
+        dueDate: item.dueDate,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        paidAt: item.paidAt ?? undefined,
+        employeeId: item.employee?.id ?? undefined,
+        customerId: item.customer?.id ?? undefined,
+        financialCategoryId: item.financialCategory.id,
+        recurringPaymentId: item.recurringPayment?.id ?? undefined,
+      }
       : undefined;
 
     openModal(
@@ -216,7 +215,7 @@ export default function PaymentList() {
       skip: currentSkip,
       take: takePayment,
       where: {
-        referenceMonth: {
+        createdAt: {
           // @ts-ignore
           gte: startDate,
           lt: endDate,
@@ -242,7 +241,7 @@ export default function PaymentList() {
       skip: currentSkip,
       take: takePayment,
       where: {
-        referenceMonth: {
+        createdAt: {
           // @ts-ignore
           gte: startDate,
           lt: endDate,

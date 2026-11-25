@@ -26,7 +26,7 @@ export type UpdateRecurringPaymentDto = Partial<CreateRecurringPaymentDto> & {
 export type GetRecurringPaymentDto = {
   id: string;
   name: string;
-  dueDay: number;
+  dueDay: number | null;
   createdAt: Date;
   updatedAt: Date;
   employee?: EmployeeDto;

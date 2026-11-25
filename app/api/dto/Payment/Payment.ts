@@ -3,9 +3,11 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import { GetCustomerDto } from "../Customer/Customer";
 import { EmployeeDto } from "../Employee/Employee";
 import { GetFinancialCategoryDto } from "../FinancialCategory/FinancialCategory";
+import { PaginationDto } from "../Pagination/Pagination";
 import { GetRecurringPaymentDto } from "../RecurringPayment/recurringPayment";
 
 export type CreatePaymentDto = {
@@ -32,11 +34,10 @@ export type GetPaymentDto = {
   createdAt: Date;
   updatedAt: Date;
   paidAt: Date | null;
-  referenceMonth: Date | null;
 
-  employee?: EmployeeDto;
-  customer?: GetCustomerDto;
-  recurringPayment?: GetRecurringPaymentDto;
+  employee?: Partial<EmployeeDto> | null;
+  customer?: Partial<GetCustomerDto> | null;
+  recurringPayment?: Partial<GetRecurringPaymentDto> | null;
   financialCategory: GetFinancialCategoryDto;
 };
 
@@ -48,3 +49,12 @@ export type GetPaymentDtoParams = {
 export type RemoverPaymentDto = {
   id: string;
 };
+
+export type PaymentWhere = Partial<GetPaymentDto>;
+
+export type PaymentParams = PaginationDto<
+  PaymentWhere,
+  Prisma.PaymentSelect,
+  Prisma.PaymentInclude,
+  Prisma.PaymentOrderByWithRelationInput
+>;

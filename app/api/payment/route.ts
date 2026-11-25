@@ -61,8 +61,6 @@ export async function PUT(req: Request) {
   }
 }
 
-
-
 export async function DELETE(req: Request) {
   try {
     authGuard(req);
@@ -87,5 +85,19 @@ export async function DELETE(req: Request) {
     }
 
     return Response.json({ error: "Erro interno" }, { status: 500 });
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    authGuard(req);
+
+    let result = await paymentController.findAll(req);
+
+    return new Response(JSON.stringify(result), { status: 200 });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: "Erro interno" }), {
+      status: 500,
+    });
   }
 }

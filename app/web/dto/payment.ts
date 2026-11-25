@@ -33,7 +33,6 @@ export type GetPaymentDto = {
   createdAt: Date;
   updatedAt: Date;
   paidAt: Date | null;
-  referenceMonth: Date | null;
 
   employee?: EmployeeDto;
   customer?: GetCustomerDto;

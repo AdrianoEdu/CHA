@@ -3,11 +3,13 @@
 // Developed by Adriano Trentin Jr.
 // All rights reserved.
 
+import { Prisma } from "@/app/generated/prisma";
 import {
   CreatePaymentDto,
   RemoverPaymentDto,
   UpdatePaymentDto,
 } from "../../dto/Payment/Payment";
+import { parsePrismaQuery } from "../../utils/parseFindParams";
 import { paymentService } from "./payment.service";
 
 class PaymentController {
@@ -27,6 +29,22 @@ class PaymentController {
 
   async remove({ id }: RemoverPaymentDto) {
     return await this.paymentService.remove({ id });
+  }
+
+  async findAll(req: Request) {
+    try {
+      const query = parsePrismaQuery<
+        Prisma.PaymentWhereInput,
+        Prisma.PaymentSelect,
+        Prisma.PaymentInclude,
+        Prisma.PaymentOrderByWithRelationInput
+      >(req);
+
+      return this.paymentService.findPayment(query);
+    } catch (error: any) {
+      console.error("Erro ao buscar dados do livro caixa:", error);
+      return Response.json({ error: error.message }, { status: 500 });
+    }
   }
 }
 

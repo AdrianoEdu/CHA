@@ -122,6 +122,19 @@ class CashBookService {
                 status: ReceivedCheckStatus.FINALIZED,
               },
             });
+
+            const payment = await tx.payment.create({
+              data: {
+                name: cashBook.title,
+                amount: cashBook.value,
+                receivedChecks: {
+                  connect: receivedCheckIds.map((id) => ({ id })),
+                },
+                dueDate: cashBook.createdAt,
+                paidAt: cashBook.createdAt,
+                financialCategoryId: cashBook.financialCategoryId,
+              },
+            });
           }
 
           const isOut =

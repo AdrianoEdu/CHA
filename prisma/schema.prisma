@@ -260,6 +260,8 @@ model ReceivedCheck {
   updatedAt   DateTime            @updatedAt
   createdAt   DateTime            @default(now())
   cashBook    CashBook?
+  payment     Payment?            @relation(fields: [paymentId], references: [id])
+  paymentId   String?
 
   @@map("received_checks")
 }
@@ -280,17 +282,18 @@ model FinancialCategory {
 }
 
 model Payment {
-  id                  String             @id @default(uuid())
+  id                  String            @id @default(uuid())
   name                String
-  amount              Decimal            @db.Decimal(12, 2)
+  amount              Decimal           @db.Decimal(12, 2)
   dueDate             DateTime
   paidAt              DateTime?
   recurringPaymentId  String?
-  recurringPayment    RecurringPayment?  @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
-  financialCategoryId String?
-  financialCategory   FinancialCategory? @relation(fields: [financialCategoryId], references: [id])
+  recurringPayment    RecurringPayment? @relation(fields: [recurringPaymentId], references: [id], onDelete: SetNull)
+  financialCategoryId String
+  financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
   employeeId          String?
-  employee            Employee?          @relation(fields: [employeeId], references: [id])
+  employee            Employee?         @relation(fields: [employeeId], references: [id])
+  receivedChecks      ReceivedCheck[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
