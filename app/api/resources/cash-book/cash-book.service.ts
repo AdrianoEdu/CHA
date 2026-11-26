@@ -58,6 +58,7 @@ class CashBookService {
           });
 
           let receivedCheckId: string | undefined;
+
           const isCheckReceipt =
             category.name === "Recebimento de cheque de terceiro";
 
@@ -123,7 +124,7 @@ class CashBookService {
               },
             });
 
-            const payment = await tx.payment.create({
+            await tx.payment.create({
               data: {
                 name: cashBook.title,
                 amount: cashBook.value,
@@ -141,14 +142,23 @@ class CashBookService {
             cashBook.financialCategory.financialFlowType ===
             FinancialFlowType.OUT;
 
+          const balance = Number(cashBook.account.balance);
+          const value = Number(cashBook.value);
+
+          if (isOut && value > balance) {
+            throw new Error(
+              `Saldo insuficiente. Saldo disponível: R$ ${balance.toFixed(2)}. Valor solicitado: R$ ${value.toFixed(2)}.`,
+            );
+          }
+
           await tx.account.update({
             where: {
               id: cashBook.accountId,
             },
             data: {
               balance: isOut
-                ? { decrement: Number(cashBook.value) }
-                : { increment: Number(cashBook.value) },
+                ? { decrement: value }
+                : { increment: value },
             },
           });
 
@@ -298,15 +308,35 @@ class CashBookService {
           },
         });
 
+        const account = await tx.account.findUniqueOrThrow({
+          where: {
+            id: cashBook.accountId,
+          },
+          select: {
+            balance: true,
+          },
+        });
+
+        const isOut =
+          category.financialFlowType === FinancialFlowType.OUT;
+
+        const value = Number(cashBook.value);
+        const availableBalance = Number(account.balance);
+
+        if (isOut && value > availableBalance) {
+          throw new Error(
+            `Saldo insuficiente. Saldo disponível: R$ ${availableBalance.toFixed(2)}. Valor solicitado: R$ ${value.toFixed(2)}.`,
+          );
+        }
+
         await tx.account.update({
           where: {
             id: cashBook.accountId,
           },
           data: {
-            balance:
-              category.financialFlowType === FinancialFlowType.OUT
-                ? { decrement: Number(cashBook.value) }
-                : { increment: Number(cashBook.value) },
+            balance: isOut
+              ? { decrement: value }
+              : { increment: value },
           },
         });
 

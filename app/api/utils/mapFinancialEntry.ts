@@ -37,7 +37,7 @@ type FinancialEntryBase = {
   customer: {
     id: string;
     name: string;
-  }
+  } | null;
 };
 
 
@@ -52,8 +52,8 @@ export function mapFinancialEntry<T extends FinancialEntryBase>(
     description: entry.description,
     filePath: entry.filePath ?? "",
     customer: {
-      id: entry.customer.id,
-      name: entry.customer.name
+      id: entry?.customer?.id,
+      name: entry?.customer?.name
     },
 
     ...(entry.account && {

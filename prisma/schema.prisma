@@ -218,8 +218,8 @@ model BankStatement {
   account             Account           @relation(fields: [accountId], references: [id])
   financialCategoryId String
   financialCategory   FinancialCategory @relation(fields: [financialCategoryId], references: [id])
-  customerId          String
-  customer            Customer          @relation(fields: [customerId], references: [id])
+  customerId          String?
+  customer            Customer?         @relation(fields: [customerId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

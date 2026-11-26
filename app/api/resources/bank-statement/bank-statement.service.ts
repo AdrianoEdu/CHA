@@ -1,3 +1,4 @@
+
 // Copyright (c) 2026-06-28
 // Contabilidade H. Alvarenga LTDA
 // Developed by Adriano Trentin Jr.
@@ -46,6 +47,7 @@ class BankStatementService {
         const bankStatement = await tx.bankStatement.create({
           data: {
             ...bankStatementData,
+            customerId: bankStatementData.customerId || null,
             filePath: key ?? "",
           },
           include: {
@@ -58,9 +60,18 @@ class BankStatementService {
           bankStatement.financialCategory.financialFlowType ===
           FinancialFlowType.OUT;
 
+        const balance = Number(bankStatement.account.balance);
+        const value = Number(bankStatement.value);
+
+        if (isOut && value > balance) {
+          throw new Error(
+            `Saldo insuficiente. Saldo disponível: R$ ${balance.toFixed(2)}. Valor solicitado: R$ ${value.toFixed(2)}.`,
+          );
+        }
+
         const currentValue = isOut
-          ? Number(bankStatement.account.balance) - Number(bankStatement.value)
-          : Number(bankStatement.account.balance) + Number(bankStatement.value);
+          ? balance - value
+          : balance + value;
 
         await tx.account.update({
           data: {
@@ -236,7 +247,6 @@ class BankStatementService {
         },
       },
     });
-
 
     return mapFinancialEntry(result);
   }

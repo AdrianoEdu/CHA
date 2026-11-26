@@ -92,7 +92,12 @@ export default function StatementPage() {
     const { count, bankStatement } = await bankStatementService.findAll({
       take,
       all: true,
-      skip: currentSkip.current,
+      where: {
+        //@ts-ignore
+        account: {
+          id: params.id as string,
+        },
+      }, skip: currentSkip.current,
       orderBy: { createdAt: "desc" },
     });
 
