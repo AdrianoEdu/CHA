@@ -5,11 +5,13 @@
 
 export const MODAL_I18N = {
   Generic: {
+    active: 'Ativar',
     remove: 'Remover',
     cancel: 'Cancelar',
     update: 'Atualizar',
     confirm: 'Confirmar',
     register: 'Registrar',
+    deactive: 'Desativar',
   },
   UpsertAccount: {
     title: {
@@ -81,6 +83,10 @@ export const MODAL_I18N = {
     registerTitle: "Registrar categoria financeira",
   },
   UpsertCustomer: {
+    Title: {
+      registerCustomer: 'Registrar clientes',
+      udpateCustomer: 'Atualizar cliente'
+    },
     fields: {
       email: "E-mail",
       phone: "Telefone",
@@ -99,6 +105,32 @@ export const MODAL_I18N = {
         generic: "Por favor informar caracteres válidos",
         email: 'Informe um e-mail válido'
       },
+    },
+  },
+  UpdateStatusEntityModal: {
+    employee: {
+      activateTitle: "Habilitar funcionário",
+      deactivateTitle: "Desativar funcionário",
+      activateDescription:
+        "Tem certeza que deseja ativar este funcionário? Ele poderá acessar o sistema novamente.",
+      deactivateDescription:
+        "Tem certeza que deseja desativar este funcionário? Ele não poderá acessar o sistema enquanto estiver desativado.",
+      activeSuccess: "O funcionário foi ativado com sucesso.",
+      deactiveSucess: "O funcionário foi desativado com sucesso.",
+      activeError: "Houve um erro ao ativar o funcionário, tente novamente",
+      deactiveError: "Houve um erro ao desativar o funcionário, tente novamente.",
+    },
+    customer: {
+      activateTitle: "Habilitar cliente",
+      deactivateTitle: "Desativar cliente",
+      activateDescription:
+        "Tem certeza que deseja ativar este cliente? Ele poderá acessar o sistema novamente.",
+      deactivateDescription:
+        "Tem certeza que deseja desativar este cliente? Ele não poderá acessar o sistema enquanto estiver desativado.",
+      activeSuccess: "O cliente foi ativado com sucesso.",
+      activeError: 'Houve um erro ao ativar o cliente, tente novamente',
+      deactiveSuccess: "O cliente foi desativado com sucesso.",
+      deactiveError: 'Houve um erro ao desativar cliente, tente novamente',
     },
   }
 }

@@ -32,10 +32,9 @@ import { i18n } from "@/app/web/constants/i18n";
 let countCustomers = 0;
 let oldCustomerList: GetCustomerDto[] = [];
 
-const { DeactiveEntity } = i18n["Pt-Br"].Components.Modal;
-
-const { activateTitle, deactivateTitle, successActive, successDeactive } =
-  DeactiveEntity.customer;
+const { activateTitle, deactivateTitle } = i18n["Pt-Br"].Components.Modal.UpdateStatusEntityModal.customer;
+const { Title } = i18n["Pt-Br"].Components.Modal.UpsertCustomer;
+const { Table: TableKey, messages } = i18n["Pt-Br"].Screen.CustomerScreen;
 
 const takeCustomers = 20;
 
@@ -70,7 +69,7 @@ export default function Customer() {
         onClose={closeModal}
         onRegister={handleRegisterCustomer}
       />,
-      "Registrar Cliente",
+      Title.registerCustomer,
     );
   };
 
@@ -95,10 +94,9 @@ export default function Customer() {
     try {
       await customerService.create(data);
 
-      toast.success("Cliente registrado com sucesso");
+      toast.success(messages.createSuccess);
     } catch (error) {
-      console.error("Erro ao cadastrar cliente:", error);
-      toast.error("Não foi possível cadastrar o cliente");
+      toast.error(messages.createError);
     }
     finally {
       await handleGetAllCustomers(currentPage);
@@ -112,10 +110,9 @@ export default function Customer() {
     try {
       await customerService.update(data);
 
-      toast.success("Cliente atualizado com sucesso");
+      toast.success(messages.updateSucess);
     } catch (error) {
-      console.error("Erro ao atualizar cliente:", error);
-      toast.error("Não foi possível atualizar o cliente");
+      toast.error(messages.updateError);
     }
     finally {
       await handleGetAllCustomers(currentPage);
@@ -177,7 +174,7 @@ export default function Customer() {
         onUpdated={handleUpdateCustomer}
         onRegister={handleRegisterCustomer}
       />,
-      "Editar Cliente",
+      Title.udpateCustomer,
     );
   };
 
@@ -211,15 +208,15 @@ export default function Customer() {
 
   const getColumns = (): TableColumn<GetCustomerDto>[] => {
     const columns: TableColumn<GetCustomerDto>[] = [
-      { label: "Identificação", accessor: "numberId" },
-      { label: "Registrado em", accessor: "createdAt" },
-      { label: "Nome do cliente", accessor: "name" },
-      { label: "Telefone", render: (row) => maskPhone(row.phone ?? "") },
-      { label: "Endereço", accessor: "address" },
-      { label: "Email", accessor: "email" },
-      { label: "CNPJ", accessor: "code" },
+      { label: TableKey.columns.identification, accessor: "numberId" },
+      { label: TableKey.columns.createdAt, accessor: "createdAt" },
+      { label: TableKey.columns.customerName, accessor: "name" },
+      { label: TableKey.columns.phone, render: (row) => maskPhone(row.phone ?? "") },
+      { label: TableKey.columns.address, accessor: "address" },
+      { label: TableKey.columns.email, accessor: "email" },
+      { label: TableKey.columns.cnpj, accessor: "code" },
       {
-        label: "Ativo?",
+        label: TableKey.columns.active,
         accessor: "isActive",
         render: (row) => (row.isActive ? "Sim" : "Não"),
       },
@@ -227,7 +224,7 @@ export default function Customer() {
 
     if (isAdmin)
       columns.push({
-        label: "Ações",
+        label: TableKey.columns.actions,
         render: (row) => {
           return (
             <div className="flex gap-2 justify-center">
@@ -256,9 +253,9 @@ export default function Customer() {
     <div>
       <Table
         enableFilter
-        title={"Clientes"}
         rows={customerList}
         take={takeCustomers}
+        title={TableKey.title}
         columns={getColumns()}
         currentPage={currentPage}
         onPageChange={setCurrentPage}

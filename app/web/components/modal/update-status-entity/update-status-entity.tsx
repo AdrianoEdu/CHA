@@ -9,8 +9,8 @@ import { EntityProp, RecipientTypeEnum } from "@/app/web/constants/enum";
 import Button from "../../button/button";
 import { i18n } from "@/app/web/constants/i18n";
 
-const { DeactiveEntity } = i18n["Pt-Br"].Components.Modal;
-const { cancel } = i18n["Pt-Br"].Components.Modal.Generic
+const DeactiveEntity = i18n["Pt-Br"].Components.Modal.UpdateStatusEntityModal;
+const { cancel, active, deactive } = i18n["Pt-Br"].Components.Modal.Generic
 
 export type UpdateStatusEntityModalProps = {
   entity: EntityProp;
@@ -28,15 +28,13 @@ export default function UpdateStatusEntityModal({
   const {
     activateDescription,
     deactivateDescription,
-    confirmActivateButton,
-    confirmDeactivateButton,
   } = DeactiveEntity[entity];
 
   const description = isActive ? deactivateDescription : activateDescription;
 
   const confirmText = isActive
-    ? confirmDeactivateButton
-    : confirmActivateButton;
+    ? deactive
+    : active;
 
   return (
     <div className="flex flex-col w-full">

@@ -10,6 +10,7 @@ import Button from "@/app/web/components/button/button";
 import RemoveModal from "@/app/web/components/modal/remove-employee/remove-employee";
 import BankModal from "@/app/web/components/modal/upsert-bank/upsert-bank";
 import Table, { TableColumn } from "@/app/web/components/table/table";
+import { i18n } from "@/app/web/constants/i18n";
 import { GetBankDto } from "@/app/web/dto/bank.dto";
 import { DeleteIcon } from "@/app/web/icons";
 import EditIcon from "@/app/web/icons/edit-icon";
@@ -24,6 +25,8 @@ let countBank = 0;
 let oldBankList: GetBankDto[] = [];
 
 const takeBank = 20;
+
+const { Table: TableKey, messages } = i18n["Pt-Br"].Screen.BankScreen;
 
 export default function BankScreen() {
   const { user } = useAuth();
@@ -99,14 +102,17 @@ export default function BankScreen() {
     data: GetBankDto,
     isEdit?: boolean,
   ): Promise<void> => {
+
     if (isEdit)
       await bankService
         .update(data)
-        .then(() => toast.success("Atualizado com sucesso"));
+        .then(() => toast.success(messages.updateSuccess))
+        .catch(() => toast.error(messages.UpdateError))
     else
       await bankService
         .create(data)
-        .then(() => toast.success("Criado com sucesso"));
+        .then(() => toast.success(messages.createSuccess))
+        .catch(() => toast.error(messages.createError))
 
     await handleFindBanks(1);
     closeModal();
@@ -114,10 +120,11 @@ export default function BankScreen() {
 
   const handleRemoveBank = (id: string): void => {
     bankService.remove(id).then(() => {
-      closeModal();
-      toast.success("Agência bancária com sucessp");
-      handleFindBanks(1);
-    });
+      toast.success(messages.removeSuccess);
+    }).catch(() => toast.error(messages.removeError));
+
+    handleFindBanks(1);
+    closeModal();
   };
 
   const handleOpenBankModal = (
@@ -162,10 +169,10 @@ export default function BankScreen() {
 
   const getColumns = (): TableColumn<GetBankDto>[] => {
     const columns: TableColumn<GetBankDto>[] = [
-      { label: "Criado em", accessor: "createdAt" },
-      { label: "Nome", accessor: "name" },
+      { label: TableKey.columns.createdAt, accessor: "createdAt" },
+      { label: TableKey.columns.name, accessor: "name" },
       {
-        label: "Agências",
+        label: TableKey.columns.agencies,
         render: (row) => {
           return (
             <div className="flex flex-wrap justify-center gap-2">
@@ -189,7 +196,7 @@ export default function BankScreen() {
 
     if (isAdmin)
       columns.push({
-        label: "Ações",
+        label: TableKey.columns.actions,
         render: (row) => {
           return (
             <div className="flex gap-2 justify-center">
@@ -220,9 +227,9 @@ export default function BankScreen() {
         rows={listBank}
         take={takeBank}
         columns={getColumns()}
+        title={TableKey.title}
         currentPage={currentPage}
         countRows={currentCountBank}
-        title={"Agências bancárias"}
         onPageChange={setCurrentPage}
         onActionClicked={handleOpenBankModal}
         onFilterChange={handleSetFilterBankName}

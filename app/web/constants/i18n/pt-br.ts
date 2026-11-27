@@ -9,6 +9,8 @@ import { SCREEN_I18N_FINANCIAL_CATEGORY } from "./screen/FinancialCategory";
 import { SCREEN_I18N_BANK_STATEMENT } from "./screen/BankStatement";
 import { SCREEN_I18N_ACCOUNT } from "./screen/AccountScreen";
 import { ENUM_I18N } from "./enum";
+import { SCREEN_I18N_BANK_SCREEN } from "./screen/BankScreen";
+import { SCREEN_I18N_CUSTOMER_SCREEN } from "./screen/CustomerScreen";
 
 export const PtBr = {
   Components: {
@@ -20,6 +22,7 @@ export const PtBr = {
       UpsertAccount: { ...MODAL_I18N.UpsertAccount },
       UpsertCustomer: { ...MODAL_I18N.UpsertCustomer },
       EmployeeAdvanced: { ...MODAL_I18N.EmployeeAdvanced },
+      UpdateStatusEntityModal: { ...MODAL_I18N.UpdateStatusEntityModal },
       UpsertFinancialCategory: { ...MODAL_I18N.UpsertFinancialCategory },
       UpsertFinancialEntryModal: { ...MODAL_I18N.UpsertFinancialEntryModal },
       UpsertBankStatement: {
@@ -52,18 +55,6 @@ export const PtBr = {
           successActive: "O funcionário foi ativado com sucesso.",
           successDeactive: "O funcionário foi desativado com sucesso.",
         },
-        customer: {
-          activateTitle: "Habilitar cliente",
-          deactivateTitle: "Desativar cliente",
-          activateDescription:
-            "Tem certeza que deseja ativar este cliente? Ele poderá acessar o sistema novamente.",
-          deactivateDescription:
-            "Tem certeza que deseja desativar este cliente? Ele não poderá acessar o sistema enquanto estiver desativado.",
-          confirmActivateButton: "Ativar",
-          confirmDeactivateButton: "Desativar",
-          successActive: "O cliente foi ativado com sucesso.",
-          successDeactive: "O cliente foi desativado com sucesso.",
-        },
       },
       RemoveEmployee: {
         title: "Remoção de funcionário",
@@ -90,8 +81,10 @@ export const PtBr = {
         systemDownError: "Sistema fora do Ar, tente novamente mais tarde",
       },
     },
-    BankStatement: { ...SCREEN_I18N_BANK_STATEMENT },
     AccountScreen: { ...SCREEN_I18N_ACCOUNT },
+    BankScreen: { ...SCREEN_I18N_BANK_SCREEN },
+    BankStatement: { ...SCREEN_I18N_BANK_STATEMENT },
+    CustomerScreen: { ...SCREEN_I18N_CUSTOMER_SCREEN },
     FinancialCategory: { ...SCREEN_I18N_FINANCIAL_CATEGORY },
   },
   ENUM_I18N: { ...ENUM_I18N, }
